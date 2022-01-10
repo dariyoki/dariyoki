@@ -1,0 +1,39 @@
+ ### Ninja Themed Platformer ###
+
+
+# Phase one - Base mechanics
+    - Collisions with player
+        - Floor collision
+        - Right & Left body collision
+        - Jumping and gravity
+            - Make player
+    - Setup
+        - Moving background
+        - Enemies
+            - Basic dark clan ninjas
+--Here
+            - Bees
+            - Snipers
+        - Attacks
+            - Dash
+        - Stats and UI
+            - HP
+                - Gain damage when enemies attack
+                - Gain health by taking potions
+            - Shield
+                - Display how much shield one has left
+
+        - Weapons
+        - Items
+            - Smoke bombs
+                - Move from current location to any mouse positioned location
+            - Health Potions
+                - Gain x HP
+            - Shield
+                - Allow a shield to take damage in your place
+    - Level Design
+        - Level Editor
+        - Progress through levels
+        - Level transitions
+        -
+
