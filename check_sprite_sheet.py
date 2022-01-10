@@ -12,12 +12,12 @@ screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption('Sprite Sheet Preview')
 
 '''Sprite Sheet'''
-from src.sprites import lsword_attack
-sprite_sheet = lsword_attack
+from src.sprites import characters
+sprite_sheet = characters
 attributes = {
-    "size": 32*3,
+    "size": 25,
     "sprite sheet": sprite_sheet,
-    "rows": 1,
+    "rows": 4,
     "columns": 4
 }
 

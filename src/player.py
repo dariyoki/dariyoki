@@ -16,7 +16,7 @@ class Player:
         self.x, self.y = x, y
         self.right_img = characters[0]
         self.left_img = pygame.transform.flip(self.right_img, True, False)
-        self.image = characters[0]
+        self.image = self.right_img
         self.rect = self.image.get_rect()
 
         # Controls
@@ -40,7 +40,12 @@ class Player:
             "items": {
                 "health potion": 0,
                 "shield potion": 0,
-
+                "smoke bomb": 0
+            },
+            "soul boosted": {
+                "soul shuriken": 0,
+                "soul bomb": 0,
+                "soul sword": 0,
             }
         }
 
@@ -53,10 +58,13 @@ class Player:
         self.touched_ground = False
         self.attacking = False
         self.dashing = False
+        self.standing_near_chest = False
 
         # Casket
         self.last_direction = "right"
         self.dash_images = []
+        self.chest_index = -1
+        self.info = {}
 
         # Movement vars
         self.angle = 0
@@ -75,13 +83,13 @@ class Player:
         # dt
         self.dt = 0
 
-    def update(self, tiles: list[pygame.Rect], events, dt):
+    def update(self, info, events, keys, dt):
         self.dt = dt
+        self.info = info
 
         # Default iteration values
         dx, dy = 0, 0
 
-        keys = pygame.key.get_pressed()
         if keys[self.right_control]:
             dx += self.speed * dt
             self.last_direction = "right"
@@ -112,7 +120,7 @@ class Player:
                     self.dash_stack = 0
 
         # Check side collisions
-        for tile in tiles:
+        for tile in info["tiles"]:
             if tile.collidepoint(self.rect.midright) and dx > 0:
                 dx = 0
 
@@ -120,7 +128,7 @@ class Player:
                 dx = 0
 
         # Gravity control
-        for tile in tiles:
+        for tile in info["tiles"]:
             if tile.collidepoint(self.rect.midbottom) and self.rect.y < tile.y:
                 self.image = self.right_img if self.last_direction == "right" else self.left_img
                 self.touched_ground = True
@@ -166,6 +174,20 @@ class Player:
             d_img.set_alpha(150)
             self.dash_images.append([d_img, (self.x, self.y), 150])
 
+        # Handle chests
+        rs = [r.rect for r in info["chests"]]
+        if (index := self.rect.collidelist(rs)) != -1:
+            self.chest_index = index
+            self.standing_near_chest = True
+        else:
+            if len(info["chests"]) != 0:
+                info["chests"][self.chest_index].loading_bar.value = 0
+                self.standing_near_chest = False
+
+        # Update loading bar
+        if self.standing_near_chest and len(info["chests"]) != 0:
+            info["chests"][self.chest_index].update(keys, dt)
+
         # Update player coord
         self.x += dx
         self.y += dy
@@ -181,8 +203,7 @@ class Player:
         for dasher in self.dash_images:
             dasher[2] -= 1 * self.dt
             if dasher[2] <= 0:
-                self.dash_images = []
-                break
+                self.dash_images.remove(dasher)
             dasher[0].set_alpha(int(dasher[2]))
             screen.blit(dasher[0], (dasher[1][0] - self.camera[0], dasher[1][1] - self.camera[1]))
 
@@ -204,5 +225,9 @@ class Player:
                                                            self.y - self.camera[1]), self.dt)
                 if self.lsword_attack_animation.index == 0:
                     self.attacking = False
+
+        # Draw loading bar
+        if self.standing_near_chest and len(self.info["chests"]) != 0:
+            self.info["chests"][self.chest_index].loading_bar.draw(screen, self.camera)
 
 
