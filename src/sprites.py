@@ -44,3 +44,22 @@ background_img = pygame.image.load(path + "background.png").convert()
 # Information cards
 i_cards = {i_card[2:-5].replace('_', ' '): pygame.image.load(path + f"icards/{i_card}").convert() for i_card in
            os.listdir(path + "icards/")}
+
+
+# Tile sets
+bee_tile_set_img = pygame.image.load(path + "tilesets/bee_tileset.png").convert_alpha()
+bee_tile_set_ss = SpriteSheet(bee_tile_set_img)
+bee_tile_set = bee_tile_set_ss.get_images(3, 3, 32, 32, fixer=10.7)
+bee_tile_set_info = {
+    "upleft": (upleft := pygame.transform.flip(bee_tile_set[2], True, False)),
+    "up": bee_tile_set[1],
+    "upright": bee_tile_set[2],
+    "left": pygame.transform.flip(bee_tile_set[5], True, False),
+    "center": bee_tile_set[4],
+    "right": bee_tile_set[5],
+    "downleft": pygame.transform.flip(upleft, False, True),
+    "down": pygame.transform.flip(bee_tile_set[1], False, True),
+    "downright": pygame.transform.flip(bee_tile_set[2], False, True)
+}
+
+

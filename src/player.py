@@ -120,15 +120,16 @@ class Player:
                     self.dash_stack = 0
 
         # Check side collisions
-        for tile in info["tiles"]:
+        for tile in info["right tiles"]:
             if tile.collidepoint(self.rect.midright) and dx > 0:
                 dx = 0
 
+        for tile in info["left tiles"]:
             if tile.collidepoint(self.rect.midleft) and dx < 0:
                 dx = 0
 
         # Gravity control
-        for tile in info["tiles"]:
+        for tile in info["up tiles"]:
             if tile.collidepoint(self.rect.midbottom) and self.rect.y < tile.y:
                 self.image = self.right_img if self.last_direction == "right" else self.left_img
                 self.touched_ground = True
@@ -210,7 +211,7 @@ class Player:
     def draw(self, screen: pygame.Surface):
         # Draw dash shadows
         for dasher in self.dash_images:
-            dasher[2] -= 1 * self.dt
+            dasher[2] -= 2 * self.dt
             if dasher[2] <= 0:
                 self.dash_images.remove(dasher)
             dasher[0].set_alpha(int(dasher[2]))
@@ -238,5 +239,4 @@ class Player:
         # Draw loading bar
         if self.standing_near_chest and len(self.info["chests"]) != 0:
             self.info["chests"][self.chest_index].loading_bar.draw(screen, self.camera)
-
 

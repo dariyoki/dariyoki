@@ -1,8 +1,12 @@
 import time
 import pickle
 from src.display import *
-from src.sprites import background_img, characters
+from src.sprites import background_img, characters, bee_tile_set_info, chests
 from src.world import World
+from src.items import Chest
+from src.level_manager import LevelManager
+from src_le.option import ChooseOption
+from src_le.s_data import SChest
 
 pygame.display.set_caption("Level Editor")
 
@@ -46,8 +50,11 @@ def save_data(data):
 
 
 def main():
-    save_data(generate_border((screen_width, screen_height), 32))
-    world = World()
+    # with open('data/level_data/level_0', 'rb') as f:
+    #     level_manager = pickle.load(f)
+
+    level_manager = LevelManager()
+    world = World(level_manager)
     possible_rects = generate_possible_rects(
         rows=120,
         columns=600,
@@ -55,6 +62,24 @@ def main():
         start=(-1000, 500)
     )
     speed = 5
+    current_tile_name = "upleft"
+    opts = {
+        0: "upleft",
+        1: "up",
+        2: "upright",
+        3: "left",
+        4: "center",
+        5: "right",
+        6: "downleft",
+        7: "down",
+        8: "downright",
+        9: "chest"
+    }
+    opts_imgs = list(bee_tile_set_info.values()) + [chests[0]]
+    options = ChooseOption(opts_imgs, screen)
+
+    # Copy double data
+    c_chests = []
 
     run = True
     start = time.perf_counter()
@@ -68,14 +93,35 @@ def main():
         mouse_pos = pygame.mouse.get_pos()
 
         # Update
-        if pygame.mouse.get_pressed()[0]:
+        if pygame.mouse.get_pressed()[0] and mouse_pos[1] > 100:
             asd = pygame.Rect((0, 0), (32, 32))
             asd.center = mouse_pos
             x = closest([r.x for r in possible_rects], asd.x + camera[0])
             y = closest([r.y for r in possible_rects], asd.y + camera[1])
             tile = pygame.Rect((x, y), (32, 32))
-            if tile not in world.rects:
-                world.rects.append(tile)
+            if tile not in level_manager.all_rects:
+                if "up" in current_tile_name:
+                    level_manager.up_rects.append(tile)
+                    level_manager.all_rects.append(tile)
+                    level_manager.all_images.append(current_tile_name)
+                if "down" in current_tile_name:
+                    level_manager.down_rects.append(tile)
+                    level_manager.all_rects.append(tile)
+                    level_manager.all_images.append(current_tile_name)
+                if "left" in current_tile_name:
+                    level_manager.left_rects.append(tile)
+                    level_manager.all_rects.append(tile)
+                    level_manager.all_images.append(current_tile_name)
+                if "right" in current_tile_name:
+                    level_manager.right_rects.append(tile)
+                    level_manager.all_rects.append(tile)
+                    level_manager.all_images.append(current_tile_name)
+
+                if "chest" in current_tile_name:
+                    level_manager.chests.append(SChest(tile.x, tile.y, pygame.K_f, 7))
+                    c_chests.append(Chest(tile.x, tile.y, pygame.K_f, 7))
+
+        current_tile_name = opts[options.chosen_option]
 
         dx, dy = 0, 0
         keys = pygame.key.get_pressed()
@@ -102,6 +148,12 @@ def main():
         screen.blit(characters[0], (player_start_pos[0] - camera[0],
                                     player_start_pos[1] - camera[1]))
 
+        for chest in c_chests:
+            chest.draw(screen, camera)
+
+        options.update(mouse_pos, dt)
+        options.draw()
+
         # for rect in possible_rects:
         #     pygame.draw.rect(screen, "black", rect, width=1)
 
@@ -113,12 +165,12 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_z:
                     if controlling:
-                        world.rects.pop()
+                        level_manager.all_rects.pop()
 
         # Update display
         pygame.display.update()
 
-    save_data(world.rects)
+    save_data(level_manager)
 
 
 if __name__ == '__main__':

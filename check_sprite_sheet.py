@@ -12,13 +12,13 @@ screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption('Sprite Sheet Preview')
 
 '''Sprite Sheet'''
-from src.sprites import characters
-sprite_sheet = characters
+from src.sprites import tester
+sprite_sheet = tester
 attributes = {
-    "size": 25,
+    "size": 32,
     "sprite sheet": sprite_sheet,
-    "rows": 4,
-    "columns": 4
+    "rows": 3,
+    "columns": 3
 }
 
 

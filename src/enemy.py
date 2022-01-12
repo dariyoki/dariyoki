@@ -36,7 +36,7 @@ class Ninja:
         # Stacking values
         self.jump_stack = 0
 
-    def update(self, player_pos, tiles, dt):
+    def update(self, player_pos, info, dt):
         direction = ""
         if abs(self.x - player_pos[0]) > self.player_dist:
             if player_pos[0] < self.x:
@@ -59,14 +59,16 @@ class Ninja:
             self.image = self.left_img
 
         # Check side collisions
-        for tile in tiles:
+        for tile in info.right_rects:
             if tile.collidepoint(self.rect.midright) and dx > 0:
                 dx = 0
 
+        for tile in info.left_rects:
             if tile.collidepoint(self.rect.midleft) and dx < 0:
                 dx = 0
 
-        for tile in tiles:
+        # Gravity control
+        for tile in info.up_rects:
             if tile.collidepoint(self.rect.midbottom) and self.rect.y < tile.y:
                 self.image = self.right_img if self.last_direction == "right" else self.left_img
                 # self.once = True

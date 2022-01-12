@@ -1,5 +1,6 @@
 import time
 import json
+import pickle
 from src.display import *
 from src.sprites import background_img
 from src.world import World
@@ -15,22 +16,27 @@ class Game:
         with open('data/controls.json') as f:
             self.controls = json.load(f)
 
+        # Level data
+        with open('data/level_data/level_0', 'rb') as f:
+            self.level_manager = pickle.load(f)
+
         self.run = True
         self.player = Player(*player_start_pos, camera, self.controls["controls"])
-        self.enemy_1 = Ninja(player_start_pos[0] + 300, player_start_pos[1], None, "shadow", 2, 400, player_dist=200)
-        chest = Chest(player_start_pos[0] + 500,
-                      player_start_pos[1] - 10, pygame.K_f, 0.5)
-        self.world = World()
+        # self.enemy_1 = Ninja(player_start_pos[0] + 300, player_start_pos[1], None, "shadow", 2, 400, player_dist=200)
+        self.world = World(self.level_manager)
         self.camera = camera
 
         self.translucent_dark = pygame.Surface(screen.get_size())
         self.translucent_dark.set_alpha(100)
 
         self.item_info = Info(screen, eval("pygame." + self.controls["controls"]["info toggle"]))
+        self.level_manager.item_info = self.item_info
 
-        self.items = []
-        self.chests = [chest]
         self.opened_chests = []
+        # Handling serialized mini objects to full fledged game objects
+        self.chests = [Chest(s.x, s.y, s.load_control, s.load_speed) for s in self.level_manager.chests]
+        self.items = []
+        self.enemies = []
 
     def main_loop(self):
         start = time.perf_counter()
@@ -52,7 +58,7 @@ class Game:
             self.camera = self.player.camera
 
             # Opened chest becomes part of the background
-            for opened_chest in self.opened_chests:
+            for opened_chest in self.level_manager.opened_chests:
                 opened_chest.draw(screen, self.camera)
 
             # Line of lighting
@@ -70,19 +76,21 @@ class Game:
                     self.opened_chests.append(chest)
 
             info = {
-                "tiles": self.world.rects,
                 "items": self.items,
-                "chests": self.chests,
-                "item info": self.item_info
+                "item info": self.item_info,
+                "up tiles": self.level_manager.up_rects,
+                "right tiles": self.level_manager.right_rects,
+                "left tiles": self.level_manager.left_rects,
+                "chests": self.chests
             }
             # Player and enemies
             self.player.update(info, events, keys, dt)
             self.player.draw(screen)
 
-            self.enemy_1.update(self.player.rect.center, self.world.rects, dt)
-            self.enemy_1.draw(screen, self.camera)
+            # self.enemy_1.update(self.player.rect.center, self.level_manager, dt)
+            # self.enemy_1.draw(screen, self.camera)
 
-            for item in self.items:
+            for item in self.level_manager.items:
                 item.update(dt)
                 item.draw(screen, self.camera)
 
