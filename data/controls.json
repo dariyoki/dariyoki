@@ -4,7 +4,8 @@
     "left": "K_a",
     "jump": "K_w",
     "attack": "K_SPACE",
-    "dash": "K_LSHIFT"
+    "dash": "K_LSHIFT",
+    "info toggle": "K_i"
   }
 }
 

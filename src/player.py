@@ -11,7 +11,7 @@ class Player:
     JUMP_HEIGHT = 200
     DASH_LENGTH = 150
 
-    def __init__(self, x, y, camera):
+    def __init__(self, x, y, camera, controls):
         # Constructor objects
         self.x, self.y = x, y
         self.right_img = characters[0]
@@ -20,16 +20,13 @@ class Player:
         self.rect = self.image.get_rect()
 
         # Controls
-        with open("data/controls.json") as f:
-            self.controls = json.load(f)
+        self.controls = controls
 
-        (
-            self.right_control,
-            self.left_control,
-            self.jump_control,
-            self.attack_control,
-            self.dash_control
-        ) = [eval("pygame." + control) for control in self.controls["controls"].values()]
+        self.right_control = eval("pygame." + controls["right"])
+        self.left_control = eval("pygame." + controls["left"])
+        self.jump_control = eval("pygame." + controls["jump"])
+        self.attack_control = eval("pygame." + controls["attack"])
+        self.dash_control = eval("pygame." + controls["dash"])
 
         # Inventory
         self.inventory = {
@@ -59,10 +56,13 @@ class Player:
         self.attacking = False
         self.dashing = False
         self.standing_near_chest = False
+        self.colliding_item = None
+        self.once = True
 
         # Casket
         self.last_direction = "right"
         self.dash_images = []
+        self.rs = []
         self.chest_index = -1
         self.info = {}
 
@@ -175,8 +175,10 @@ class Player:
             self.dash_images.append([d_img, (self.x, self.y), 150])
 
         # Handle chests
-        rs = [r.rect for r in info["chests"]]
-        if (index := self.rect.collidelist(rs)) != -1:
+        if self.once:
+            self.rs = [r.rect for r in info["chests"]]
+            self.once = False
+        if (index := self.rect.collidelist(self.rs)) != -1:
             self.chest_index = index
             self.standing_near_chest = True
         else:
@@ -187,6 +189,13 @@ class Player:
         # Update loading bar
         if self.standing_near_chest and len(info["chests"]) != 0:
             info["chests"][self.chest_index].update(keys, dt)
+
+        # Handle items
+        for item in info["items"]:
+            if self.rect.colliderect(item.rect):
+                self.colliding_item = item
+                if not info["item info"].o_lock:
+                    info["item info"].opening = True
 
         # Update player coord
         self.x += dx

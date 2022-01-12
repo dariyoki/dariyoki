@@ -2,7 +2,8 @@ import pygame
 import random
 from enum import Enum
 from src.sprites import chests, items
-from src.utils import circle_surf, Glow, LoadingBar
+from src.utils import circle_surf, Glow
+from src.widgets import LoadingBar
 
 
 class HoverDirection(Enum):

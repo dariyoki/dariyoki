@@ -1,4 +1,5 @@
 import pygame
+import os
 from src.sprite_sheet import SpriteSheet
 from src.utils import resize, turn_left
 
@@ -19,6 +20,9 @@ chest_ss = SpriteSheet(chest_img)
 chests = chest_ss.get_images(1, 2, 32, 32, fixer=8, bound=False)
 chests = resize(chests, scale=2)
 
+# Border art
+border_img = pygame.image.load(path + "border.png").convert_alpha()
+
 # Items
 health_potion_img = pygame.image.load(path + "items/health_potion.png").convert_alpha()
 shield_potion_img = pygame.image.load(path + "items/shield_potion.png").convert_alpha()
@@ -34,3 +38,9 @@ items = {
     "smoke bomb": pygame.transform.scale(sb_img, item_size),
     "sword": pygame.transform.scale(sword_img, item_size)
 }
+
+background_img = pygame.image.load(path + "background.png").convert()
+
+# Information cards
+i_cards = {i_card[2:-5].replace('_', ' '): pygame.image.load(path + f"icards/{i_card}").convert() for i_card in
+           os.listdir(path + "icards/")}

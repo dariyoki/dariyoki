@@ -42,26 +42,4 @@ class Glow:
                     special_flags=pygame.BLEND_RGB_ADD)
 
 
-class LoadingBar:
-    def __init__(self, value, fg_color, bg_color, rect: pygame.Rect):
-        self.value = value
-        self.fg_color = fg_color
-        self.bg_color = bg_color
-        self.rect = rect
-        self.rect.center = self.rect.topleft
-        self.val_rect = pygame.Rect(
-            (rect.x + 2, rect.y + 2),
-            (self.value, self.rect.height // 2)
-        )
-        self.loaded = False
-
-    def draw(self, screen: pygame.Surface, camera):
-        pygame.draw.rect(screen, self.bg_color, pygame.Rect((self.rect.x - camera[0], self.rect.y - camera[1]),
-                                                            self.rect.size))
-
-        self.loaded = self.value >= self.rect.width - 4
-
-        pygame.draw.rect(screen, self.fg_color, pygame.Rect((self.val_rect.x - camera[0], self.val_rect.y - camera[1]),
-                                                            (int(self.value), self.rect.height // 2)))
-
 

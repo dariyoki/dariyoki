@@ -1,32 +1,38 @@
 import time
-import random
+import json
 from src.display import *
-from src.sprites import items
+from src.sprites import background_img
 from src.world import World
 from src.player import Player
 from src.enemy import Ninja
-from src.items import Item, Chest
+from src.items import Chest
+from src.stats import Info
 
 
 class Game:
     def __init__(self):
+        # Controls
+        with open('data/controls.json') as f:
+            self.controls = json.load(f)
+
         self.run = True
-        self.enemy_1 = Ninja(300, 200, None, "shadow", 2, 400, player_dist=200)
-        chest = Chest(400, screen_height - (32*3), pygame.K_f, 0.5)
-        # self.item_1 = Item('shield potion', items['shield potion'], [400, screen_height - (32*2) - 20])
+        self.player = Player(*player_start_pos, camera, self.controls["controls"])
+        self.enemy_1 = Ninja(player_start_pos[0] + 300, player_start_pos[1], None, "shadow", 2, 400, player_dist=200)
+        chest = Chest(player_start_pos[0] + 500,
+                      player_start_pos[1] - 10, pygame.K_f, 0.5)
         self.world = World()
-        self.camera = [-(screen_width // 2), -(screen_height // 2)]
-        self.player = Player(50, 50, self.camera)
+        self.camera = camera
 
         self.translucent_dark = pygame.Surface(screen.get_size())
         self.translucent_dark.set_alpha(100)
+
+        self.item_info = Info(screen, eval("pygame." + self.controls["controls"]["info toggle"]))
 
         self.items = []
         self.chests = [chest]
         self.opened_chests = []
 
     def main_loop(self):
-        x_freq = random.randrange(10)
         start = time.perf_counter()
         while self.run:
             clock.tick()
@@ -41,7 +47,7 @@ class Game:
             keys = pygame.key.get_pressed()
 
             # Render
-            screen.fill(bg)
+            screen.blit(background_img, (0, 0))
             self.world.draw(screen, self.camera)
             self.camera = self.player.camera
 
@@ -66,7 +72,8 @@ class Game:
             info = {
                 "tiles": self.world.rects,
                 "items": self.items,
-                "chests": self.chests
+                "chests": self.chests,
+                "item info": self.item_info
             }
             # Player and enemies
             self.player.update(info, events, keys, dt)
@@ -81,6 +88,10 @@ class Game:
 
             # self.item_1.update(dt)
             # self.item_1.draw(screen, self.camera)
+
+            # Item information
+            self.item_info.update(self.player.colliding_item, events, dt)
+            self.item_info.draw(screen)
 
             # Event handler
             for event in events:

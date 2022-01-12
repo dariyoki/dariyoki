@@ -11,11 +11,12 @@
         - Moving background
         - Enemies
             - Basic dark clan ninjas
---Here
-            - Bees
-            - Snipers
+            - Bees  [X]
+            - Snipers  [X]
         - Attacks
+            - Sword slash
             - Dash
+--Here
         - Stats and UI
             - HP
                 - Gain damage when enemies attack
