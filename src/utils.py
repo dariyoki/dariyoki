@@ -1,4 +1,5 @@
 import pygame
+import math
 
 
 def circle_surf(radius, color):
@@ -26,6 +27,14 @@ def turn_left(extract):
     left_images = [pygame.transform.flip(img, True, False) for img in extract]
 
     return left_images
+
+
+def get_movement(angle: int, speed) -> tuple[int, int]:
+    # Change in x and y
+    dx = math.cos(angle) * speed
+    dy = math.sin(angle) * speed
+
+    return dx, dy
 
 
 class Glow:

@@ -7,7 +7,7 @@ from src.world import World
 from src.player import Player
 from src.enemy import Ninja
 from src.items import Chest
-from src.stats import Info
+from src.stats import Info, PlayerStatistics
 
 
 class Game:
@@ -37,6 +37,12 @@ class Game:
         self.chests = [Chest(s.x, s.y, s.load_control, s.load_speed) for s in self.level_manager.chests]
         self.items = []
         self.enemies = []
+
+        # Inventory 
+        self.statistics = PlayerStatistics(
+            screen,
+            self.player
+        )
 
     def main_loop(self):
         start = time.perf_counter()
@@ -79,21 +85,20 @@ class Game:
                 "items": self.items,
                 "item info": self.item_info,
                 "tiles": self.level_manager.all_rects,
-                "chests": self.chests
+                "chests": self.chests,
+                "stats": self.statistics
             }
             # Player and enemies
             self.player.update(info, events, keys, dt)
             self.player.draw(screen)
 
-            # self.enemy_1.update(self.player.rect.center, self.level_manager, dt)
-            # self.enemy_1.draw(screen, self.camera)
-
+            # Items
             for item in self.items:
                 item.update(dt)
                 item.draw(screen, self.camera)
 
-            # self.item_1.update(dt)
-            # self.item_1.draw(screen, self.camera)
+            # Inventory and statistics
+            self.statistics.draw()
 
             # Item information
             self.item_info.update(self.player.colliding_item, events, dt)

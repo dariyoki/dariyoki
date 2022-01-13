@@ -53,10 +53,10 @@ def save_data(data):
 
 
 def main():
-    # with open('data/level_data/level_0', 'rb') as f:
-    #     level_manager = pickle.load(f)
+    with open('data/level_data/level_0', 'rb') as f:
+        level_manager = pickle.load(f)
 
-    level_manager = LevelManager()
+    # level_manager = LevelManager()
     world = World(level_manager)
     possible_rects = generate_possible_rects(
         rows=120,
@@ -122,6 +122,9 @@ def main():
                 if "left" in current_tile_name:
                     level_manager.all_rects[(tile.x, tile.y)] = current_tile_name
                 if "right" in current_tile_name:
+                    level_manager.all_rects[(tile.x, tile.y)] = current_tile_name
+
+                if "center" in current_tile_name:
                     level_manager.all_rects[(tile.x, tile.y)] = current_tile_name
 
                 if "chest" in current_tile_name:

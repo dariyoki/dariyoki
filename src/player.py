@@ -66,6 +66,13 @@ class Player:
         self.chest_index = -1
         self.info = {}
 
+        # Statistics
+        self.hp = 100
+        self.last_hp = self.hp
+        self.sheild = 0 
+        self.soul_energy = 100
+        self.current_damage = 0
+
         # Movement vars
         self.angle = 0
         self.camera = camera
@@ -82,10 +89,12 @@ class Player:
 
         # dt
         self.dt = 0
+        self.dx, self.dy = 0, 0
 
     def update(self, info, events, keys, dt):
         self.dt = dt
         self.info = info
+        self.last_hp = self.hp
 
         # Default iteration values
         dx, dy = 0, 0
@@ -118,6 +127,10 @@ class Player:
                 if event.key == self.dash_control:
                     self.dashing = True
                     self.dash_stack = 0
+
+                if event.key == pygame.K_e:
+                    self.hp -= 5
+                    info["stats"].hp_bar.value = self.hp
 
         # Check collisions
         for pos in info["tiles"]:
@@ -215,8 +228,11 @@ class Player:
         self.y += dy
 
         # Update Camera coord
-        self.camera[0] += dx
-        self.camera[1] += dy
+        self.dx, self.dy = dx, dy
+        # self.camera[0] += dx
+        # self.camera[1] += dy
+        # self.camera[0] = (self.x - self.camera[0]) * 0.6
+        # self.camera[1] = (self.y - self.camera[1]) * 0.6
 
         self.rect = self.right_img.get_rect(topleft=(self.x, self.y))
 
@@ -252,3 +268,8 @@ class Player:
         if self.standing_near_chest and len(self.info["chests"]) != 0:
             self.info["chests"][self.chest_index].loading_bar.draw(screen, self.camera)
 
+        self.current_damage = self.last_hp - self.hp
+
+        # Update camera pos
+        self.camera[0] += (self.x - self.camera[0] - (screen.get_width() // 2)) * 0.2
+        self.camera[1] += (self.y - self.camera[1] - (screen.get_height() // 2)) * 0.2

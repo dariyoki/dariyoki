@@ -1,6 +1,6 @@
 import pygame
 from src.sprites import border_img, i_cards
-from src.widgets import Label
+from src.widgets import Label, LoadingBar
 
 
 class ItemStats:
@@ -104,22 +104,28 @@ class Info:
         screen.blit(self.surf, tuple(self.pos))
 
         self.label.draw(screen)
-        # if self.item_stats is not None:
-        #     text = self.font.render(self.item_stats.name, True, "yellow")
-        #     f_rect = text.get_rect(center=(
-        #         self.rect.midtop[0],
-        #         self.rect.midtop[1] + 100
-        #     ))
-        #
-        #     img_rect = self.item.image.get_rect(center=(
-        #         self.rect.midtop[0],
-        #         self.rect.midtop[1] + 50
-        #     ))
-        #
-        #     screen.blit(self.item.image, img_rect)
-        #     screen.blit(self.image_border, img_rect)
-        #     screen.blit(
-        #         self.font.render(self.item_stats.name, True, "white"),
-        #         f_rect
-        #     )
-        # screen.blit(self.surf, tuple(self.pos))
+
+
+class PlayerStatistics:
+    def __init__(self, screen, player_obj):
+        self.screen = screen
+        self.player_obj = player_obj
+
+        # Inventory back surface
+        self.inventory_surf = pygame.Surface((screen.get_width(), 100))
+        self.inventory_surf.set_alpha(170)
+
+        self.hp_bar = LoadingBar(
+                value=player_obj.hp,
+                fg_color='green',
+                bg_color='black',
+                rect=pygame.Rect((80, 30), (player_obj.hp, 20))
+            )
+
+    def update(self):
+        ...
+
+    def draw(self):
+        self.screen.blit(self.inventory_surf, (0, 0))
+        self.hp_bar.draw(self.screen, [0, 0])
+
