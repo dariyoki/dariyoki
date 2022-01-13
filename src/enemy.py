@@ -58,30 +58,41 @@ class Ninja:
 
             self.image = self.left_img
 
-        # Check side collisions
-        for tile in info["right tiles"]:
-            if tile.collidepoint(self.rect.midright) and dx > 0:
-                dx = 0
+        # Check collisions
+        for pos in info["tiles"]:
+            stub = pygame.Rect(pos, (32, 32))
 
-        for tile in info["left tiles"]:
-            if tile.collidepoint(self.rect.midleft) and dx < 0:
-                dx = 0
+            # Check for floor collision
+            if "up" in info["tiles"][pos]:
+                if stub.collidepoint(self.rect.midbottom) and self.rect.y < pos[1]:
+                    self.image = self.right_img if self.last_direction == "right" else self.left_img
+                    self.touched_ground = True
+                    self.angle = 0
+                    dy = stub.top - self.rect.bottom
+                    # self.velocity = 5
+                    break
 
-        # Gravity control
-        for tile in info["up tiles"]:
-            if tile.collidepoint(self.rect.midbottom) and self.rect.y < tile.y:
-                self.image = self.right_img if self.last_direction == "right" else self.left_img
-                # self.once = True
-                self.touched_ground = True
-                self.angle = 0
-                dy = tile.top - self.rect.bottom
-                # self.velocity = 5
-                break
+            # Check for right collision
+            if "right" in info["tiles"][pos]:
+                if stub.collidepoint(self.rect.midright) and dx > 0:
+                    dx = 0
+
+            # Check for left collision
+            if "left" in info["tiles"][pos]:
+                if stub.collidepoint(self.rect.midleft) and dx < 0:
+                    dx = 0
+
+            # Check for roof collsion
+            if "down" in info["tiles"][pos]:
+                if dy != 0 and stub.collidepoint(self.rect.midtop):
+                    # dy = 0
+                    self.jumping = False
         else:
             if not self.jumping:
                 self.velocity += self.acceleration * dt
                 dy += self.velocity * dt
 
+        # Gravity control
         if self.jumping:
             self.angle += 200 * dt
 
@@ -89,6 +100,10 @@ class Ninja:
             self.velocity -= self.acceleration * dt
             dy -= self.velocity * dt
             self.jump_stack += abs(dy)
+
+            if dy == abs(dy):
+                dy = -dy
+
             if self.jump_stack > self.JUMP_HEIGHT:
                 self.jumping = False
                 self.jump_stack = 0

@@ -108,34 +108,21 @@ def main():
             tile = pygame.Rect((x, y), (32, 32))
 
             if "clear" in current_tile_name:
-                if (index := tile.collidelist(level_manager.all_rects)) != -1:
-                    level_manager.all_rects.pop(index)
-                    if tile in level_manager.up_rects:
-                        level_manager.up_rects.remove(tile)
-                    if tile in level_manager.down_rects:
-                        level_manager.down_rects.remove(tile)
-                    if tile in level_manager.left_rects:
-                        level_manager.left_rects.remove(tile)
-                    if tile in level_manager.right_rects:
-                        level_manager.right_rects.remove(tile)
+                for pos in level_manager.all_rects:
+                    stub = pygame.Rect(pos, (32, 32))
+                    if stub.colliderect(tile):
+                        del level_manager.all_rects[pos]
+                        break
 
-            elif tile not in level_manager.all_rects:
+            elif (tile.x, tile.y) not in level_manager.all_rects:
                 if "up" in current_tile_name:
-                    level_manager.up_rects.append(tile)
-                    level_manager.all_rects.append(tile)
-                    level_manager.all_images.append(current_tile_name)
+                    level_manager.all_rects[(tile.x, tile.y)] = current_tile_name
                 if "down" in current_tile_name:
-                    level_manager.down_rects.append(tile)
-                    level_manager.all_rects.append(tile)
-                    level_manager.all_images.append(current_tile_name)
+                    level_manager.all_rects[(tile.x, tile.y)] = current_tile_name
                 if "left" in current_tile_name:
-                    level_manager.left_rects.append(tile)
-                    level_manager.all_rects.append(tile)
-                    level_manager.all_images.append(current_tile_name)
+                    level_manager.all_rects[(tile.x, tile.y)] = current_tile_name
                 if "right" in current_tile_name:
-                    level_manager.right_rects.append(tile)
-                    level_manager.all_rects.append(tile)
-                    level_manager.all_images.append(current_tile_name)
+                    level_manager.all_rects[(tile.x, tile.y)] = current_tile_name
 
                 if "chest" in current_tile_name:
                     if (tile.x, tile.y) not in c_chest_poses:

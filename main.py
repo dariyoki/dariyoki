@@ -78,10 +78,7 @@ class Game:
             info = {
                 "items": self.items,
                 "item info": self.item_info,
-                "up tiles": self.level_manager.up_rects,
-                "down tiles": self.level_manager.down_rects,
-                "right tiles": self.level_manager.right_rects,
-                "left tiles": self.level_manager.left_rects,
+                "tiles": self.level_manager.all_rects,
                 "chests": self.chests
             }
             # Player and enemies
