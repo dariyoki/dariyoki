@@ -58,7 +58,7 @@ class Game:
             self.camera = self.player.camera
 
             # Opened chest becomes part of the background
-            for opened_chest in self.level_manager.opened_chests:
+            for opened_chest in self.opened_chests:
                 opened_chest.draw(screen, self.camera)
 
             # Line of lighting
@@ -79,6 +79,7 @@ class Game:
                 "items": self.items,
                 "item info": self.item_info,
                 "up tiles": self.level_manager.up_rects,
+                "down tiles": self.level_manager.down_rects,
                 "right tiles": self.level_manager.right_rects,
                 "left tiles": self.level_manager.left_rects,
                 "chests": self.chests
@@ -90,7 +91,7 @@ class Game:
             # self.enemy_1.update(self.player.rect.center, self.level_manager, dt)
             # self.enemy_1.draw(screen, self.camera)
 
-            for item in self.level_manager.items:
+            for item in self.items:
                 item.update(dt)
                 item.draw(screen, self.camera)
 

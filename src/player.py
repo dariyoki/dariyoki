@@ -160,6 +160,12 @@ class Player:
 
             self.touched_ground = False
 
+        # Check if playing hitting the roof
+        for tile in info["down tiles"]:
+            if dy != 0 and tile.collidepoint(self.rect.midtop):
+                # dy = 0
+                self.jumping = False
+
         # Dashing
         if self.dashing:
             dx *= self.dash_mult * dt

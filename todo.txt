@@ -25,6 +25,18 @@
                 - Display how much shield one has left
 
         - Weapons
+            - Sword attack
+                - Move sword from top to bottom + play sword attack animation
+                - Damage enemies when hit by sword
+            - Shuriken
+                - Move shuriken towards mouse pos angle + make trailing square particle effect
+                - Damage enemies when hit by shuriken
+            - Scythe
+                - Acts like a boomerang
+                - Damage enemies when hit by Scythe
+            - Sniper
+                - Long range, high damage
+                - Damage enemies when hit by sniper
         - Items
             - Smoke bombs
                 - Move from current location to any mouse positioned location

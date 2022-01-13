@@ -59,16 +59,16 @@ class Ninja:
             self.image = self.left_img
 
         # Check side collisions
-        for tile in info.right_rects:
+        for tile in info["right tiles"]:
             if tile.collidepoint(self.rect.midright) and dx > 0:
                 dx = 0
 
-        for tile in info.left_rects:
+        for tile in info["left tiles"]:
             if tile.collidepoint(self.rect.midleft) and dx < 0:
                 dx = 0
 
         # Gravity control
-        for tile in info.up_rects:
+        for tile in info["up tiles"]:
             if tile.collidepoint(self.rect.midbottom) and self.rect.y < tile.y:
                 self.image = self.right_img if self.last_direction == "right" else self.left_img
                 # self.once = True

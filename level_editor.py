@@ -1,5 +1,8 @@
 import time
 import pickle
+
+import pygame
+
 from src.display import *
 from src.sprites import background_img, characters, bee_tile_set_info, chests
 from src.world import World
@@ -73,13 +76,17 @@ def main():
         6: "downleft",
         7: "down",
         8: "downright",
-        9: "chest"
+        9: "chest",
+        10: "clear"
     }
-    opts_imgs = list(bee_tile_set_info.values()) + [chests[0]]
+    r_surf = pygame.Surface((32, 32))
+    r_surf.fill('red')
+    opts_imgs = list(bee_tile_set_info.values()) + [chests[0], r_surf]
     options = ChooseOption(opts_imgs, screen)
 
     # Copy double data
     c_chests = []
+    c_chest_poses = []
 
     run = True
     start = time.perf_counter()
@@ -99,7 +106,20 @@ def main():
             x = closest([r.x for r in possible_rects], asd.x + camera[0])
             y = closest([r.y for r in possible_rects], asd.y + camera[1])
             tile = pygame.Rect((x, y), (32, 32))
-            if tile not in level_manager.all_rects:
+
+            if "clear" in current_tile_name:
+                if (index := tile.collidelist(level_manager.all_rects)) != -1:
+                    level_manager.all_rects.pop(index)
+                    if tile in level_manager.up_rects:
+                        level_manager.up_rects.remove(tile)
+                    if tile in level_manager.down_rects:
+                        level_manager.down_rects.remove(tile)
+                    if tile in level_manager.left_rects:
+                        level_manager.left_rects.remove(tile)
+                    if tile in level_manager.right_rects:
+                        level_manager.right_rects.remove(tile)
+
+            elif tile not in level_manager.all_rects:
                 if "up" in current_tile_name:
                     level_manager.up_rects.append(tile)
                     level_manager.all_rects.append(tile)
@@ -118,8 +138,10 @@ def main():
                     level_manager.all_images.append(current_tile_name)
 
                 if "chest" in current_tile_name:
-                    level_manager.chests.append(SChest(tile.x, tile.y, pygame.K_f, 7))
-                    c_chests.append(Chest(tile.x, tile.y, pygame.K_f, 7))
+                    if (tile.x, tile.y) not in c_chest_poses:
+                        level_manager.chests.append(SChest(tile.x, tile.y, pygame.K_f, 7))
+                        c_chests.append(Chest(tile.x, tile.y, pygame.K_f, 7))
+                        c_chest_poses.append((tile.x, tile.y))
 
         current_tile_name = opts[options.chosen_option]
 
@@ -162,10 +184,10 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
 
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_z:
-                    if controlling:
-                        level_manager.all_rects.pop()
+            # if event.type == pygame.KEYDOWN:
+            #     if event.key == pygame.K_z:
+            #         if controlling:
+            #             level_manager.all_rects.pop()
 
         # Update display
         pygame.display.update()
