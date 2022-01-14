@@ -27,12 +27,14 @@ class Player:
         self.jump_control = eval("pygame." + controls["jump"])
         self.attack_control = eval("pygame." + controls["attack"])
         self.dash_control = eval("pygame." + controls["dash"])
+        self.pickup_control = eval("pygame." + controls["pickup item"])
 
         # Inventory
         self.inventory = {
             "weapons": {
                 "shuriken": 0,
-                "sword": 0
+                "sword": 0,
+                "scythe": 0
             },
             "items": {
                 "health potion": 0,
@@ -69,7 +71,7 @@ class Player:
         # Statistics
         self.hp = 100
         self.last_hp = self.hp
-        self.sheild = 0 
+        self.shield = 0
         self.soul_energy = 100
         self.current_damage = 0
 
@@ -95,6 +97,9 @@ class Player:
         self.dt = dt
         self.info = info
         self.last_hp = self.hp
+        info["stats"].hp_bar.value = self.hp * 1.5
+        info["stats"].shield_bar.value = self.shield * 1.5
+        info["stats"].se_bar.value = self.soul_energy * 1.5
 
         # Default iteration values
         dx, dy = 0, 0
@@ -128,9 +133,14 @@ class Player:
                     self.dashing = True
                     self.dash_stack = 0
 
-                if event.key == pygame.K_e:
-                    self.hp -= 5
-                    info["stats"].hp_bar.value = self.hp
+                if event.key == self.pickup_control:
+                    if self.colliding_item is not None:
+                        info["items"].remove(self.colliding_item)
+                        name = self.colliding_item.name
+                        if name in self.inventory["weapons"]:
+                            self.inventory["weapons"][name] += 1
+                        elif name in self.inventory["items"]:
+                            self.inventory["items"][name] += 1
 
         # Check collisions
         for pos in info["tiles"]:
@@ -201,9 +211,7 @@ class Player:
             self.dash_images.append([d_img, (self.x, self.y), 150])
 
         # Handle chests
-        if self.once:
-            self.rs = [r.rect for r in info["chests"]]
-            self.once = False
+        self.rs = [r.rect for r in info["chests"]]
         if (index := self.rect.collidelist(self.rs)) != -1:
             self.chest_index = index
             self.standing_near_chest = True
@@ -214,14 +222,21 @@ class Player:
 
         # Update loading bar
         if self.standing_near_chest and len(info["chests"]) != 0:
+            # TODO
+            # if info["chests"][self.chest_index].loading_bar.loaded:
+            #     self.chest_index = 0
             info["chests"][self.chest_index].update(keys, dt)
 
         # Handle items
-        for item in info["items"]:
-            if self.rect.colliderect(item.rect):
-                self.colliding_item = item
-                if not info["item info"].o_lock:
-                    info["item info"].opening = True
+        stub_rx = [item.rect for item in info["items"]]
+        if (index := self.rect.collidelist(stub_rx)) != -1:
+            self.colliding_item = info["items"][index]
+            if not info["item info"].o_lock:
+                info["item info"].opening = True
+        else:
+            self.colliding_item = None
+            if not info["item info"].o_lock:
+                info["item info"].opening = False
 
         # Update player coord
         self.x += dx
@@ -271,5 +286,5 @@ class Player:
         self.current_damage = self.last_hp - self.hp
 
         # Update camera pos
-        self.camera[0] += (self.x - self.camera[0] - (screen.get_width() // 2)) * 0.2
-        self.camera[1] += (self.y - self.camera[1] - (screen.get_height() // 2)) * 0.2
+        self.camera[0] += (self.x - self.camera[0] - (screen.get_width() // 2)) * 0.012
+        self.camera[1] += (self.y - self.camera[1] - (screen.get_height() // 2)) * 0.012

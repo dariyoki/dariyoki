@@ -95,7 +95,9 @@ class Chest:
             60: "health potion",
             50: "shield potion",
             30: "shuriken",
-            10: "sword"
+            10: "sword",
+            5: "smoke bomb",
+            # 1: "scythe"
         }
 
         for _ in range(n_items):

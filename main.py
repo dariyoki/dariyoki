@@ -2,7 +2,7 @@ import time
 import json
 import pickle
 from src.display import *
-from src.sprites import background_img
+from src.sprites import background_img, game_border_img
 from src.world import World
 from src.player import Player
 from src.enemy import Ninja
@@ -57,6 +57,8 @@ class Game:
 
             events = pygame.event.get()
             keys = pygame.key.get_pressed()
+            mouse_pos = pygame.mouse.get_pos()
+            mouse_press = pygame.mouse.get_pressed()
 
             # Render
             screen.blit(background_img, (0, 0))
@@ -98,11 +100,14 @@ class Game:
                 item.draw(screen, self.camera)
 
             # Inventory and statistics
+            self.statistics.update(mouse_pos, mouse_press)
             self.statistics.draw()
 
             # Item information
             self.item_info.update(self.player.colliding_item, events, dt)
             self.item_info.draw(screen)
+
+            screen.blit(game_border_img, (0, 0))
 
             # Event handler
             for event in events:

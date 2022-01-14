@@ -1,5 +1,12 @@
 import pygame
-from src.sprites import border_img, i_cards
+from src.sprites import (border_img,
+                         i_cards,
+                         sword_img,
+                         shuriken_img,
+                         health_potion_img,
+                         shield_potion_img,
+                         sb_img,
+                         scythe_img)
 from src.widgets import Label, LoadingBar
 
 
@@ -112,20 +119,110 @@ class PlayerStatistics:
         self.player_obj = player_obj
 
         # Inventory back surface
-        self.inventory_surf = pygame.Surface((screen.get_width(), 100))
+        self.inventory_surf = pygame.Surface((screen.get_width(), 130))
         self.inventory_surf.set_alpha(170)
 
+        start = (120, 30)
+        width = player_obj.hp * 1.5
         self.hp_bar = LoadingBar(
                 value=player_obj.hp,
                 fg_color='green',
                 bg_color='black',
-                rect=pygame.Rect((80, 30), (player_obj.hp, 20))
+                rect=pygame.Rect(start, (width, 20))
+            )
+        self.shield_bar = LoadingBar(
+                value=player_obj.hp,
+                fg_color=(0, 0, 255),
+                bg_color='black',
+                rect=pygame.Rect((start[0], start[1] + 20 + 5), (width, 20))
+            )
+        self.se_bar = LoadingBar(
+                value=player_obj.hp,
+                fg_color=(0, 255, 255),
+                bg_color='black',
+                rect=pygame.Rect((start[0], start[1] + (20 * 2) + (5 * 2)), (width, 20))
             )
 
-    def update(self):
-        ...
+        brect = border_img.get_rect()
+        self.inventory_rects = []
+        for row in range(len(player_obj.inventory.keys())):
+            for col in range(10):
+                self.inventory_rects.append(
+                    pygame.Rect(
+                        (brect.height * col + 370, brect.width * row + 10),
+                        brect.size
+                    )
+                )
+
+        self.order = {
+            "J1": ("shuriken", shuriken_img),
+            "J2": ("sword", sword_img),
+            "J3": None,
+            "J4": None,
+            "J5": None,
+            "J6": None,
+            "J7": None,
+            "J8": None,
+            "J9": None,
+            "J10": ("scythe", scythe_img),
+            "K1": ("health potion", pygame.transform.scale(health_potion_img, (32, 32))),
+            "K2": ("shield potion", pygame.transform.scale(shield_potion_img, (32, 32))),
+            "K3": None,
+            "K4": None,
+            "K5": None,
+            "K6": ("smoke bomb", sb_img),
+            "K7": None,
+            "K8": None,
+            "K9": None,
+            "K10": None,
+            "L1": None,
+            "L2": None,
+            "L3": None,
+            "L4": None,
+            "L5": None,
+            "L6": None,
+            "L7": None,
+            "L8": None,
+            "L9": None,
+            "L10": None,
+        }
+
+        self.chosen_index = 1
+
+        # Font
+        self.font = pygame.font.SysFont("bahnschrift", 25)
+
+    def update(self, mouse_pos, mouse_press):
+        if mouse_press[0]:
+            for rect in self.inventory_rects:
+                if rect.collidepoint(mouse_pos):
+                    self.chosen_index = self.inventory_rects.index(rect)
 
     def draw(self):
         self.screen.blit(self.inventory_surf, (0, 0))
         self.hp_bar.draw(self.screen, [0, 0])
+        self.shield_bar.draw(self.screen, [0, 0])
+        self.se_bar.draw(self.screen, [0, 0])
+
+        for index, vals in enumerate(zip(self.order, self.inventory_rects)):
+            pos_key, rect = vals
+            if self.order[pos_key] is not None:
+                quantity = 0
+                if "J" in pos_key:
+                    quantity = self.player_obj.inventory["weapons"][self.order[pos_key][0]]
+                elif "K" in pos_key:
+                    quantity = self.player_obj.inventory["items"][self.order[pos_key][0]]
+                elif "L" in pos_key:
+                    quantity = self.player_obj.inventory["soul boosted"][self.order[pos_key][0]]
+
+                if quantity > 0:
+                    self.screen.blit(self.order[pos_key][1], rect)
+                    if quantity > 1:
+                        num_surf = self.font.render(str(quantity), True, "green")
+                        self.screen.blit(num_surf, rect)
+
+            if index == self.chosen_index:
+                pygame.draw.rect(self.screen, 'yellow', rect, width=3)
+            else:
+                self.screen.blit(border_img, rect)
 

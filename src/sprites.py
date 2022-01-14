@@ -29,6 +29,7 @@ shield_potion_img = pygame.image.load(path + "items/shield_potion.png").convert_
 shuriken_img = pygame.image.load(path + "items/shuriken.png").convert_alpha()
 sb_img = pygame.image.load(path + "items/smoke_bomb.png").convert_alpha()
 sword_img = pygame.image.load(path + "items/sword.png").convert_alpha()
+scythe_img = pygame.image.load(path + "items/scythe.png").convert_alpha()
 
 item_size = (25, 25)
 items = {
@@ -36,10 +37,12 @@ items = {
     "shield potion": pygame.transform.scale(shield_potion_img, item_size),
     "shuriken": pygame.transform.scale(shuriken_img, item_size),
     "smoke bomb": pygame.transform.scale(sb_img, item_size),
-    "sword": pygame.transform.scale(sword_img, item_size)
+    "sword": pygame.transform.scale(sword_img, item_size),
+    "scythe": pygame.transform.scale(scythe_img, item_size)
 }
 
 background_img = pygame.image.load(path + "background.png").convert()
+game_border_img = pygame.image.load(path + "game_border.png").convert_alpha()
 
 # Information cards
 i_cards = {i_card[2:-5].replace('_', ' '): pygame.image.load(path + f"icards/{i_card}").convert() for i_card in

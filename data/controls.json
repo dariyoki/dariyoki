@@ -5,7 +5,8 @@
     "jump": "K_w",
     "attack": "K_SPACE",
     "dash": "K_LSHIFT",
-    "info toggle": "K_i"
+    "info toggle": "K_i",
+    "pickup item": "K_g"
   }
 }
 
