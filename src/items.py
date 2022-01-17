@@ -83,7 +83,7 @@ class Chest:
                                       bg_color='black',
                                       rect=pygame.Rect(
                                           (self.rect.center[0], y + 10),
-                                          (60, 10)
+                                          (150 / 2, 20 / 2)
                                       ))
         self.load_control = load_control
         self.load_speed = load_speed
@@ -97,7 +97,7 @@ class Chest:
             30: "shuriken",
             10: "sword",
             5: "smoke bomb",
-            # 1: "scythe"
+            1: "scythe"
         }
 
         for _ in range(n_items):

@@ -65,4 +65,10 @@ bee_tile_set_info = {
     "downright": pygame.transform.flip(bee_tile_set[2], False, True)
 }
 
+# Spawners
+spawner_imgs = [
+    pygame.image.load(path + "spawners/spawner_shadow_ninja.png").convert_alpha(),
+    pygame.image.load(path + "spawners/spawning_shadow_ninja.png").convert_alpha()
+]
+
 

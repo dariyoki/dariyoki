@@ -7,6 +7,7 @@ from src.world import World
 from src.player import Player
 from src.enemy import Ninja
 from src.items import Chest
+from src.spawner import Spawner
 from src.stats import Info, PlayerStatistics
 
 
@@ -35,6 +36,7 @@ class Game:
         self.opened_chests = []
         # Handling serialized mini objects to full fledged game objects
         self.chests = [Chest(s.x, s.y, s.load_control, s.load_speed) for s in self.level_manager.chests]
+        self.spawners = [Spawner(*args) for args in self.level_manager.spawners]
         self.items = []
         self.enemies = []
 
@@ -62,6 +64,10 @@ class Game:
 
             # Render
             screen.blit(background_img, (0, 0))
+
+            for spawner in self.spawners:
+                spawner.update(dt)
+                spawner.draw(screen, camera)
             self.world.draw(screen, self.camera)
             self.camera = self.player.camera
 

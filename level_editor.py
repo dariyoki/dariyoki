@@ -1,12 +1,10 @@
 import time
 import pickle
-
-import pygame
-
 from src.display import *
-from src.sprites import background_img, characters, bee_tile_set_info, chests
+from src.sprites import background_img, characters, bee_tile_set_info, chests, spawner_imgs
 from src.world import World
 from src.items import Chest
+from src.spawner import Spawner
 from src.level_manager import LevelManager
 from src_le.option import ChooseOption
 from src_le.s_data import SChest
@@ -77,16 +75,27 @@ def main():
         7: "down",
         8: "downright",
         9: "chest",
-        10: "clear"
+        10: "spawner",
+        11: "clear"
     }
     r_surf = pygame.Surface((32, 32))
     r_surf.fill('red')
-    opts_imgs = list(bee_tile_set_info.values()) + [chests[0], r_surf]
+    size = (250, 250)
+    opts_imgs = [
+        *list(bee_tile_set_info.values()),
+        pygame.transform.scale(chests[0], (32, 32)),
+        pygame.transform.scale(spawner_imgs[1], (32, 32)),
+        r_surf
+    ]
     options = ChooseOption(opts_imgs, screen)
+    level_manager.spawners = []
 
     # Copy double data
     c_chests = []
     c_chest_poses = []
+
+    c_spawners = []
+    c_spawner_poses = []
 
     run = True
     start = time.perf_counter()
@@ -133,6 +142,14 @@ def main():
                         c_chests.append(Chest(tile.x, tile.y, pygame.K_f, 7))
                         c_chest_poses.append((tile.x, tile.y))
 
+                if "spawner" in current_tile_name:
+                    if (tile.x, tile.y) not in c_spawner_poses:
+                        level_manager.spawners.append(
+                            ((tile.x, tile.y), size)
+                        )
+                        c_spawners.append(Spawner((tile.x, tile.y), size))
+                        c_spawner_poses.append((tile.x, tile.y))
+
         current_tile_name = opts[options.chosen_option]
 
         dx, dy = 0, 0
@@ -162,6 +179,9 @@ def main():
 
         for chest in c_chests:
             chest.draw(screen, camera)
+
+        for spawner in c_spawners:
+            spawner.draw(screen, camera)
 
         options.update(mouse_pos, dt)
         options.draw()

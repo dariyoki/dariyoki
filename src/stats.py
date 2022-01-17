@@ -217,6 +217,8 @@ class PlayerStatistics:
 
                 if quantity > 0:
                     self.screen.blit(self.order[pos_key][1], rect)
+                    if index == self.chosen_index:
+                        self.player_obj.equipped = self.order[pos_key][0]
                     if quantity > 1:
                         num_surf = self.font.render(str(quantity), True, "green")
                         self.screen.blit(num_surf, rect)

@@ -1,9 +1,8 @@
 import pygame
-import json
 import math
 import random
 from src.utils import circle_surf, rotate
-from src.sprites import characters, sword_attack, lsword_attack
+from src.sprites import characters, sword_attack, lsword_attack, items
 from src.animation import Animation
 
 
@@ -14,7 +13,8 @@ class Player:
     def __init__(self, x, y, camera, controls):
         # Constructor objects
         self.x, self.y = x, y
-        self.right_img = characters[0]
+        self.right_img = characters[2]
+        print(self.right_img.get_rect().size)
         self.left_img = pygame.transform.flip(self.right_img, True, False)
         self.image = self.right_img
         self.rect = self.image.get_rect()
@@ -67,13 +67,17 @@ class Player:
         self.rs = []
         self.chest_index = -1
         self.info = {}
+        self.equip_items = items.copy()
+        self.equip_items["sword"] = pygame.transform.rotate(pygame.transform.scale2x(self.equip_items["sword"]), -45)
+        self.equip_items["scythe"] = pygame.transform.scale2x(self.equip_items["scythe"])
 
         # Statistics
         self.hp = 100
         self.last_hp = self.hp
-        self.shield = 0
+        self.shield = 100
         self.soul_energy = 100
         self.current_damage = 0
+        self.equipped = None
 
         # Movement vars
         self.angle = 0
@@ -216,6 +220,7 @@ class Player:
             self.chest_index = index
             self.standing_near_chest = True
         else:
+            self.chest_index = -1
             if len(info["chests"]) != 0:
                 info["chests"][self.chest_index].loading_bar.value = 0
                 self.standing_near_chest = False
@@ -278,6 +283,23 @@ class Player:
                                                            self.y - self.camera[1]), self.dt)
                 if self.lsword_attack_animation.index == 0:
                     self.attacking = False
+
+        # Draw player weapon
+        if self.equipped is not None:
+            stub = pygame.Rect((0, 0), self.equip_items[self.equipped].get_size())
+            if self.last_direction == "right":
+                stub.midleft = self.rect.midright
+                screen.blit(self.equip_items[self.equipped], (
+                    stub.x + 10 - self.camera[0],
+                    stub.y - self.camera[1]
+                ))
+            elif self.last_direction == "left":
+                stub.midright = self.rect.midright
+                img = pygame.transform.flip(self.equip_items[self.equipped], True, False)
+                screen.blit(img, (
+                    stub.x - 10 - self.camera[0],
+                    stub.y - self.camera[1]
+                ))
 
         # Draw loading bar
         if self.standing_near_chest and len(self.info["chests"]) != 0:

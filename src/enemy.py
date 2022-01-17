@@ -25,6 +25,11 @@ class Ninja:
 
         # Movement vars
         self.angle = 0
+        
+        # Statistics
+        self.hp = 100
+        self.shield = 100
+        self.soul_energy = 100
 
         # Movement speeds
         self.speed = speed
