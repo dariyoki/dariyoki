@@ -4,6 +4,7 @@ import random
 from src.utils import circle_surf, rotate
 from src.sprites import characters, sword_attack, lsword_attack, items
 from src.animation import Animation
+from src.weapons.shurikens import Shuriken
 
 
 class Player:
@@ -14,7 +15,6 @@ class Player:
         # Constructor objects
         self.x, self.y = x, y
         self.right_img = characters[2]
-        print(self.right_img.get_rect().size)
         self.left_img = pygame.transform.flip(self.right_img, True, False)
         self.image = self.right_img
         self.rect = self.image.get_rect()
@@ -69,7 +69,7 @@ class Player:
         self.info = {}
         self.equip_items = items.copy()
         self.equip_items["sword"] = pygame.transform.rotate(pygame.transform.scale2x(self.equip_items["sword"]), -45)
-        self.equip_items["scythe"] = pygame.transform.scale2x(self.equip_items["scythe"])
+        self.equip_items["scythe"] = pygame.transform.rotate(pygame.transform.scale2x(self.equip_items["scythe"]), -45)
 
         # Statistics
         self.hp = 100
@@ -78,6 +78,14 @@ class Player:
         self.soul_energy = 100
         self.current_damage = 0
         self.equipped = None
+
+        # Weapon data
+        self.cooldowns = {
+            "shuriken": 0.3,
+            "glock": 0.6
+        }
+        self.attack_cd = 0
+        self.shurikens: list[Shuriken] = []
 
         # Movement vars
         self.angle = 0
@@ -97,8 +105,21 @@ class Player:
         self.dt = 0
         self.dx, self.dy = 0, 0
 
-    def update(self, info, events, keys, dt):
-        self.dt = dt
+    def handle_shurikens(self, target):
+        self.shurikens.append(Shuriken(
+            start=(
+                self.rect.center[0] - self.camera[0],
+                self.rect.center[1] - self.camera[1]
+            ),
+            target=target,
+            speed=12
+        ))
+        if self.inventory["weapons"]["shuriken"] > 0:
+            self.inventory["weapons"]["shuriken"] -= 1
+
+    def update(self, info: dict, event_info: dict) -> None:
+        dt = event_info["dt"]
+        self.dt = event_info["dt"]
         self.info = info
         self.last_hp = self.hp
         info["stats"].hp_bar.value = self.hp * 1.5
@@ -108,30 +129,37 @@ class Player:
         # Default iteration values
         dx, dy = 0, 0
 
-        if keys[self.right_control]:
+        if event_info["keys"][self.right_control]:
             dx += self.speed * dt
             self.last_direction = "right"
 
             self.image = self.right_img
-        if keys[self.left_control]:
+        if event_info["keys"][self.left_control]:
             dx -= self.speed * dt
             self.last_direction = "left"
 
             self.image = self.left_img
 
-        for event in events:
+        if event_info["mouse press"][0] and self.equipped == "shuriken":
+            self.attack_cd += event_info["raw dt"]
+            if self.attack_cd >= self.cooldowns[self.equipped]:
+                if self.equipped == "shuriken":
+                    self.handle_shurikens(event_info["mouse pos"])
+                    self.attack_cd = 0
+
+        for event in event_info["events"]:
             if event.type == pygame.KEYDOWN:
                 if event.key == self.jump_control and self.touched_ground:
                     self.jumping = True
                     self.jump_stack = 0
 
-                if event.key == self.attack_control:
-                    r_angle = random.randrange(-50, 20)
-                    if self.last_direction == "right":
-                        self.sword_attack_animation.frames = rotate(sword_attack, r_angle)
-                    elif self.last_direction == "left":
-                        self.lsword_attack_animation.frames = rotate(lsword_attack, r_angle)
-                    self.attacking = True
+                # if event.key == self.attack_control:
+                #     r_angle = random.randrange(-50, 20)
+                #     if self.last_direction == "right":
+                #         self.sword_attack_animation.frames = rotate(sword_attack, r_angle)
+                #     elif self.last_direction == "left":
+                #         self.lsword_attack_animation.frames = rotate(lsword_attack, r_angle)
+                #     self.attacking = True
 
                 if event.key == self.dash_control:
                     self.dashing = True
@@ -142,24 +170,16 @@ class Player:
                         info["items"].remove(self.colliding_item)
                         name = self.colliding_item.name
                         if name in self.inventory["weapons"]:
-                            self.inventory["weapons"][name] += 1
+                            if name == "shuriken":
+                                self.inventory["weapons"][name] += 10
+                            else:
+                                self.inventory["weapons"][name] += 1
                         elif name in self.inventory["items"]:
                             self.inventory["items"][name] += 1
 
         # Check collisions
         for pos in info["tiles"]:
             stub = pygame.Rect(pos, (32, 32))
-
-            # Check for floor collision
-            if "up" in info["tiles"][pos]:
-                if stub.collidepoint(self.rect.midbottom) and self.rect.y < pos[1]:
-                    self.image = self.right_img if self.last_direction == "right" else self.left_img
-                    self.touched_ground = True
-                    self.angle = 0
-                    dy = stub.top - self.rect.bottom
-                    # self.velocity = 5
-                    break
-
             # Check for right collision
             if "right" in info["tiles"][pos]:
                 if stub.collidepoint(self.rect.midright) and dx > 0:
@@ -175,6 +195,17 @@ class Player:
                 if dy != 0 and stub.collidepoint(self.rect.midtop):
                     # dy = 0
                     self.jumping = False
+
+            # Check for floor collision
+            if "up" in info["tiles"][pos]:
+                if stub.collidepoint(self.rect.midbottom) and self.rect.y < pos[1]:
+                    self.image = self.right_img if self.last_direction == "right" else self.left_img
+                    self.touched_ground = True
+                    self.angle = 0
+                    dy = stub.top - self.rect.bottom
+                    # self.velocity = 5
+                    break
+
         else:
             if not self.jumping:
                 self.velocity += self.acceleration * dt
@@ -227,10 +258,7 @@ class Player:
 
         # Update loading bar
         if self.standing_near_chest and len(info["chests"]) != 0:
-            # TODO
-            # if info["chests"][self.chest_index].loading_bar.loaded:
-            #     self.chest_index = 0
-            info["chests"][self.chest_index].update(keys, dt)
+            info["chests"][self.chest_index].update(event_info["keys"], dt)
 
         # Handle items
         stub_rx = [item.rect for item in info["items"]]
@@ -257,6 +285,7 @@ class Player:
         self.rect = self.right_img.get_rect(topleft=(self.x, self.y))
 
     def draw(self, screen: pygame.Surface):
+        # pygame.draw.rect(screen, "red", self.rect, width=3)
         # Draw dash shadows
         for dasher in self.dash_images:
             dasher[2] -= 2 * self.dt
@@ -272,32 +301,30 @@ class Player:
                     (self.x - self.right_img.get_width() - 5 - self.camera[0],
                      self.y - (self.right_img.get_height() // 2) - self.camera[1]),
                     special_flags=pygame.BLEND_RGB_ADD)
-        if self.attacking:
-            if self.last_direction == "right":
-                self.sword_attack_animation.play(screen,
-                                                 (self.x + 10 - self.camera[0], self.y - self.camera[1]), self.dt)
-                if self.sword_attack_animation.index == 0:
-                    self.attacking = False
-            elif self.last_direction == "left":
-                self.lsword_attack_animation.play(screen, (self.x - 10 - self.image.get_width() - self.camera[0],
-                                                           self.y - self.camera[1]), self.dt)
-                if self.lsword_attack_animation.index == 0:
-                    self.attacking = False
+        # if self.attacking:
+        #     if self.last_direction == "right":
+        #         self.sword_attack_animation.play(screen,
+        #                                          (self.x + 10 - self.camera[0], self.y - self.camera[1]), self.dt)
+        #         if self.sword_attack_animation.index == 0:
+        #             self.attacking = False
+        #     elif self.last_direction == "left":
+        #         self.lsword_attack_animation.play(screen, (self.x - 10 - self.image.get_width() - self.camera[0],
+        #                                                    self.y - self.camera[1]), self.dt)
+        #         if self.lsword_attack_animation.index == 0:
+        #             self.attacking = False
 
         # Draw player weapon
         if self.equipped is not None:
-            stub = pygame.Rect((0, 0), self.equip_items[self.equipped].get_size())
+            stub = self.equip_items[self.equipped].get_rect(center=self.rect.center)
             if self.last_direction == "right":
-                stub.midleft = self.rect.midright
                 screen.blit(self.equip_items[self.equipped], (
-                    stub.x + 10 - self.camera[0],
+                    stub.x + 20 - self.camera[0],
                     stub.y - self.camera[1]
                 ))
             elif self.last_direction == "left":
-                stub.midright = self.rect.midright
                 img = pygame.transform.flip(self.equip_items[self.equipped], True, False)
                 screen.blit(img, (
-                    stub.x - 10 - self.camera[0],
+                    stub.x - 20 - self.camera[0],
                     stub.y - self.camera[1]
                 ))
 

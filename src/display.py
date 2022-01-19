@@ -16,6 +16,10 @@ pygame.display.set_caption("dariyoki")
 logo = pygame.image.load("assets/sprites/logo.png").convert_alpha()
 pygame.display.set_icon(logo)
 
-camera = [-(screen_width // 2 - 60), -(screen_height // 2)]
+# camera = [-(screen_width // 2 - 60), -(screen_height // 2)]
+camera = [0, 0]
 player_start_pos = (50, 57)
+
+pygame.mouse.set_visible(False)
+
 

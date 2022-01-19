@@ -10,6 +10,7 @@ from src_le.option import ChooseOption
 from src_le.s_data import SChest
 
 pygame.display.set_caption("Level Editor")
+pygame.mouse.set_visible(True)
 
 
 def generate_border(dimensions, rect_size) -> list[pygame.Rect]:
@@ -89,6 +90,7 @@ def main():
     ]
     options = ChooseOption(opts_imgs, screen)
     level_manager.spawners = []
+    level_manager.chests = []
 
     # Copy double data
     c_chests = []
@@ -144,12 +146,12 @@ def main():
 
                 if "spawner" in current_tile_name:
                     if (tile.x, tile.y) not in c_spawner_poses:
+                        args = ((tile.x, tile.y), size, 7, (1, 4))
                         level_manager.spawners.append(
-                            ((tile.x, tile.y), size)
+                            args
                         )
-                        c_spawners.append(Spawner((tile.x, tile.y), size))
+                        c_spawners.append(Spawner(*args))
                         c_spawner_poses.append((tile.x, tile.y))
-
         current_tile_name = opts[options.chosen_option]
 
         dx, dy = 0, 0

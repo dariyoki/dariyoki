@@ -1,11 +1,25 @@
 import pygame
+import random
+import math
+import uuid
 from src.sprites import characters
+from src.widgets import LoadingBar
+from src.identification import enemy_ids
 
 
 class Ninja:
-    def __init__(self, x, y, weapon, clan: str, speed, jump_height, player_dist):
+    JUMP_HEIGHT = 200
+    PLAYER_CHASE_RANGE = 400
+
+    def __init__(self, x, y, weapon, clan: str, speed):
         self.x, self.y = x, y
+        self.PLAYER_DIST = random.randrange(100, 200)
         self.weapon = weapon
+        self.id = uuid.uuid1()
+        enemy_ids.append(self.id)
+        self.denotion_font = pygame.font.SysFont("arialrounded", 24)
+        self.question_mark = self.denotion_font.render("?", True, "red")
+        self.exclamation_mark = self.denotion_font.render("!", True, "red")
 
         match clan:
             case "shadow":
@@ -19,35 +33,53 @@ class Ninja:
         self.jumping = False
         self.touched_ground = False
         self.once = True
+        self.chasing = False
 
         # Casket
         self.last_direction = "right"
+        self.idle_movement_direction = "right"
 
         # Movement vars
         self.angle = 0
-        
+        self.idle_distance = 0
+
         # Statistics
         self.hp = 100
-        self.shield = 100
-        self.soul_energy = 100
+        self.max_hp = 100
 
         # Movement speeds
         self.speed = speed
-        self.JUMP_HEIGHT = jump_height
-        self.player_dist = player_dist
         self.velocity = 5
         self.acceleration = 2
 
         # Stacking values
         self.jump_stack = 0
 
+        # HP bar
+        self.hp_bar_size = (60, 10)
+        self.hp_bar = LoadingBar(
+            value=self.hp,
+            fg_color=(179, 2, 43),
+            bg_color='black',
+            rect=pygame.Rect((0, 0), self.hp_bar_size)
+        )
+        self.camera = [0, 0]
+
     def update(self, player_pos, info, dt):
         direction = ""
-        if abs(self.x - player_pos[0]) > self.player_dist:
+        dist = abs(self.x - player_pos[0])
+        self.chasing = self.PLAYER_CHASE_RANGE > dist
+        if self.chasing and dist > self.PLAYER_DIST:
+            self.chasing = True
             if player_pos[0] < self.x:
                 direction = "left"
             else:
                 direction = "right"
+
+        if not self.chasing:
+            direction = self.idle_movement_direction
+            if direction == "jump" and self.touched_ground:
+                self.jumping = True
 
         # Default iteration values
         dx, dy = 0, 0
@@ -97,6 +129,17 @@ class Ninja:
                 self.velocity += self.acceleration * dt
                 dy += self.velocity * dt
 
+        # # Handle damage
+        # for shuriken in info["shurikens"]:
+        #     if shuriken.rect.colliderect(pygame.Rect(
+        #             self.rect.x - self.camera[0],
+        #             self.rect.y - self.camera[1],
+        #             *self.rect.size
+        #     )):
+        #         print('shuriken death')
+        #         self.hp -= shuriken.damage
+        #         info["shurikens"].remove(shuriken)
+
         # Gravity control
         if self.jumping:
             self.angle += 200 * dt
@@ -119,10 +162,35 @@ class Ninja:
         self.x += dx
         self.y += dy
 
+        # Handle idle distance
+        if not self.chasing:
+            self.idle_distance += abs(math.sqrt(dx ** 2 + dy ** 2))
+            if self.idle_distance > 40:
+                self.idle_movement_direction = random.choice(("right", "right", "left", "right", "jump"))
+                self.idle_distance = 0
+
         self.rect = self.right_img.get_rect(topleft=(self.x, self.y))
+        self.hp_bar.value = self.hp * (self.hp_bar_size[0] / self.max_hp)
+        self.hp_bar.rect.center = (
+            self.rect.midtop[0],
+            self.rect.midtop[1] - 10
+        )
 
     def draw(self, screen: pygame.Surface, camera):
-        # pygame.draw.rect(screen, "red", self.rect, width=1)
+        self.camera = camera
         screen.blit(self.image, (self.x - camera[0], self.y - camera[1]))
+        self.hp_bar.draw(screen, camera, moving=True)
+        denotion_pos = (
+            self.hp_bar.rect.midtop[0] - camera[0],
+            self.hp_bar.rect.y - camera[1] - self.hp_bar.rect.height * 2
+        )
+        if self.chasing:
+            screen.blit(self.exclamation_mark, denotion_pos)
+        else:
+            screen.blit(self.question_mark, denotion_pos)
 
-
+        # pygame.draw.rect(screen, "red", (
+        #     self.rect.x - camera[0],
+        #     self.rect.y - camera[1],
+        #     *self.rect.size
+        # ), width=3)

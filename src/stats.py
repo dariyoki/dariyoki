@@ -124,23 +124,24 @@ class PlayerStatistics:
 
         start = (120, 30)
         width = player_obj.hp * 1.5
+        height = 15
         self.hp_bar = LoadingBar(
                 value=player_obj.hp,
                 fg_color='green',
                 bg_color='black',
-                rect=pygame.Rect(start, (width, 20))
+                rect=pygame.Rect(start, (width, height))
             )
         self.shield_bar = LoadingBar(
                 value=player_obj.hp,
                 fg_color=(0, 0, 255),
                 bg_color='black',
-                rect=pygame.Rect((start[0], start[1] + 20 + 5), (width, 20))
+                rect=pygame.Rect((start[0], start[1] + 20 + 5), (width, height))
             )
         self.se_bar = LoadingBar(
                 value=player_obj.hp,
                 fg_color=(0, 255, 255),
                 bg_color='black',
-                rect=pygame.Rect((start[0], start[1] + (20 * 2) + (5 * 2)), (width, 20))
+                rect=pygame.Rect((start[0], start[1] + (20 * 2) + (5 * 2)), (width, height))
             )
 
         brect = border_img.get_rect()
@@ -190,7 +191,7 @@ class PlayerStatistics:
         self.chosen_index = 1
 
         # Font
-        self.font = pygame.font.SysFont("bahnschrift", 25)
+        self.font = pygame.font.SysFont("bahnschrift", 20)
 
     def update(self, mouse_pos, mouse_press):
         if mouse_press[0]:
@@ -220,8 +221,13 @@ class PlayerStatistics:
                     if index == self.chosen_index:
                         self.player_obj.equipped = self.order[pos_key][0]
                     if quantity > 1:
-                        num_surf = self.font.render(str(quantity), True, "green")
+                        if self.order[pos_key][0] in ("sword", "scythe"):
+                            num_surf = self.font.render(str(quantity), True, "yellow")
+                        else:
+                            num_surf = self.font.render(str(quantity), True, "green")
                         self.screen.blit(num_surf, rect)
+                elif index == self.chosen_index:
+                    self.player_obj.equipped = None
 
             if index == self.chosen_index:
                 pygame.draw.rect(self.screen, 'yellow', rect, width=3)

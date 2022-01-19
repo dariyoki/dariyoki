@@ -4,6 +4,10 @@ from src.sprite_sheet import SpriteSheet
 from src.utils import resize, turn_left
 
 path = "assets/sprites/"
+# Cursor
+cursor_img = pygame.image.load(path + "cursor.png").convert_alpha()
+cursor_img = resize([cursor_img], 0.5)[0]
+
 ss = pygame.image.load(path + "player/characters.png").convert_alpha()
 characters_ss = SpriteSheet(ss)
 characters = characters_ss.get_images(4, 4, 32, 32, fixer=8)

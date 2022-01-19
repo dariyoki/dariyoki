@@ -45,6 +45,9 @@ class Glow:
         self.surf = circle_surf(radius, color)
         self.rect = self.surf.get_rect(center=self.img_rect.center)
 
+    def change_pos(self, new_pos):
+        self.rect = pygame.Rect(new_pos, self.rect.size)
+
     def draw(self, screen: pygame.Surface, camera):
         screen.blit(self.surf, pygame.Rect((self.rect.x - camera[0], self.rect.y - camera[1]),
                                            self.surf.get_size()),

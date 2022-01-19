@@ -13,23 +13,25 @@ class LoadingBar:
         self.rect = rect
         self.rect.center = self.rect.topleft
         self.val_rect = pygame.Rect(
-            (rect.x + 2, rect.y + 2),
-            (self.value, self.rect.height // 2)
+            rect.topleft,
+            (self.value, self.rect.height)
         )
         self.loaded = False
-        self.border_img = pygame.transform.scale(border_img, (
-            self.rect.width + 7,
-            self.rect.height - 4
-        ))
+        self.border_img = pygame.transform.scale(border_img, self.rect.size)
 
-    def draw(self, screen: pygame.Surface, camera):
+    def draw(self, screen: pygame.Surface, camera, moving: bool = False):
+        if moving:
+            self.val_rect = pygame.Rect(
+                self.rect.topleft,
+                (self.value, self.rect.height)
+            )
         pygame.draw.rect(screen, self.bg_color, pygame.Rect((self.rect.x - camera[0], self.rect.y - camera[1]),
                                                             self.rect.size))
 
-        self.loaded = self.value >= self.rect.width - 4
+        self.loaded = self.value >= self.rect.width
 
         pygame.draw.rect(screen, self.fg_color, pygame.Rect((self.val_rect.x - camera[0], self.val_rect.y - camera[1]),
-                                                            (int(self.value), self.rect.height // 2)))
+                                                            (int(self.value), self.rect.height)))
 
         screen.blit(self.border_img, (self.rect.x - camera[0], self.rect.y - camera[1]))
 
