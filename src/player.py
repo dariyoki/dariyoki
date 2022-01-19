@@ -5,6 +5,7 @@ from src.utils import circle_surf, rotate
 from src.sprites import characters, sword_attack, lsword_attack, items
 from src.animation import Animation
 from src.weapons.shurikens import Shuriken
+from src.identification import shuriken_ids
 
 
 class Player:
@@ -117,6 +118,11 @@ class Player:
         if self.inventory["weapons"]["shuriken"] > 0:
             self.inventory["weapons"]["shuriken"] -= 1
 
+        # # Clean up
+        # for shuriken in self.shurikens:
+        #     if shuriken not in shuriken_ids:
+        #         self.shurikens.remove(shuriken)
+
     def update(self, info: dict, event_info: dict) -> None:
         dt = event_info["dt"]
         self.dt = event_info["dt"]
@@ -183,6 +189,7 @@ class Player:
             # Check for right collision
             if "right" in info["tiles"][pos]:
                 if stub.collidepoint(self.rect.midright) and dx > 0:
+                    print('happening')
                     dx = 0
 
             # Check for left collision
@@ -190,12 +197,14 @@ class Player:
                 if stub.collidepoint(self.rect.midleft) and dx < 0:
                     dx = 0
 
-            # Check for roof collsion
+            # Check for roof collision
             if "down" in info["tiles"][pos]:
                 if dy != 0 and stub.collidepoint(self.rect.midtop):
                     # dy = 0
                     self.jumping = False
 
+        for pos in info["tiles"]:
+            stub = pygame.Rect(pos, (32, 32))
             # Check for floor collision
             if "up" in info["tiles"][pos]:
                 if stub.collidepoint(self.rect.midbottom) and self.rect.y < pos[1]:
@@ -205,7 +214,6 @@ class Player:
                     dy = stub.top - self.rect.bottom
                     # self.velocity = 5
                     break
-
         else:
             if not self.jumping:
                 self.velocity += self.acceleration * dt

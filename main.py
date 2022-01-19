@@ -9,7 +9,7 @@ from src.enemy import Ninja
 from src.items import Chest
 from src.spawner import Spawner
 from src.stats import Info, PlayerStatistics
-from src.identification import enemy_ids
+from src.identification import enemy_ids, shuriken_ids
 
 
 class Game:
@@ -29,7 +29,7 @@ class Game:
         self.camera = camera
 
         self.translucent_dark = pygame.Surface(screen.get_size())
-        self.translucent_dark.set_alpha(100)
+        self.translucent_dark.set_alpha(125)
 
         self.item_info = Info(screen, eval("pygame." + self.controls["controls"]["info toggle"]))
         self.level_manager.item_info = self.item_info
@@ -130,12 +130,16 @@ class Game:
                 enemy.update(
                     player_pos=self.player.rect.center,
                     info=info,
-                    dt=dt
+                    event_info=event_info
                 )
                 enemy.draw(screen, self.camera)
                 if enemy.hp <= 0:
                     self.enemies.remove(enemy)
                     enemy_ids.remove(enemy.id)
+
+                for shuriken in enemy.shurikens:
+                    if shuriken not in self.shurikens:
+                        self.shurikens.append(shuriken)
 
             # Items
             for item in self.items:
@@ -152,9 +156,12 @@ class Game:
                         pygame.Rect(enemy.x - self.camera[0], enemy.y - self.camera[1], *enemy.rect.size)
                     ):
                         enemy.hp -= shuriken.damage
-                        self.shurikens.remove(shuriken)
-                        self.player.shurikens.remove(shuriken)
+                        if shuriken.id in shuriken_ids:
+                            shuriken_ids.remove(shuriken.id)
                         break
+
+                if shuriken.id not in shuriken_ids:
+                    self.shurikens.remove(shuriken)
 
             # Inventory and statistics
             self.statistics.update(mouse_pos, mouse_press)

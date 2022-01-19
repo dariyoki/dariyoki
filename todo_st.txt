@@ -1,0 +1,8 @@
+19/1/2022
+Fix shurikens - Make them disappear after colliding with an enemy
+Fix left and right wall collision } Look at
+Fix upward collision              } old code samples
+Add special effects - Expanding orange circle on click, expanding white circle on shuriken removal
+                    - Square Particle explosion effects
+                    - Spawning red imploding rectangle animation
+Delete entities which go outside the boundaries of the world

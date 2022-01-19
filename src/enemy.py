@@ -4,7 +4,8 @@ import math
 import uuid
 from src.sprites import characters
 from src.widgets import LoadingBar
-from src.identification import enemy_ids
+from src.identification import enemy_ids, shuriken_ids
+from src.weapons.shurikens import Shuriken
 
 
 class Ninja:
@@ -38,6 +39,7 @@ class Ninja:
         # Casket
         self.last_direction = "right"
         self.idle_movement_direction = "right"
+        self.shuriken_cd = 1
 
         # Movement vars
         self.angle = 0
@@ -54,6 +56,7 @@ class Ninja:
 
         # Stacking values
         self.jump_stack = 0
+        self.shuriken_stack = 0
 
         # HP bar
         self.hp_bar_size = (60, 10)
@@ -65,7 +68,31 @@ class Ninja:
         )
         self.camera = [0, 0]
 
-    def update(self, player_pos, info, dt):
+        self.shurikens: list[Shuriken] = []
+
+    def handle_shurikens(self, target):
+        if self.last_direction == "right":
+            start_x = self.rect.midleft[0]
+            # start_x = self.rect.midright[0] + 35
+        else:
+            # start_x = self.rect.midleft[0] - 35
+            start_x = self.rect.midright[0]
+        self.shurikens.append(Shuriken(
+            start=(
+                start_x - self.camera[0],
+                self.rect.center[1] - self.camera[1]
+            ),
+            target=target,
+            speed=6
+        ))
+
+        # # Clean up
+        # for shuriken in self.shurikens:
+        #     if shuriken not in shuriken_ids:
+        #         self.shurikens.remove(shuriken)
+
+    def update(self, player_pos, info, event_info):
+        dt = event_info["dt"]
         direction = ""
         dist = abs(self.x - player_pos[0])
         self.chasing = self.PLAYER_CHASE_RANGE > dist
@@ -76,7 +103,12 @@ class Ninja:
             else:
                 direction = "right"
 
-        if not self.chasing:
+        if self.chasing:
+            self.shuriken_stack += event_info["raw dt"]
+            if self.shuriken_stack > self.shuriken_cd:
+                self.handle_shurikens(player_pos)
+                self.shuriken_stack = 0
+        else:
             direction = self.idle_movement_direction
             if direction == "jump" and self.touched_ground:
                 self.jumping = True
@@ -98,17 +130,6 @@ class Ninja:
         # Check collisions
         for pos in info["tiles"]:
             stub = pygame.Rect(pos, (32, 32))
-
-            # Check for floor collision
-            if "up" in info["tiles"][pos]:
-                if stub.collidepoint(self.rect.midbottom) and self.rect.y < pos[1]:
-                    self.image = self.right_img if self.last_direction == "right" else self.left_img
-                    self.touched_ground = True
-                    self.angle = 0
-                    dy = stub.top - self.rect.bottom
-                    # self.velocity = 5
-                    break
-
             # Check for right collision
             if "right" in info["tiles"][pos]:
                 if stub.collidepoint(self.rect.midright) and dx > 0:
@@ -124,21 +145,23 @@ class Ninja:
                 if dy != 0 and stub.collidepoint(self.rect.midtop):
                     # dy = 0
                     self.jumping = False
+
+        for pos in info["tiles"]:
+            stub = pygame.Rect(pos, (32, 32))
+            # Check for floor collision
+            if "up" in info["tiles"][pos]:
+                if stub.collidepoint(self.rect.midbottom) and self.rect.y < pos[1]:
+                    self.image = self.right_img if self.last_direction == "right" else self.left_img
+                    self.touched_ground = True
+                    self.angle = 0
+                    dy = stub.top - self.rect.bottom
+                    # self.velocity = 5
+                    break
+
         else:
             if not self.jumping:
                 self.velocity += self.acceleration * dt
                 dy += self.velocity * dt
-
-        # # Handle damage
-        # for shuriken in info["shurikens"]:
-        #     if shuriken.rect.colliderect(pygame.Rect(
-        #             self.rect.x - self.camera[0],
-        #             self.rect.y - self.camera[1],
-        #             *self.rect.size
-        #     )):
-        #         print('shuriken death')
-        #         self.hp -= shuriken.damage
-        #         info["shurikens"].remove(shuriken)
 
         # Gravity control
         if self.jumping:

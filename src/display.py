@@ -13,7 +13,7 @@ screen_height = 650
 
 screen = pygame.display.set_mode((screen_width, screen_height), pygame.SCALED | pygame.RESIZABLE)
 pygame.display.set_caption("dariyoki")
-logo = pygame.image.load("assets/sprites/logo.png").convert_alpha()
+logo = pygame.image.load("assets/sprites/logo.ico").convert_alpha()
 pygame.display.set_icon(logo)
 
 # camera = [-(screen_width // 2 - 60), -(screen_height // 2)]
