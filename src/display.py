@@ -22,4 +22,10 @@ player_start_pos = (50, 57)
 
 pygame.mouse.set_visible(False)
 
+# Game boundary
+start_x = -1000
+end_x = -1000 + (32 * 600)
+start_y = 500
+end_y = 500 - (32 * 120)
+
 

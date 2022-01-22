@@ -4,7 +4,7 @@ import math
 import uuid
 from src.sprites import characters
 from src.widgets import LoadingBar
-from src.identification import enemy_ids, shuriken_ids
+from src.identification import enemy_ids, shurikens
 from src.weapons.shurikens import Shuriken
 
 
@@ -68,22 +68,12 @@ class Ninja:
         )
         self.camera = [0, 0]
 
-        self.shurikens: list[Shuriken] = []
-
     def handle_shurikens(self, target):
-        if self.last_direction == "right":
-            start_x = self.rect.midleft[0]
-            # start_x = self.rect.midright[0] + 35
-        else:
-            # start_x = self.rect.midleft[0] - 35
-            start_x = self.rect.midright[0]
-        self.shurikens.append(Shuriken(
-            start=(
-                start_x - self.camera[0],
-                self.rect.center[1] - self.camera[1]
-            ),
+        shurikens.append(Shuriken(
+            start=self.rect.center,
             target=target,
-            speed=6
+            speed=6,
+            launcher=self
         ))
 
         # # Clean up
@@ -131,19 +121,18 @@ class Ninja:
         for pos in info["tiles"]:
             stub = pygame.Rect(pos, (32, 32))
             # Check for right collision
-            if "right" in info["tiles"][pos]:
-                if stub.collidepoint(self.rect.midright) and dx > 0:
+            if "right" in info["tiles"][pos] and self.last_direction == "left":
+                if stub.colliderect(self.rect):
                     dx = 0
 
             # Check for left collision
-            if "left" in info["tiles"][pos]:
-                if stub.collidepoint(self.rect.midleft) and dx < 0:
+            if "left" in info["tiles"][pos] and self.last_direction == "right":
+                if stub.colliderect(self.rect):
                     dx = 0
 
-            # Check for roof collsion
+            # Check for roof collision
             if "down" in info["tiles"][pos]:
-                if dy != 0 and stub.collidepoint(self.rect.midtop):
-                    # dy = 0
+                if stub.colliderect(self.rect):
                     self.jumping = False
 
         for pos in info["tiles"]:
@@ -157,7 +146,6 @@ class Ninja:
                     dy = stub.top - self.rect.bottom
                     # self.velocity = 5
                     break
-
         else:
             if not self.jumping:
                 self.velocity += self.acceleration * dt

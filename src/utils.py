@@ -29,7 +29,13 @@ def turn_left(extract):
     return left_images
 
 
-def get_movement(angle: int, speed) -> tuple[int, int]:
+def get_movement(angle: float, speed) -> tuple[int, int]:
+    """
+
+    :param angle: Angle in radians
+    :param speed:
+    :return:
+    """
     # Change in x and y
     dx = math.cos(angle) * speed
     dy = math.sin(angle) * speed

@@ -2,21 +2,57 @@ import pygame
 import uuid
 from src.sprites import items, item_size
 from src.angular_movement import Angle
-from src.identification import shuriken_ids
+from src.effects.particle_effects import ShurikenContrail
+from src.utils import circle_surf
 
 
 # TODO: Work on shurikens
 class Shuriken(Angle):
-    def __init__(self, start, target, speed):
+    def __init__(self, start, target, speed, launcher):
         super().__init__(start, target, speed, item_size)
         self.shuriken_img = items["shuriken"]
         self.image = self.shuriken_img.copy()
         self.damage = 30
         self.id = uuid.uuid1()
-        shuriken_ids.append(self.id)
+        self.launcher = launcher
+        self.angle = 0
+        self.contrail = ShurikenContrail()
+        self.glow_radius = self.image.get_width() // 2
 
-    def draw(self, screen):
-        # pygame.draw.rect(screen, 'red', self.rect, width=1)
-        screen.blit(self.image, self.rect)
+    def draw(self, screen, camera, dt):
+        self.angle += 5 * dt
+        # pygame.draw.rect(screen, 'red', pygame.Rect(
+        #     self.rect.x - camera[0],
+        #     self.rect.y - camera[1],
+        #     *self.rect.size
+        # ), width=1)
+
+        # if self.glow_radius > self.image.get_width() * 0.3:
+        #     self.glow_radius -= 1.3 * dt
+        # if self.glow_radius < self.image.get_width() * 1.3:
+        #     self.glow_radius += 1.3 * dt
+        self.image = pygame.transform.rotozoom(self.shuriken_img, int(self.angle), 1)
+        self.contrail.update(
+            self.rect.center[0] - camera[0],
+            self.rect.center[1] - camera[1],
+            screen,
+            dt
+        )
+        screen.blit(self.image, (
+            self.rect.x - camera[0],
+            self.rect.y - camera[1]
+        ))
+
+        surf = circle_surf(self.glow_radius, (31, 32, 34))
+        rect = surf.get_rect(center=self.rect.center)
+        screen.blit(
+            surf,
+            (
+                rect.x - camera[0],
+                rect.y - camera[1]
+            ),
+            special_flags=pygame.BLEND_RGB_ADD
+        )
+
 
 

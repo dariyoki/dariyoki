@@ -1,11 +1,11 @@
 import pygame
 import math
-import random
-from src.utils import circle_surf, rotate
 from src.sprites import characters, sword_attack, lsword_attack, items
+from src.audio import dash_sfx, pickup_item_sfx
 from src.animation import Animation
+from src.effects.particle_effects import PlayerAura
 from src.weapons.shurikens import Shuriken
-from src.identification import shuriken_ids
+from src.identification import shurikens
 
 
 class Player:
@@ -15,7 +15,7 @@ class Player:
     def __init__(self, x, y, camera, controls):
         # Constructor objects
         self.x, self.y = x, y
-        self.right_img = characters[2]
+        self.right_img = characters[0]
         self.left_img = pygame.transform.flip(self.right_img, True, False)
         self.image = self.right_img
         self.rect = self.image.get_rect()
@@ -26,7 +26,6 @@ class Player:
         self.right_control = eval("pygame." + controls["right"])
         self.left_control = eval("pygame." + controls["left"])
         self.jump_control = eval("pygame." + controls["jump"])
-        self.attack_control = eval("pygame." + controls["attack"])
         self.dash_control = eval("pygame." + controls["dash"])
         self.pickup_control = eval("pygame." + controls["pickup item"])
 
@@ -52,6 +51,7 @@ class Player:
         # Animations
         self.sword_attack_animation = Animation(sword_attack, speed=0.4)
         self.lsword_attack_animation = Animation(lsword_attack, speed=0.4)
+        self.aura = PlayerAura((34, 13, 42), 2)
 
         # Flags
         self.jumping = False
@@ -61,6 +61,9 @@ class Player:
         self.standing_near_chest = False
         self.colliding_item = None
         self.once = True
+
+        # Sound once booleans
+        self.dash_once = True
 
         # Casket
         self.last_direction = "right"
@@ -86,7 +89,6 @@ class Player:
             "glock": 0.6
         }
         self.attack_cd = 0
-        self.shurikens: list[Shuriken] = []
 
         # Movement vars
         self.angle = 0
@@ -107,21 +109,17 @@ class Player:
         self.dx, self.dy = 0, 0
 
     def handle_shurikens(self, target):
-        self.shurikens.append(Shuriken(
+        shurikens.append(Shuriken(
             start=(
                 self.rect.center[0] - self.camera[0],
                 self.rect.center[1] - self.camera[1]
             ),
             target=target,
-            speed=12
+            speed=12,
+            launcher=self
         ))
         if self.inventory["weapons"]["shuriken"] > 0:
             self.inventory["weapons"]["shuriken"] -= 1
-
-        # # Clean up
-        # for shuriken in self.shurikens:
-        #     if shuriken not in shuriken_ids:
-        #         self.shurikens.remove(shuriken)
 
     def update(self, info: dict, event_info: dict) -> None:
         dt = event_info["dt"]
@@ -183,24 +181,45 @@ class Player:
                         elif name in self.inventory["items"]:
                             self.inventory["items"][name] += 1
 
+                        pickup_item_sfx.play()
+
+        # Dashing
+        if not self.dashing:
+            self.dash_once = True
+
+        if self.dashing:
+            if self.dash_once:
+                dash_sfx.play()
+                self.dash_once = False
+            dx *= self.dash_mult * dt
+            dy *= self.dash_mult * dt
+
+            self.dash_stack += math.sqrt(dx**2 + dy**2)
+
+            if self.dash_stack >= self.DASH_LENGTH:
+                self.dashing = False
+                self.dash_stack = 0
+
+            d_img = self.image.copy()
+            d_img.set_alpha(150)
+            self.dash_images.append([d_img, (self.x, self.y), 150])
+
         # Check collisions
         for pos in info["tiles"]:
             stub = pygame.Rect(pos, (32, 32))
             # Check for right collision
-            if "right" in info["tiles"][pos]:
-                if stub.collidepoint(self.rect.midright) and dx > 0:
-                    print('happening')
+            if "right" in info["tiles"][pos] and self.last_direction == "left":
+                if stub.colliderect(self.rect):
                     dx = 0
 
             # Check for left collision
-            if "left" in info["tiles"][pos]:
-                if stub.collidepoint(self.rect.midleft) and dx < 0:
+            if "left" in info["tiles"][pos] and self.last_direction == "right":
+                if stub.colliderect(self.rect):
                     dx = 0
 
             # Check for roof collision
             if "down" in info["tiles"][pos]:
-                if dy != 0 and stub.collidepoint(self.rect.midtop):
-                    # dy = 0
+                if stub.colliderect(self.rect):
                     self.jumping = False
 
         for pos in info["tiles"]:
@@ -238,21 +257,6 @@ class Player:
 
             self.touched_ground = False
 
-        # Dashing
-        if self.dashing:
-            dx *= self.dash_mult * dt
-            dy *= self.dash_mult * dt
-
-            self.dash_stack += math.sqrt(dx**2 + dy**2)
-
-            if self.dash_stack >= self.DASH_LENGTH:
-                self.dashing = False
-                self.dash_stack = 0
-
-            d_img = self.image.copy()
-            d_img.set_alpha(150)
-            self.dash_images.append([d_img, (self.x, self.y), 150])
-
         # Handle chests
         self.rs = [r.rect for r in info["chests"]]
         if (index := self.rect.collidelist(self.rs)) != -1:
@@ -285,15 +289,15 @@ class Player:
 
         # Update Camera coord
         self.dx, self.dy = dx, dy
-        # self.camera[0] += dx
-        # self.camera[1] += dy
-        # self.camera[0] = (self.x - self.camera[0]) * 0.6
-        # self.camera[1] = (self.y - self.camera[1]) * 0.6
 
         self.rect = self.right_img.get_rect(topleft=(self.x, self.y))
 
     def draw(self, screen: pygame.Surface):
-        # pygame.draw.rect(screen, "red", self.rect, width=3)
+        # pygame.draw.rect(screen, "red", (
+        #     self.rect.x - self.camera[0],
+        #     self.rect.y - self.camera[1],
+        #     *self.rect.size
+        # ), width=3)
         # Draw dash shadows
         for dasher in self.dash_images:
             dasher[2] -= 2 * self.dt
@@ -302,24 +306,13 @@ class Player:
             dasher[0].set_alpha(int(dasher[2]))
             screen.blit(dasher[0], (dasher[1][0] - self.camera[0], dasher[1][1] - self.camera[1]))
 
+        # Draw player aura
+        self.aura.update(
+            self.rect.center[0] - self.camera[0],
+            self.rect.center[1] - self.camera[1], screen, self.dt)
+
         # Draw player
         screen.blit(self.image, (self.x - self.camera[0], self.y - self.camera[1]))
-        # Draw glowing effect
-        screen.blit(circle_surf(radius=self.right_img.get_height(), color=(20, 20, 20)),
-                    (self.x - self.right_img.get_width() - 5 - self.camera[0],
-                     self.y - (self.right_img.get_height() // 2) - self.camera[1]),
-                    special_flags=pygame.BLEND_RGB_ADD)
-        # if self.attacking:
-        #     if self.last_direction == "right":
-        #         self.sword_attack_animation.play(screen,
-        #                                          (self.x + 10 - self.camera[0], self.y - self.camera[1]), self.dt)
-        #         if self.sword_attack_animation.index == 0:
-        #             self.attacking = False
-        #     elif self.last_direction == "left":
-        #         self.lsword_attack_animation.play(screen, (self.x - 10 - self.image.get_width() - self.camera[0],
-        #                                                    self.y - self.camera[1]), self.dt)
-        #         if self.lsword_attack_animation.index == 0:
-        #             self.attacking = False
 
         # Draw player weapon
         if self.equipped is not None:

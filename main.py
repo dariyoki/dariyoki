@@ -1,15 +1,18 @@
+import random
 import time
 import json
 import pickle
 from src.display import *
-from src.sprites import cursor_img, background_img, game_border_img
+from src.sprites import cursor_img, background_img, game_border_img, characters
 from src.world import World
 from src.player import Player
 from src.enemy import Ninja
 from src.items import Chest
 from src.spawner import Spawner
 from src.stats import Info, PlayerStatistics
-from src.identification import enemy_ids, shuriken_ids
+from src.identification import enemy_ids, shurikens
+from src.effects.exp_circle import ExpandingCircles, ExpandingCircle
+from src.effects.explosion import Explosion
 
 
 class Game:
@@ -28,27 +31,45 @@ class Game:
         self.world = World(self.level_manager)
         self.camera = camera
 
+        # Visuals
         self.translucent_dark = pygame.Surface(screen.get_size())
         self.translucent_dark.set_alpha(125)
+        self.expanding_circles = ExpandingCircles(
+            init_radius=5, max_radius=40, increment=3, colour=(255, 0, 0), width=10
+        )
+        self.explosions: list[Explosion] = []
+        self.screen_shake = 0
+        self.screen_shake_val = 0
 
+        # Levels
         self.item_info = Info(screen, eval("pygame." + self.controls["controls"]["info toggle"]))
         self.level_manager.item_info = self.item_info
 
         self.opened_chests = []
         # Handling serialized mini objects to full fledged game objects
         self.chests = [Chest(s.x, s.y, s.load_control, s.load_speed) for s in self.level_manager.chests]
-        self.spawners = [Spawner(*args) for args in self.level_manager.spawners]
+        self.spawners = [Spawner(*args, Ninja, characters[0].get_size()) for args in self.level_manager.spawners]
         self.items = []
         self.enemies: list[Ninja] = []
 
-        # World objects
-        self.shurikens = []
-
-        # Inventory 
+        # Inventory
         self.statistics = PlayerStatistics(
             screen,
             self.player
         )
+
+    def handle_screen_shake(self, dt):
+        # Handle screen shake
+        if self.screen_shake > 0:
+            self.screen_shake -= 1.3 * dt
+
+        render_offset = [0, 0]
+        if self.screen_shake > 0:
+            render_offset[0] = random.randint(0, self.screen_shake_val * 2) - self.screen_shake_val
+            render_offset[1] = random.randint(0, self.screen_shake_val * 2) - self.screen_shake_val
+
+        self.camera[0] += render_offset[0]
+        self.camera[1] += render_offset[1]
 
     def main_loop(self):
         start = time.perf_counter()
@@ -71,7 +92,7 @@ class Game:
             screen.blit(background_img, (0, 0))
 
             for spawner in self.spawners:
-                spawner.update(raw_dt)
+                spawner.update(raw_dt, dt)
                 spawner.draw(screen, camera)
                 for enemy in spawner.enemies:
                     if enemy not in self.enemies and enemy.id in enemy_ids:
@@ -107,7 +128,6 @@ class Game:
                 "tiles": self.level_manager.all_rects,
                 "chests": self.chests,
                 "stats": self.statistics,
-                "shurikens": self.shurikens
             }
 
             event_info = {
@@ -122,10 +142,8 @@ class Game:
             self.player.update(info, event_info)
             self.player.draw(screen)
 
-            for shuriken in self.player.shurikens:
-                if shuriken not in self.shurikens:
-                    self.shurikens.append(shuriken)
-
+            for spawner in self.spawners:
+                spawner.draw_spawn(screen, self.camera)
             for enemy in self.enemies:
                 enemy.update(
                     player_pos=self.player.rect.center,
@@ -137,31 +155,71 @@ class Game:
                     self.enemies.remove(enemy)
                     enemy_ids.remove(enemy.id)
 
-                for shuriken in enemy.shurikens:
-                    if shuriken not in self.shurikens:
-                        self.shurikens.append(shuriken)
-
             # Items
             for item in self.items:
                 item.update(dt)
                 item.draw(screen, self.camera)
 
             # Shurikens
-            for shuriken in self.shurikens:
+            for shuriken in shurikens:
                 shuriken.move(dt)
-                shuriken.draw(screen)
+                if shuriken.launcher == self.player:
+                    shuriken.draw(screen, [0, 0], dt)
+                else:
+                    shuriken.draw(screen, self.camera, dt)
 
-                for enemy in self.enemies:
-                    if shuriken.rect.colliderect(
-                        pygame.Rect(enemy.x - self.camera[0], enemy.y - self.camera[1], *enemy.rect.size)
-                    ):
-                        enemy.hp -= shuriken.damage
-                        if shuriken.id in shuriken_ids:
-                            shuriken_ids.remove(shuriken.id)
-                        break
+                broken = False
+                if not isinstance(shuriken.launcher, Ninja):
+                    for enemy in self.enemies:
+                        if shuriken.rect.colliderect((
+                                enemy.rect.x - self.camera[0],
+                                enemy.rect.y - self.camera[1],
+                                *enemy.rect.size
+                        )):
+                            enemy.hp -= shuriken.damage
+                            shurikens.remove(shuriken)
+                            self.explosions.append(
+                                Explosion(500, (12, 25), list(shuriken.rect.center), (5, 12))
+                            )
+                            self.expanding_circles.circles.append(
+                                ExpandingCircle(
+                                    shuriken.rect.center,
+                                    self.expanding_circles.init_radius,
+                                    self.expanding_circles.max_radius,
+                                    self.expanding_circles.increment,
+                                    (255, 255, 255),
+                                    width=self.expanding_circles.width,
+                                )
+                            )
+                            self.screen_shake = 20
+                            self.screen_shake_val = 2
 
-                if shuriken.id not in shuriken_ids:
-                    self.shurikens.remove(shuriken)
+                            broken = True
+                            break
+
+                    if broken:
+                        continue
+
+                if shuriken.launcher != self.player and shuriken.rect.colliderect(self.player.rect):
+                    self.player.hp -= shuriken.damage
+                    shurikens.remove(shuriken)
+                    self.screen_shake = 30
+                    self.screen_shake_val = 4
+                    continue
+
+                # Remove shuriken if it goes outside of boundary
+                if shuriken.distance > 800:
+                    shurikens.remove(shuriken)
+
+            # Handle screen shake
+            self.handle_screen_shake(dt)
+
+            # Explosions
+            for explosion in self.explosions:
+                explosion.draw(screen, dt)
+
+                if len(explosion.particles) == 0:
+                    self.explosions.remove(explosion)
 
             # Inventory and statistics
             self.statistics.update(mouse_pos, mouse_press)
@@ -170,6 +228,10 @@ class Game:
             # Item information
             self.item_info.update(self.player.colliding_item, events, dt)
             self.item_info.draw(screen)
+
+            # Click effect
+            self.expanding_circles.update(events, mouse_pos)
+            self.expanding_circles.draw(screen, dt)
 
             screen.blit(game_border_img, (0, 0))
             screen.blit(cursor_img, mouse_pos)

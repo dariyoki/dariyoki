@@ -63,7 +63,7 @@ def main():
         rect_size=32,
         start=(-1000, 500)
     )
-    speed = 5
+    speed = 10
     current_tile_name = "upleft"
     opts = {
         0: "upleft",
