@@ -6,26 +6,28 @@ from src.animation import Animation
 from src.effects.particle_effects import PlayerAura
 from src.weapons.shurikens import Shuriken
 from src.identification import shurikens
+from src.consumables import HealthPotion, ShieldPotion
 
 
 class Player:
     JUMP_HEIGHT = 200
     DASH_LENGTH = 150
 
-    def __init__(self, x, y, camera, controls):
+    def __init__(self, x, y, camera, controls, screen: pygame.Surface):
         # Constructor objects
         self.x, self.y = x, y
         self.right_img = characters[0]
         self.left_img = pygame.transform.flip(self.right_img, True, False)
         self.image = self.right_img
         self.rect = self.image.get_rect()
+        self.screen = screen
 
         # Controls
         self.controls = controls
 
         self.right_control = eval("pygame." + controls["right"])
         self.left_control = eval("pygame." + controls["left"])
-        self.jump_control = eval("pygame." + controls["jump"])
+        self.jump_control = [eval("pygame." + control) for control in controls["jump"]]
         self.dash_control = eval("pygame." + controls["dash"])
         self.pickup_control = eval("pygame." + controls["pickup item"])
 
@@ -47,6 +49,9 @@ class Player:
                 "soul sword": 0,
             }
         }
+        self.item_pickup_circle_radius = self.rect.height
+        self.item_pickup_circle_width = 5
+        self.item_pickup_start = False
 
         # Animations
         self.sword_attack_animation = Animation(sword_attack, speed=0.4)
@@ -75,7 +80,12 @@ class Player:
         self.equip_items["sword"] = pygame.transform.rotate(pygame.transform.scale2x(self.equip_items["sword"]), -45)
         self.equip_items["scythe"] = pygame.transform.rotate(pygame.transform.scale2x(self.equip_items["scythe"]), -45)
 
+        # Consumables
+        self.health_potion = HealthPotion(self)
+        self.shield_potion = ShieldPotion(self)
+
         # Statistics
+        self.max_hp, self.max_soul_energy, self.max_shield = 100, 100, 100
         self.hp = 100
         self.last_hp = self.hp
         self.shield = 100
@@ -121,6 +131,63 @@ class Player:
         if self.inventory["weapons"]["shuriken"] > 0:
             self.inventory["weapons"]["shuriken"] -= 1
 
+    def handle_health_potion(self):
+        self.health_potion.loading_bar.rect = pygame.Rect(
+            pygame.Rect(
+                self.rect.midtop[0],
+                self.rect.midtop[1] - 10,
+                50,
+                12
+            )
+        )
+        self.health_potion.loading_bar.value += 0.9 * self.dt
+        self.health_potion.draw(self.screen, self.camera)
+        if self.health_potion.loading_bar.loaded:
+            if self.inventory["items"]["health potion"] > 0:
+                self.inventory["items"]["health potion"] -= 1
+                self.health_potion = HealthPotion(self)
+
+    def handle_shield_potion(self):
+        self.shield_potion.loading_bar.rect = pygame.Rect(
+            pygame.Rect(
+                self.rect.midtop[0],
+                self.rect.midtop[1] - 10,
+                50,
+                12
+            )
+        )
+        self.shield_potion.loading_bar.value += 0.5 * self.dt
+        self.shield_potion.draw(self.screen, self.camera)
+        if self.shield_potion.loading_bar.loaded:
+            if self.inventory["items"]["shield potion"] > 0:
+                self.inventory["items"]["shield potion"] -= 1
+                self.shield_potion = ShieldPotion(self)
+
+    def handle_item_pickup(self, info):
+        # Handle items
+        stub_rx = [item.rect for item in info["items"]]
+        if (index := self.rect.collidelist(stub_rx)) != -1:
+            self.colliding_item = info["items"][index]
+            if not info["item info"].o_lock:
+                info["item info"].opening = True
+        else:
+            self.colliding_item = None
+            if not info["item info"].o_lock:
+                info["item info"].opening = False
+
+        # Drawing item pickup circle
+        if self.item_pickup_start:
+            pygame.draw.circle(self.screen, 'white', (
+                self.rect.center[0] - self.camera[0],
+                self.rect.center[1] - self.camera[1]
+            ), radius=self.item_pickup_circle_radius, width=int(self.item_pickup_circle_width))
+            self.item_pickup_circle_radius -= 3 * self.dt
+            self.item_pickup_circle_width -= 0.3 * self.dt
+            if self.item_pickup_circle_radius < 1:
+                self.item_pickup_start = False
+                self.item_pickup_circle_radius = self.rect.height
+                self.item_pickup_circle_width = 5
+
     def update(self, info: dict, event_info: dict) -> None:
         dt = event_info["dt"]
         self.dt = event_info["dt"]
@@ -144,26 +211,25 @@ class Player:
 
             self.image = self.left_img
 
-        if event_info["mouse press"][0] and self.equipped == "shuriken":
+        if event_info["mouse press"][0] and self.equipped is not None and event_info["mouse pos"][1] > 130:
             self.attack_cd += event_info["raw dt"]
-            if self.attack_cd >= self.cooldowns[self.equipped]:
-                if self.equipped == "shuriken":
-                    self.handle_shurikens(event_info["mouse pos"])
-                    self.attack_cd = 0
+            if self.equipped in self.cooldowns:
+                if self.attack_cd >= self.cooldowns[self.equipped]:
+                    if self.equipped == "shuriken":
+                        self.handle_shurikens(event_info["mouse pos"])
+                        self.attack_cd = 0
+
+            if self.equipped == "health potion":
+                self.handle_health_potion()
+
+            if self.equipped == "shield potion":
+                self.handle_shield_potion()
 
         for event in event_info["events"]:
             if event.type == pygame.KEYDOWN:
-                if event.key == self.jump_control and self.touched_ground:
+                if event.key in self.jump_control and self.touched_ground:
                     self.jumping = True
                     self.jump_stack = 0
-
-                # if event.key == self.attack_control:
-                #     r_angle = random.randrange(-50, 20)
-                #     if self.last_direction == "right":
-                #         self.sword_attack_animation.frames = rotate(sword_attack, r_angle)
-                #     elif self.last_direction == "left":
-                #         self.lsword_attack_animation.frames = rotate(lsword_attack, r_angle)
-                #     self.attacking = True
 
                 if event.key == self.dash_control:
                     self.dashing = True
@@ -171,6 +237,7 @@ class Player:
 
                 if event.key == self.pickup_control:
                     if self.colliding_item is not None:
+                        self.item_pickup_start = True
                         info["items"].remove(self.colliding_item)
                         name = self.colliding_item.name
                         if name in self.inventory["weapons"]:
@@ -268,20 +335,12 @@ class Player:
                 info["chests"][self.chest_index].loading_bar.value = 0
                 self.standing_near_chest = False
 
+        # Handle item pickup
+        self.handle_item_pickup(info)
+
         # Update loading bar
         if self.standing_near_chest and len(info["chests"]) != 0:
             info["chests"][self.chest_index].update(event_info["keys"], dt)
-
-        # Handle items
-        stub_rx = [item.rect for item in info["items"]]
-        if (index := self.rect.collidelist(stub_rx)) != -1:
-            self.colliding_item = info["items"][index]
-            if not info["item info"].o_lock:
-                info["item info"].opening = True
-        else:
-            self.colliding_item = None
-            if not info["item info"].o_lock:
-                info["item info"].opening = False
 
         # Update player coord
         self.x += dx

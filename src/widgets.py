@@ -4,7 +4,7 @@ from src.sprites import border_img
 
 
 class LoadingBar:
-    def __init__(self, value, fg_color, bg_color, rect: pygame.Rect):
+    def __init__(self, value, fg_color, bg_color, rect: pygame.Rect, max_value=100):
         self.value = value
         self.sfg_color = fg_color
         self.sbg_color = bg_color
@@ -18,6 +18,7 @@ class LoadingBar:
         )
         self.loaded = False
         self.border_img = pygame.transform.scale(border_img, self.rect.size)
+        self.max_value = max_value
 
     def draw(self, screen: pygame.Surface, camera, moving: bool = False):
         if moving:

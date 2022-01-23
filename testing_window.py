@@ -35,7 +35,7 @@ while True:
             sys.exit()
 
         if event.type == pygame.MOUSEBUTTONDOWN:
-            explosions.append(Explosion(1000, (4, 15), list(mouse_pos), (40, 120)))
+            explosions.append(Explosion(1000, (4, 15), list(mouse_pos), (40, 120), 'green'))
 
     # Rendering
     screen.fill(0)

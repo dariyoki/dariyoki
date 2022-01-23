@@ -10,9 +10,12 @@ from src.enemy import Ninja
 from src.items import Chest
 from src.spawner import Spawner
 from src.stats import Info, PlayerStatistics
-from src.identification import enemy_ids, shurikens
+from src.identification import enemy_ids, shurikens, explosions
 from src.effects.exp_circle import ExpandingCircles, ExpandingCircle
 from src.effects.explosion import Explosion
+if compiling:
+    from src.level_manager import LevelManager
+    from src_le.s_data import SChest
 
 
 class Game:
@@ -26,8 +29,7 @@ class Game:
             self.level_manager = pickle.load(f)
 
         self.run = True
-        self.player = Player(*player_start_pos, camera, self.controls["controls"])
-        # self.enemy_1 = Ninja(player_start_pos[0] + 300, player_start_pos[1], None, "shadow", 2, 400, player_dist=200)
+        self.player = Player(*player_start_pos, camera, self.controls["controls"], screen)
         self.world = World(self.level_manager)
         self.camera = camera
 
@@ -37,7 +39,6 @@ class Game:
         self.expanding_circles = ExpandingCircles(
             init_radius=5, max_radius=40, increment=3, colour=(255, 0, 0), width=10
         )
-        self.explosions: list[Explosion] = []
         self.screen_shake = 0
         self.screen_shake_val = 0
 
@@ -178,8 +179,8 @@ class Game:
                         )):
                             enemy.hp -= shuriken.damage
                             shurikens.remove(shuriken)
-                            self.explosions.append(
-                                Explosion(500, (12, 25), list(shuriken.rect.center), (5, 12))
+                            explosions.append(
+                                Explosion(500, (12, 25), list(shuriken.rect.center), (5, 12), 'white')
                             )
                             self.expanding_circles.circles.append(
                                 ExpandingCircle(
@@ -201,7 +202,10 @@ class Game:
                         continue
 
                 if shuriken.launcher != self.player and shuriken.rect.colliderect(self.player.rect):
-                    self.player.hp -= shuriken.damage
+                    if self.player.shield > 0:
+                        self.player.shield -= shuriken.damage
+                    else:
+                        self.player.hp -= shuriken.damage
                     shurikens.remove(shuriken)
                     self.screen_shake = 30
                     self.screen_shake_val = 4
@@ -215,11 +219,11 @@ class Game:
             self.handle_screen_shake(dt)
 
             # Explosions
-            for explosion in self.explosions:
+            for explosion in explosions:
                 explosion.draw(screen, dt)
 
                 if len(explosion.particles) == 0:
-                    self.explosions.remove(explosion)
+                    explosions.remove(explosion)
 
             # Inventory and statistics
             self.statistics.update(mouse_pos, mouse_press)

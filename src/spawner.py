@@ -49,9 +49,11 @@ class Spawner:
     def update(self, raw_dt, dt):
         self.time_passed += raw_dt
         if self.time_passed > self.cool_down:
-            print('hasp1')
             self.spawn_it = True
             self.once = True
+            self.time_passed = 0
+
+        if len(self.enemies) > 10:
             self.time_passed = 0
 
         if self.spawn_it:

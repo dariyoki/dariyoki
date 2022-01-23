@@ -177,7 +177,7 @@ class Ninja:
         if not self.chasing:
             self.idle_distance += abs(math.sqrt(dx ** 2 + dy ** 2))
             if self.idle_distance > 40:
-                self.idle_movement_direction = random.choice(("right", "right", "left", "right", "jump"))
+                self.idle_movement_direction = random.choice(("right", "left", "right", "left", "jump"))
                 self.idle_distance = 0
 
         self.rect = self.right_img.get_rect(topleft=(self.x, self.y))
