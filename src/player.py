@@ -5,8 +5,9 @@ from src.audio import dash_sfx, pickup_item_sfx
 from src.animation import Animation
 from src.effects.particle_effects import PlayerAura
 from src.weapons.shurikens import Shuriken
-from src.identification import shurikens
+from src.identification import shurikens, general_info
 from src.consumables import HealthPotion, ShieldPotion
+from src.game_events import GeneralInfo
 
 
 class Player:
@@ -240,14 +241,18 @@ class Player:
                         self.item_pickup_start = True
                         info["items"].remove(self.colliding_item)
                         name = self.colliding_item.name
-                        if name in self.inventory["weapons"]:
-                            if name == "shuriken":
-                                self.inventory["weapons"][name] += 10
-                            else:
-                                self.inventory["weapons"][name] += 1
-                        elif name in self.inventory["items"]:
-                            self.inventory["items"][name] += 1
 
+                        match name:
+                            case "shuriken":
+                                quantity = 10
+                            case _:
+                                quantity = 1
+                        if name in self.inventory["weapons"]:
+                            self.inventory["weapons"][name] += quantity
+                        elif name in self.inventory["items"]:
+                            self.inventory["items"][name] += quantity
+
+                        general_info[0] = GeneralInfo(f"+{quantity} {name} picked up!", "white")
                         pickup_item_sfx.play()
 
         # Dashing

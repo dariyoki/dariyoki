@@ -47,6 +47,8 @@ class Spawner:
         ) for _ in range(n)]
 
     def update(self, raw_dt, dt):
+        self.angle += 0.7 * dt
+
         self.time_passed += raw_dt
         if self.time_passed > self.cool_down:
             self.spawn_it = True
@@ -57,11 +59,14 @@ class Spawner:
             self.time_passed = 0
 
         if self.spawn_it:
-            self.image = self.spawn_images[1]
+            self.image = pygame.transform.rotate(self.spawn_images[1], self.angle)
             self.time_passed = 0
             self.spawn(random.randrange(*self.number_of_enemies))
         else:
-            self.image = self.spawn_images[0]
+            self.image = pygame.transform.rotate(self.spawn_images[0], self.angle)
+
+        stub_r = pygame.Rect(tuple(self.location), self.size)
+        self.rect = self.image.get_rect(center=stub_r.center)
 
         for rect in self.spawning_rects:
             v = 0
@@ -96,7 +101,7 @@ class Spawner:
 
     def draw(self, screen: pygame.Surface, camera):
         screen.blit(self.image, (
-            self.location[0] - camera[0],
-            self.location[1] - camera[1]
+            self.rect.x - camera[0],
+            self.rect.y - camera[1]
         ))
         self.glow.draw(screen, camera)

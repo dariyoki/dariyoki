@@ -1,5 +1,6 @@
 import pygame
 from src.sprites import (border_img,
+                         selected_border_img,
                          i_cards,
                          sword_img,
                          shuriken_img,
@@ -230,7 +231,8 @@ class PlayerStatistics:
                     self.player_obj.equipped = None
 
             if index == self.chosen_index:
-                pygame.draw.rect(self.screen, 'yellow', rect, width=3)
+                # pygame.draw.rect(self.screen, 'yellow', rect, width=3)
+                self.screen.blit(selected_border_img, rect)
             else:
                 self.screen.blit(border_img, rect)
 

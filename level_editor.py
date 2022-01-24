@@ -47,12 +47,12 @@ def closest(lst, k):
 
 
 def save_data(data):
-    with open("data/level_data/level_0", "wb") as f:
+    with open("assets/data/level_data/level_0", "wb") as f:
         pickle.dump(data, f)
 
 
 def main():
-    with open('data/level_data/level_0', 'rb') as f:
+    with open('assets/data/level_data/level_0', 'rb') as f:
         level_manager = pickle.load(f)
 
     # level_manager = LevelManager()

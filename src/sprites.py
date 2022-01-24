@@ -26,6 +26,7 @@ chests = resize(chests, scale=2)
 
 # Border art
 border_img = pygame.image.load(path + "border.png").convert_alpha()
+selected_border_img = pygame.image.load(path + "selected_border.png").convert_alpha()
 
 # Items
 health_potion_img = pygame.image.load(path + "items/health_potion.png").convert_alpha()
@@ -75,4 +76,5 @@ spawner_imgs = [
     pygame.image.load(path + "spawners/spawning_shadow_ninja.png").convert_alpha()
 ]
 
-
+# The Blue Ribbon
+blue_ribbon = pygame.image.load(path + "blue_ribbon.png").convert_alpha()

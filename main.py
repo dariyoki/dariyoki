@@ -10,9 +10,10 @@ from src.enemy import Ninja
 from src.items import Chest
 from src.spawner import Spawner
 from src.stats import Info, PlayerStatistics
-from src.identification import enemy_ids, shurikens, explosions
+from src.identification import enemy_ids, shurikens, explosions, general_info
 from src.effects.exp_circle import ExpandingCircles, ExpandingCircle
 from src.effects.explosion import Explosion
+from src.game_events import GeneralInfo
 if compiling:
     from src.level_manager import LevelManager
     from src_le.s_data import SChest
@@ -21,11 +22,11 @@ if compiling:
 class Game:
     def __init__(self):
         # Controls
-        with open('data/controls.json') as f:
+        with open('assets/data/controls.json') as f:
             self.controls = json.load(f)
 
         # Level data
-        with open('data/level_data/level_0', 'rb') as f:
+        with open('assets/data/level_data/level_0', 'rb') as f:
             self.level_manager = pickle.load(f)
 
         self.run = True
@@ -224,6 +225,10 @@ class Game:
 
                 if len(explosion.particles) == 0:
                     explosions.remove(explosion)
+
+            # General Info and Achievements
+            if general_info[0] is not None:
+                general_info[0].draw(screen, dt)
 
             # Inventory and statistics
             self.statistics.update(mouse_pos, mouse_press)
