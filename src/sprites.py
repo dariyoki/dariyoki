@@ -25,8 +25,8 @@ chests = chest_ss.get_images(1, 2, 32, 32, fixer=8, bound=False)
 chests = resize(chests, scale=2)
 
 # Border art
-border_img = pygame.image.load(path + "border.png").convert_alpha()
-selected_border_img = pygame.image.load(path + "selected_border.png").convert_alpha()
+border_img = pygame.image.load(path + "borders/border.png").convert_alpha()
+selected_border_img = pygame.image.load(path + "borders/selected_border.png").convert_alpha()
 
 # Items
 health_potion_img = pygame.image.load(path + "items/health_potion.png").convert_alpha()
@@ -47,7 +47,7 @@ items = {
 }
 
 background_img = pygame.image.load(path + "background.png").convert()
-game_border_img = pygame.image.load(path + "game_border.png").convert_alpha()
+game_border_img = pygame.image.load(path + "borders/game_border.png").convert_alpha()
 
 # Information cards
 i_cards = {i_card[2:-5].replace('_', ' '): pygame.image.load(path + f"icards/{i_card}").convert() for i_card in
@@ -78,3 +78,6 @@ spawner_imgs = [
 
 # The Blue Ribbon
 blue_ribbon = pygame.image.load(path + "blue_ribbon.png").convert_alpha()
+
+# Bar boder
+bar_border_img = pygame.image.load(path + "borders/bar_border.png").convert_alpha()

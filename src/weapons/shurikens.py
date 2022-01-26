@@ -27,10 +27,6 @@ class Shuriken(Angle):
         #     *self.rect.size
         # ), width=1)
 
-        # if self.glow_radius > self.image.get_width() * 0.3:
-        #     self.glow_radius -= 1.3 * dt
-        # if self.glow_radius < self.image.get_width() * 1.3:
-        #     self.glow_radius += 1.3 * dt
         self.image = pygame.transform.rotozoom(self.shuriken_img, int(self.angle), 1)
         self.contrail.update(
             self.rect.center[0] - camera[0],

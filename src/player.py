@@ -1,5 +1,6 @@
 import pygame
 import math
+from typing import Optional
 from src.sprites import characters, sword_attack, lsword_attack, items
 from src.audio import dash_sfx, pickup_item_sfx
 from src.animation import Animation
@@ -13,6 +14,7 @@ from src.game_events import GeneralInfo
 class Player:
     JUMP_HEIGHT = 200
     DASH_LENGTH = 150
+    INVENTORY_SLOTS = 5*8
 
     def __init__(self, x, y, camera, controls, screen: pygame.Surface):
         # Constructor objects
@@ -33,23 +35,18 @@ class Player:
         self.pickup_control = eval("pygame." + controls["pickup item"])
 
         # Inventory
-        self.inventory = {
-            "weapons": {
-                "shuriken": 0,
-                "sword": 0,
-                "scythe": 0
-            },
-            "items": {
-                "health potion": 0,
-                "shield potion": 0,
-                "smoke bomb": 0
-            },
-            "soul boosted": {
-                "soul shuriken": 0,
-                "soul bomb": 0,
-                "soul sword": 0,
-            }
+        self.item_count = {
+            "health potion": 0,
+            "shield potion": 0,
+            "smoke bomb": 0,
+            "shuriken": 0,
+            "sword": 0,
+            "scythe": 0,
+            "soul shuriken": 0,
+            "soul bomb": 0,
+            "soul sword": 0,
         }
+        self.inventory: list[Optional[str]] = [None for _ in range(self.INVENTORY_SLOTS)]
         self.item_pickup_circle_radius = self.rect.height
         self.item_pickup_circle_width = 5
         self.item_pickup_start = False
@@ -57,7 +54,7 @@ class Player:
         # Animations
         self.sword_attack_animation = Animation(sword_attack, speed=0.4)
         self.lsword_attack_animation = Animation(lsword_attack, speed=0.4)
-        self.aura = PlayerAura((34, 13, 42), 2)
+        self.aura = PlayerAura((0, 0, 0), 2)
 
         # Flags
         self.jumping = False
@@ -129,8 +126,10 @@ class Player:
             speed=12,
             launcher=self
         ))
-        if self.inventory["weapons"]["shuriken"] > 0:
-            self.inventory["weapons"]["shuriken"] -= 1
+        if self.item_count["shuriken"] > 0:
+            self.item_count["shuriken"] -= 1
+        else:
+            self.equipped = None
 
     def handle_health_potion(self):
         self.health_potion.loading_bar.rect = pygame.Rect(
@@ -144,9 +143,11 @@ class Player:
         self.health_potion.loading_bar.value += 0.9 * self.dt
         self.health_potion.draw(self.screen, self.camera)
         if self.health_potion.loading_bar.loaded:
-            if self.inventory["items"]["health potion"] > 0:
-                self.inventory["items"]["health potion"] -= 1
+            if self.item_count["health potion"] > 0:
+                self.item_count["health potion"] -= 1
                 self.health_potion = HealthPotion(self)
+            else:
+                self.equipped = None
 
     def handle_shield_potion(self):
         self.shield_potion.loading_bar.rect = pygame.Rect(
@@ -160,9 +161,11 @@ class Player:
         self.shield_potion.loading_bar.value += 0.5 * self.dt
         self.shield_potion.draw(self.screen, self.camera)
         if self.shield_potion.loading_bar.loaded:
-            if self.inventory["items"]["shield potion"] > 0:
-                self.inventory["items"]["shield potion"] -= 1
+            if self.item_count["shield potion"] > 0:
+                self.item_count["shield potion"] -= 1
                 self.shield_potion = ShieldPotion(self)
+            else:
+                self.equipped = None
 
     def handle_item_pickup(self, info):
         # Handle items
@@ -189,14 +192,19 @@ class Player:
                 self.item_pickup_circle_radius = self.rect.height
                 self.item_pickup_circle_width = 5
 
+        # Update `item_count` and `inventory` sync
+        for item, quantity in self.item_count.items():
+            if quantity == 0 and item in self.inventory:
+                self.inventory[self.inventory.index(item)] = None
+
     def update(self, info: dict, event_info: dict) -> None:
         dt = event_info["dt"]
         self.dt = event_info["dt"]
         self.info = info
         self.last_hp = self.hp
-        info["stats"].hp_bar.value = self.hp * 1.5
-        info["stats"].shield_bar.value = self.shield * 1.5
-        info["stats"].se_bar.value = self.soul_energy * 1.5
+        info["stats"].hp_bar.value = self.hp * 1.7
+        info["stats"].shield_bar.value = self.shield * 1.7
+        info["stats"].se_bar.value = self.soul_energy * 1.7
 
         # Default iteration values
         dx, dy = 0, 0
@@ -247,10 +255,13 @@ class Player:
                                 quantity = 10
                             case _:
                                 quantity = 1
-                        if name in self.inventory["weapons"]:
-                            self.inventory["weapons"][name] += quantity
-                        elif name in self.inventory["items"]:
-                            self.inventory["items"][name] += quantity
+
+                        self.item_count[name] += quantity
+                        if name not in self.inventory:
+                            for index, item in enumerate(self.inventory):
+                                if item is None:
+                                    self.inventory[index] = name
+                                    break
 
                         general_info[0] = GeneralInfo(f"+{quantity} {name} picked up!", "white")
                         pickup_item_sfx.play()

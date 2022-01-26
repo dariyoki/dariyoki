@@ -13,7 +13,6 @@ from src.stats import Info, PlayerStatistics
 from src.identification import enemy_ids, shurikens, explosions, general_info
 from src.effects.exp_circle import ExpandingCircles, ExpandingCircle
 from src.effects.explosion import Explosion
-from src.game_events import GeneralInfo
 if compiling:
     from src.level_manager import LevelManager
     from src_le.s_data import SChest
