@@ -118,39 +118,45 @@ class Ninja:
             self.image = self.left_img
 
         # Check collisions
-        for pos in info["tiles"]:
-            stub = pygame.Rect(pos, (32, 32))
+        for tile_name, tile_rect in info["tiles"].items():
             # Check for right collision
-            if "right" in info["tiles"][pos] and self.last_direction == "left":
-                if stub.colliderect(self.rect):
+            if "right" in tile_name and self.last_direction == "left":
+                if tile_rect.colliderect(self.rect):
                     dx = 0
 
-            # Check for left collision
-            if "left" in info["tiles"][pos] and self.last_direction == "right":
-                if stub.colliderect(self.rect):
-                    dx = 0
+            # Check collisions
+            for pos in info["tiles"]:
+                stub = pygame.Rect(pos, (32, 32))
+                # Check for right collision
+                if "right" in info["tiles"][pos] and self.last_direction == "left":
+                    if stub.colliderect(self.rect):
+                        dx = 0
 
-            # Check for roof collision
-            if "down" in info["tiles"][pos]:
-                if stub.colliderect(self.rect):
-                    self.jumping = False
+                # Check for left collision
+                if "left" in info["tiles"][pos] and self.last_direction == "right":
+                    if stub.colliderect(self.rect):
+                        dx = 0
 
-        for pos in info["tiles"]:
-            stub = pygame.Rect(pos, (32, 32))
-            # Check for floor collision
-            if "up" in info["tiles"][pos]:
-                if stub.collidepoint(self.rect.midbottom) and self.rect.y < pos[1]:
-                    self.image = self.right_img if self.last_direction == "right" else self.left_img
-                    self.touched_ground = True
-                    self.angle = 0
-                    dy = stub.top - self.rect.bottom
-                    # self.velocity = 5
-                    break
-        else:
-            if not self.jumping:
-                self.velocity += self.acceleration * dt
-                dy += self.velocity * dt
+                # Check for roof collision
+                if "down" in info["tiles"][pos]:
+                    if stub.colliderect(self.rect):
+                        self.jumping = False
 
+            for pos in info["tiles"]:
+                stub = pygame.Rect(pos, (32, 32))
+                # Check for floor collision
+                if "up" in info["tiles"][pos]:
+                    if stub.collidepoint(self.rect.midbottom) and self.rect.y < pos[1]:
+                        self.image = self.right_img if self.last_direction == "right" else self.left_img
+                        self.touched_ground = True
+                        self.angle = 0
+                        dy = stub.top - self.rect.bottom
+                        # self.velocity = 5
+                        break
+            else:
+                if not self.jumping:
+                    self.velocity += self.acceleration * dt
+                    dy += self.velocity * dt
         # Gravity control
         if self.jumping:
             self.angle += 200 * dt

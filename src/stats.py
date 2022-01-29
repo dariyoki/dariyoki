@@ -1,4 +1,5 @@
 import pygame
+import itertools
 from src.sprites import (border_img,
                          selected_border_img,
                          i_cards,
@@ -55,7 +56,8 @@ class ItemStats:
 
 
 class Info:
-    ALPHA = 200
+    ALPHA = 150
+
     def __init__(self, screen: pygame.Surface, open_control: int):
         self.screen = screen
         padx, pady = 30, 15
@@ -153,9 +155,9 @@ class PlayerStatistics:
         self.selected_border_img = pygame.transform.scale(selected_border_img, bsize)
         brect = self.border_img.get_rect()
         self.inventory_rects = [pygame.Rect(
-                    ((brect.height + 5) * col + 300, (brect.width + 5) * 0 + 30),
-                    brect.size
-                ) for col in range(8)]
+                     ((brect.height + 5) * col + 300, (brect.width + 5) * 0 + 30),
+                     brect.size
+                 ) for col in range(8)]
         self.init_inventory_rects = list(self.inventory_rects)
         self.order = {
             "shuriken": pygame.transform.scale(shuriken_img, bsize),
@@ -166,17 +168,37 @@ class PlayerStatistics:
             "smoke bomb": pygame.transform.scale(sb_img, bsize),
         }
 
+        # Indices
         self.chosen_index = 1
+        self.init_collide_index = 1
+        self.init_collide = False
         self.last_index = None
 
         # Font
         self.font = pygame.font.SysFont("bahnschrift", 20)
 
-    def update(self, mouse_pos, mouse_press):
+    def update(self, mouse_pos, mouse_press, events):
+        self.screen.blit(self.inventory_surf, (0, 0))
+        if mouse_press[0] and self.init_collide:
+            name = self.player_obj.inventory[self.init_collide_index]
+            if name is not None:
+                surf = self.order[name].copy()
+                surf.set_alpha(200)
+                self.screen.blit(surf, mouse_pos)
+
         for hover_index, rect in enumerate(self.inventory_rects):
             if rect.collidepoint(mouse_pos):
-                if mouse_press[0]:
-                    self.chosen_index = self.inventory_rects.index(rect)
+                for event in events:
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        self.chosen_index = hover_index
+                        self.init_collide_index = hover_index
+                        self.init_collide = True
+
+                    if event.type == pygame.MOUSEBUTTONUP and self.init_collide:
+                        if hover_index != self.init_collide_index:
+                            self.player_obj.inventory[self.init_collide_index], self.player_obj.inventory[hover_index] = self.player_obj.inventory[hover_index], self.player_obj.inventory[self.init_collide_index]
+
+                        self.init_collide = False
 
                 if self.last_index != hover_index:
                     copy_rects = []
@@ -199,12 +221,11 @@ class PlayerStatistics:
             self.inventory_rects = self.init_inventory_rects
 
     def draw(self):
-        self.screen.blit(self.inventory_surf, (0, 0))
         self.hp_bar.draw(self.screen, [0, 0])
         self.shield_bar.draw(self.screen, [0, 0])
         self.se_bar.draw(self.screen, [0, 0])
 
-        for index, vals in enumerate(zip(self.player_obj.inventory[:8], self.inventory_rects)):
+        for index, vals in enumerate(zip(self.player_obj.inventory, self.inventory_rects)):
             item_name, rect = vals
             if item_name is not None:
                 quantity = self.player_obj.item_count[item_name]

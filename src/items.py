@@ -103,7 +103,7 @@ class Chest:
         for _ in range(n_items):
             name = None
             while name is None:
-                n_item = random.randrange(100)
+                n_item = random.uniform(0, 100)
 
                 for chance in list(chances.keys())[::-1]:
                     if n_item < chance:

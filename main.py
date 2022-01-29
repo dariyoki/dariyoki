@@ -1,21 +1,17 @@
 import random
 import time
 import json
-import pickle
+import pytmx
+import itertools
 from src.display import *
-from src.sprites import cursor_img, background_img, game_border_img, characters
+from src.sprites import cursor_img, background_img, game_border_img
 from src.world import World
 from src.player import Player
 from src.enemy import Ninja
-from src.items import Chest
-from src.spawner import Spawner
 from src.stats import Info, PlayerStatistics
 from src.identification import enemy_ids, shurikens, explosions, general_info
 from src.effects.exp_circle import ExpandingCircles, ExpandingCircle
 from src.effects.explosion import Explosion
-if compiling:
-    from src.level_manager import LevelManager
-    from src_le.s_data import SChest
 
 
 class Game:
@@ -25,12 +21,16 @@ class Game:
             self.controls = json.load(f)
 
         # Level data
-        with open('assets/data/level_data/level_0', 'rb') as f:
-            self.level_manager = pickle.load(f)
+        tile_map = pytmx.load_pygame('assets/data/level_data/level_0_test.tmx')
+        self.all_rects = {}
+        for index, layer in enumerate(tile_map):
+            for x, y, _ in layer.tiles():
+                tile_properties = tile_map.get_tile_properties(x, y, index)
+                self.all_rects[(x * tile_map.tileheight, y * tile_map.tilewidth)] = tile_properties['type']
 
         self.run = True
         self.player = Player(*player_start_pos, camera, self.controls["controls"], screen)
-        self.world = World(self.level_manager)
+        self.world = World(tile_map)
         self.camera = camera
 
         # Visuals
@@ -44,12 +44,13 @@ class Game:
 
         # Levels
         self.item_info = Info(screen, eval("pygame." + self.controls["controls"]["info toggle"]))
-        self.level_manager.item_info = self.item_info
 
         self.opened_chests = []
         # Handling serialized mini objects to full fledged game objects
-        self.chests = [Chest(s.x, s.y, s.load_control, s.load_speed) for s in self.level_manager.chests]
-        self.spawners = [Spawner(*args, Ninja, characters[0].get_size()) for args in self.level_manager.spawners]
+        # self.chests = [Chest(s.x, s.y, s.load_control, s.load_speed) for s in self.level_manager.chests]
+        # self.spawners = [Spawner(*args, Ninja, characters[0].get_size()) for args in self.level_manager.spawners]
+        self.chests = []
+        self.spawners = []
         self.items = []
         self.enemies: list[Ninja] = []
 
@@ -58,6 +59,15 @@ class Game:
             screen,
             self.player
         )
+
+    def load_level(self, n):
+        tiles = ["upleft", "up", "upright", "left", "center", "right", "downleft", "down", "downright"]
+        tile_map = pytmx.load_pygame(f'assets/data/level_data/level_{n}.tmx')
+        self.all_rects = {}
+        for layer in tile_map:
+            for (_, x, y), num in zip(layer.tiles(), itertools.chain(*layer.data)):
+                self.all_rects[tiles[num - 1]] = pygame.Rect((x * tile_map.height, y * tile_map.width),
+                                                        (tile_map.width, tile_map.height))
 
     def handle_screen_shake(self, dt):
         # Handle screen shake
@@ -126,7 +136,7 @@ class Game:
             info = {
                 "items": self.items,
                 "item info": self.item_info,
-                "tiles": self.level_manager.all_rects,
+                "tiles": self.all_rects,
                 "chests": self.chests,
                 "stats": self.statistics,
             }
@@ -230,7 +240,7 @@ class Game:
                 general_info[0].draw(screen, dt)
 
             # Inventory and statistics
-            self.statistics.update(mouse_pos, mouse_press)
+            self.statistics.update(mouse_pos, mouse_press, events)
             self.statistics.draw()
 
             # Item information

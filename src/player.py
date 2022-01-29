@@ -14,7 +14,7 @@ from src.game_events import GeneralInfo
 class Player:
     JUMP_HEIGHT = 200
     DASH_LENGTH = 150
-    INVENTORY_SLOTS = 5*8
+    INVENTORY_SLOTS = 8
 
     def __init__(self, x, y, camera, controls, screen: pygame.Surface):
         # Constructor objects
@@ -105,7 +105,7 @@ class Player:
         # Movement speeds
         self.speed = 5
         self.velocity = 3
-        self.acceleration = 2
+        self.acceleration = 1.7
         self.dash_mult = 15
 
         # Stacking values
@@ -246,25 +246,26 @@ class Player:
 
                 if event.key == self.pickup_control:
                     if self.colliding_item is not None:
-                        self.item_pickup_start = True
-                        info["items"].remove(self.colliding_item)
                         name = self.colliding_item.name
-
                         match name:
                             case "shuriken":
                                 quantity = 10
                             case _:
                                 quantity = 1
 
-                        self.item_count[name] += quantity
-                        if name not in self.inventory:
-                            for index, item in enumerate(self.inventory):
-                                if item is None:
-                                    self.inventory[index] = name
-                                    break
-
-                        general_info[0] = GeneralInfo(f"+{quantity} {name} picked up!", "white")
-                        pickup_item_sfx.play()
+                        if self.inventory.count(None) < 1:
+                            general_info[0] = GeneralInfo(f"Out of inventory slots! (MAX:8)", "red")
+                        else:
+                            info["items"].remove(self.colliding_item)
+                            self.item_count[name] += quantity
+                            general_info[0] = GeneralInfo(f"+{quantity} {name} picked up!", "white")
+                            pickup_item_sfx.play()
+                            if name not in self.inventory:
+                                for index, item in enumerate(self.inventory):
+                                    if item is None:
+                                        self.inventory[index] = name
+                                        self.item_pickup_start = True
+                                        break
 
         # Dashing
         if not self.dashing:
@@ -287,6 +288,7 @@ class Player:
             d_img.set_alpha(150)
             self.dash_images.append([d_img, (self.x, self.y), 150])
 
+        # Check collisions
         # Check collisions
         for pos in info["tiles"]:
             stub = pygame.Rect(pos, (32, 32))
