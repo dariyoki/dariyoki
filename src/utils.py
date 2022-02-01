@@ -10,6 +10,15 @@ def circle_surf(radius, color):
     return surf
 
 
+def camerify(coord, camera):
+    """
+    Converts a coordinate to camera relative position
+
+    :return: Converted coordinate
+    """
+    return coord[0] - camera[0], coord[1] - camera[1]
+
+
 def rotate(extract, angle):
     dump = [pygame.transform.rotozoom(img, angle, 1) for img in extract]
 
@@ -34,7 +43,7 @@ def get_movement(angle: float, speed) -> tuple[int, int]:
 
     :param angle: Angle in radians
     :param speed:
-    :return:
+    :return: Required change in x and y to move towards angle
     """
     # Change in x and y
     dx = math.cos(angle) * speed

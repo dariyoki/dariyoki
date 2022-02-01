@@ -1,6 +1,6 @@
 import pygame
 from src.widgets import LoadingBar
-from src.identification import explosions
+from src.globals import explosions
 from src.effects.explosion import Explosion
 
 

@@ -93,7 +93,7 @@ class Info:
             if event.type == pygame.KEYDOWN:
                 if event.key == self.open_control:
                     self.opening = not self.opening
-                    self.o_lock = not self.o_lock
+                    self.o_lock = True
 
         if self.opening:
             if self.pos[0] < 30:

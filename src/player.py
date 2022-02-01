@@ -1,14 +1,16 @@
 import pygame
 import math
 from typing import Optional
-from src.sprites import characters, sword_attack, lsword_attack, items
+from src.sprites import characters, sword_attack, lsword_attack, items, shield_frames, player_shield_img
 from src.audio import dash_sfx, pickup_item_sfx
 from src.animation import Animation
 from src.effects.particle_effects import PlayerAura
 from src.weapons.shurikens import Shuriken
-from src.identification import shurikens, general_info
+from src.globals import shurikens, general_info
 from src.consumables import HealthPotion, ShieldPotion
 from src.game_events import GeneralInfo
+from src.utils import camerify as c
+from src.utils import circle_surf
 
 
 class Player:
@@ -27,7 +29,6 @@ class Player:
 
         # Controls
         self.controls = controls
-
         self.right_control = eval("pygame." + controls["right"])
         self.left_control = eval("pygame." + controls["left"])
         self.jump_control = [eval("pygame." + control) for control in controls["jump"]]
@@ -54,6 +55,7 @@ class Player:
         # Animations
         self.sword_attack_animation = Animation(sword_attack, speed=0.4)
         self.lsword_attack_animation = Animation(lsword_attack, speed=0.4)
+        self.shield_breaking_animation = Animation(shield_frames, speed=0.2)
         self.aura = PlayerAura((0, 0, 0), 2)
 
         # Flags
@@ -64,9 +66,12 @@ class Player:
         self.standing_near_chest = False
         self.colliding_item = None
         self.once = True
-
-        # Sound once booleans
+        self.shield_break = False
         self.dash_once = True
+
+        # Surfs
+        self.glow_surf = circle_surf(40, (20, 20, 40))
+        self.glow_surf_alpha = 255
 
         # Casket
         self.last_direction = "right"
@@ -86,7 +91,7 @@ class Player:
         self.max_hp, self.max_soul_energy, self.max_shield = 100, 100, 100
         self.hp = 100
         self.last_hp = self.hp
-        self.shield = 100
+        self.shield = 0
         self.soul_energy = 100
         self.current_damage = 0
         self.equipped = None
@@ -111,6 +116,7 @@ class Player:
         # Stacking values
         self.jump_stack = 0
         self.dash_stack = 0
+        self.item_collide_stack = 0
 
         # dt
         self.dt = 0
@@ -161,20 +167,23 @@ class Player:
         self.shield_potion.loading_bar.value += 0.5 * self.dt
         self.shield_potion.draw(self.screen, self.camera)
         if self.shield_potion.loading_bar.loaded:
+            self.glow_surf_alpha = 255
             if self.item_count["shield potion"] > 0:
                 self.item_count["shield potion"] -= 1
                 self.shield_potion = ShieldPotion(self)
             else:
                 self.equipped = None
 
-    def handle_item_pickup(self, info):
+    def handle_item_pickup(self, info, raw_dt):
         # Handle items
         stub_rx = [item.rect for item in info["items"]]
         if (index := self.rect.collidelist(stub_rx)) != -1:
+            self.item_collide_stack += raw_dt
             self.colliding_item = info["items"][index]
-            if not info["item info"].o_lock:
+            if not info["item info"].o_lock and self.item_collide_stack > 1.5:
                 info["item info"].opening = True
         else:
+            self.item_collide_stack = 0
             self.colliding_item = None
             if not info["item info"].o_lock:
                 info["item info"].opening = False
@@ -354,7 +363,7 @@ class Player:
                 self.standing_near_chest = False
 
         # Handle item pickup
-        self.handle_item_pickup(info)
+        self.handle_item_pickup(info, event_info["raw dt"])
 
         # Update loading bar
         if self.standing_near_chest and len(info["chests"]) != 0:
@@ -381,12 +390,15 @@ class Player:
             if dasher[2] <= 0:
                 self.dash_images.remove(dasher)
             dasher[0].set_alpha(int(dasher[2]))
-            screen.blit(dasher[0], (dasher[1][0] - self.camera[0], dasher[1][1] - self.camera[1]))
+            screen.blit(dasher[0], c(dasher[1], self.camera))
 
         # Draw player aura
-        self.aura.update(
-            self.rect.center[0] - self.camera[0],
-            self.rect.center[1] - self.camera[1], screen, self.dt)
+        player_shield_rect = player_shield_img.get_rect(center=self.rect.center)
+        shield_pos = c(player_shield_rect.topleft, self.camera)
+        if self.shield < 1 or self.glow_surf_alpha <= 0:
+            self.aura.update(
+                self.rect.center[0] - self.camera[0],
+                self.rect.center[1] - self.camera[1], screen, self.dt)
 
         # Draw player
         screen.blit(self.image, (self.x - self.camera[0], self.y - self.camera[1]))
@@ -412,6 +424,26 @@ class Player:
 
         self.current_damage = self.last_hp - self.hp
 
+        # Draw shield
+        if self.shield > 1:
+            self.shield_break = True
+
+            if self.glow_surf_alpha > 0:
+                self.glow_surf_alpha -= 2.3 * self.dt
+                player_shield_img.set_alpha(self.glow_surf_alpha)
+                self.glow_surf.set_alpha(self.glow_surf_alpha)
+                screen.blit(player_shield_img, shield_pos)
+                screen.blit(self.glow_surf, shield_pos, special_flags=pygame.BLEND_RGB_ADD)
+        elif self.shield_break:
+            if self.shield_breaking_animation.index > self.shield_breaking_animation.f_len - 1:
+                self.shield_break = False
+                self.info["expanding circles"].add(
+                    pos=c(player_shield_rect.center, self.camera),
+                    color=(0, 20, 200)
+                )
+            else:
+                self.shield_breaking_animation.play(screen, shield_pos, self.dt)
+
         # Update camera pos
-        self.camera[0] += (self.x - self.camera[0] - (screen.get_width() // 2)) * 0.012
-        self.camera[1] += (self.y - self.camera[1] - (screen.get_height() // 2)) * 0.012
+        self.camera[0] += (self.x - self.camera[0] - (screen.get_width() // 2)) * 0.03
+        self.camera[1] += (self.y - self.camera[1] - (screen.get_height() // 2)) * 0.03

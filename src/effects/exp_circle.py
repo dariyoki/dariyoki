@@ -61,6 +61,18 @@ class ExpandingCircles:
         self.color = colour
         self.width = width
 
+    def add(self, pos, color):
+        self.circles.append(
+            ExpandingCircle(
+                pos,
+                self.init_radius,
+                self.max_radius,
+                self.increment,
+                color,
+                width=self.width,
+            )
+        )
+
     def update(self, events, pos: Tuple[int, int]) -> None:
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:

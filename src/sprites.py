@@ -12,6 +12,7 @@ ss = pygame.image.load(path + "player/characters.png").convert_alpha()
 characters_ss = SpriteSheet(ss)
 characters = characters_ss.get_images(4, 4, 32, 32, fixer=8)
 characters = resize(characters, scale=2)
+player_size = characters[0].get_size()
 
 sword_attack_img = pygame.image.load(path + "player/sword attack.png").convert_alpha()
 sword_attack_ss = SpriteSheet(sword_attack_img)
@@ -79,5 +80,22 @@ spawner_imgs = [
 # The Blue Ribbon
 blue_ribbon = pygame.image.load(path + "blue_ribbon.png").convert_alpha()
 
-# Bar boder
+# Bar border
 bar_border_img = pygame.image.load(path + "borders/bar_border.png").convert_alpha()
+
+# Shield
+shield_ss_img = pygame.image.load(path + "player/shield_bubble.png").convert_alpha()
+shield_ss = SpriteSheet(shield_ss_img)
+shield_frames = shield_ss.get_images(rows=1,
+                                     columns=4,
+                                     width=32,
+                                     height=32,
+                                     fixer=16)
+shield_frames = resize(shield_frames, scale=3)
+player_shield_img = shield_frames[0]
+
+# Bee boss
+bee_boss_ss_img = pygame.image.load(path + "boss/boss_walking.png").convert_alpha()
+bee_boss_ss = SpriteSheet(bee_boss_ss_img)
+bee_boss_frames = bee_boss_ss.get_images(1, 4, 64, 64, fixer=1)
+bee_boss_frames = resize(bee_boss_frames, scale=2)

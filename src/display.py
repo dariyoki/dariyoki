@@ -32,8 +32,8 @@ logo = pygame.image.load("assets/sprites/logo.ico").convert_alpha()
 pygame.display.set_icon(logo)
 
 # camera = [-(screen_width // 2 - 60), -(screen_height // 2)]
-camera = [0, 0]
-player_start_pos = (50, 57)
+camera = [100, 100]
+player_start_pos = (32*4, -200)
 
 pygame.mouse.set_visible(False)
 
