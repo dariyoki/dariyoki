@@ -146,11 +146,6 @@ class Spawner:
             ), width=3)
 
     def draw(self, screen: pygame.Surface, camera):
-        pygame.draw.rect(screen, "red", (
-                c(self.init_rect.topleft, self.camera),
-                self.size
-            ), width=3)
-
         self.camera = camera
         pos = c(self.rect.topleft, camera)
         self.spawn_images = [
