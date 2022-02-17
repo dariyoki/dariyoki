@@ -4,6 +4,11 @@ from src.sprite_sheet import SpriteSheet
 from src.utils import resize, turn_left
 
 path = "assets/sprites/"
+
+# Background art
+background_img = pygame.image.load(path + "backgrounds/background.png").convert()
+menu_background_img = pygame.transform.scale(pygame.image.load(path + "backgrounds/red_ski_looks_good.jpeg"), (1100, 650))
+
 # Cursor
 cursor_img = pygame.image.load(path + "cursor.png").convert_alpha()
 cursor_img = resize([cursor_img], 0.5)[0]
@@ -47,7 +52,6 @@ items = {
     "scythe": pygame.transform.scale(scythe_img, item_size)
 }
 
-background_img = pygame.image.load(path + "background.png").convert()
 game_border_img = pygame.image.load(path + "borders/game_border.png").convert_alpha()
 
 # Information cards
@@ -99,3 +103,14 @@ bee_boss_ss_img = pygame.image.load(path + "boss/boss_walking.png").convert_alph
 bee_boss_ss = SpriteSheet(bee_boss_ss_img)
 bee_boss_frames = bee_boss_ss.get_images(1, 4, 64, 64, fixer=1)
 bee_boss_frames = resize(bee_boss_frames, scale=2)
+
+# Flame particles
+flame_particles_ss_img = pygame.image.load(path + "decoration/flame_particles.png").convert_alpha()
+flame_particles_ss = SpriteSheet(flame_particles_ss_img)
+flame_particles_images = flame_particles_ss.get_images(
+    rows=2,
+    columns=4,
+    width=8,
+    height=8,
+    fixer=0.3
+)

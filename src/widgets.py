@@ -1,6 +1,8 @@
 import pygame
+from typing import Any
 from src.generic_types import Pos, Size, ColorValue
 from src.sprites import border_img
+from src.audio import hover_sfx
 
 
 class LoadingBar:
@@ -40,6 +42,65 @@ class LoadingBar:
                                                             (int(self.value), self.rect.height)))
 
         screen.blit(self.border_img, (self.rect.x - camera[0], self.rect.y - camera[1]))
+
+
+class MenuButton:
+    """
+    Nice looking minimalistic button for the main menu.
+    """
+    def __init__(self, pos: Pos, title: str) -> None:
+        self.pos = pos
+        self.size = (170, 30)
+        self.title = title
+        self.clicked = False
+        self.hover = False
+        self.font = pygame.font.Font("assets/fonts/Roboto/Roboto-Regular.ttf", 17)
+        self.rect = pygame.Rect(self.pos, self.size)
+        self.text_surf = self.font.render(title, True, 'white')
+        self.text_surf_rect = self.text_surf.get_rect(center=self.pos)
+        self.text_surf_rect.center = self.rect.center
+        self.hover_surf = pygame.Surface(self.size)
+        self.hover_surf.fill((0, 75, 189))
+        self.hover_surf.set_alpha(230)
+        self.hover_surf_alpha = 0
+        self.once = True
+
+    def update(self, event_info: dict[str, Any]):
+        self.hover = self.rect.collidepoint(event_info["mouse pos"])
+        if self.hover and self.hover_surf_alpha < 230:
+            self.hover_surf_alpha += 7.4 * event_info["dt"]
+
+        if not self.hover and self.hover_surf_alpha > 0:
+            self.hover_surf_alpha -= 7.4 * event_info["dt"]
+
+        # Cleanup
+        if self.hover_surf_alpha > 230:
+            self.hover_surf_alpha = 230
+        if self.hover_surf_alpha < 0:
+            self.hover_surf_alpha = 0
+
+        for event in event_info["events"]:
+            if self.hover and event.type == pygame.MOUSEBUTTONDOWN:
+                self.clicked = True
+
+    def draw(self, screen: pygame.Surface):
+        # Hover surface
+        screen.blit(self.hover_surf, self.rect)
+        self.hover_surf.set_alpha(self.hover_surf_alpha)
+
+        # Hover SFX
+        if self.hover and self.once:
+            hover_sfx.play()
+            self.once = False
+
+        if not self.hover:
+            self.once = True
+
+        # Border
+        pygame.draw.rect(screen, 'white', self.rect, width=3)
+
+        # Actual text
+        screen.blit(self.text_surf, self.text_surf_rect)
 
 
 class Label:

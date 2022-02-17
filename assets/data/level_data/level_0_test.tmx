@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.5" tiledversion="1.7.2" orientation="orthogonal" renderorder="right-down" width="250" height="100" tilewidth="32" tileheight="32" infinite="0" nextlayerid="7" nextobjectid="49">
+<map version="1.5" tiledversion="1.7.2" orientation="orthogonal" renderorder="right-down" width="250" height="100" tilewidth="32" tileheight="32" infinite="0" nextlayerid="11" nextobjectid="62">
  <tileset firstgid="1" source="bee_tileset.tsx"/>
  <tileset firstgid="10" source="stone_bush_hive.tsx"/>
  <tileset firstgid="22" source="trees.tsx"/>
  <tileset firstgid="26" source="chest.tsx"/>
  <tileset firstgid="28" source="spawning_shadow_ninja.tsx"/>
+ <tileset firstgid="29" source="grass.tsx"/>
  <objectgroup id="6" name="spawners">
   <object id="21" gid="28" x="1111" y="305" width="250" height="250"/>
  </objectgroup>
@@ -156,5 +157,17 @@
   <object id="46" gid="16" x="1184.67" y="258" width="32" height="32"/>
   <object id="47" gid="22" x="1190" y="258.667" width="134.667" height="161.333"/>
   <object id="48" gid="14" x="968" y="260.667" width="32" height="60"/>
+ </objectgroup>
+ <objectgroup id="10" name="grass">
+  <object id="52" gid="29" x="205.75" y="133.375" width="34.625" height="39.75"/>
+  <object id="53" gid="30" x="73.3333" y="130" width="24" height="23.3333"/>
+  <object id="54" gid="31" x="398" y="354" width="22" height="18.6667"/>
+  <object id="55" gid="31" x="368.667" y="355.333" width="28.6667" height="24.6667"/>
+  <object id="56" gid="31" x="218" y="356" width="16" height="16"/>
+  <object id="57" gid="31" x="236.667" y="355.333" width="16" height="16"/>
+  <object id="58" gid="31" x="503.333" y="354.667" width="16" height="26"/>
+  <object id="59" gid="31" x="519.333" y="355.333" width="16" height="26"/>
+  <object id="60" gid="32" x="466" y="197.333" width="21.3333" height="20"/>
+  <object id="61" gid="32" x="536" y="194" width="16" height="26.6667"/>
  </objectgroup>
 </map>

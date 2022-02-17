@@ -1,11 +1,70 @@
-"""
-Cursor for pygame applications
-Flexible and can be used in other projects
-"""
-
 import pygame
 import random
-from src.effects.particle import SoulParticle
+from src.effects.particle import SoulParticle, BezierParticle
+from src.generic_types import EventInfo
+
+
+class MainMenuFlare:
+    def __init__(self) -> None:
+        self.particles: list[BezierParticle] = []
+
+        # Wind
+        self.wind = 1
+        self.wind_to_be = 1
+        self.wind_tension = 0.3
+        self.p1 = -3
+        self.p2 = 3
+
+        # Particle generation
+        self.generation_rate = 30
+        self.generation_speed = 2
+        self.count = 0
+        self.time_passed = 0
+        self.time_to_pass = random.randrange(1, 3)
+
+    def draw(self, screen: pygame.Surface, event_info: EventInfo) -> None:
+        dt = event_info["dt"]
+        raw_dt = event_info["raw dt"]
+        self.count += self.generation_speed * dt
+        if self.count > self.generation_rate:
+            type_one = (random.randrange(0, 1100), 0)
+            type_two = (0, random.randrange(0, 650))
+            self.particles.append(BezierParticle(*random.choice((type_one, type_two))))
+            self.count = 0
+
+        self.time_passed += raw_dt
+        if self.time_passed > self.time_to_pass:
+            self.wind_to_be = random.uniform(self.p1, self.p2)
+            if 1 > self.wind_to_be > 0:
+                self.wind_to_be += 1.3
+            elif -1 < self.wind_to_be < 0:
+                self.wind_to_be -= 1.3
+            else:
+                self.wind_to_be = 1.5
+            self.wind_tension = random.uniform(0.3, 0.9) if self.wind_to_be > 0 else 1.3
+
+            self.time_passed = 0
+            self.time_to_pass = random.randrange(1, 3)
+
+        # Update wind
+        if self.wind < self.wind_to_be:
+            self.wind += self.wind_tension * dt
+        elif self.wind > self.wind_to_be:
+            self.wind -= self.wind_tension * dt
+
+        # Cleanup wind
+        if self.wind > self.p2:
+            self.wind = self.p2
+
+        if self.wind < self.p1:
+            self.wind = self.p1
+
+        # Draw particles
+        for particle in self.particles:
+            particle.draw(screen, self.wind, dt)
+
+            if particle.x > 1100 or particle.y > 650:
+                self.particles.remove(particle)
 
 
 class PlayerAura:

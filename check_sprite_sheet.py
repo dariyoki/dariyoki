@@ -12,15 +12,14 @@ screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption('Sprite Sheet Preview')
 
 '''Sprite Sheet'''
-from src.sprites import shield_frames
-sprite_sheet = shield_frames
+from src.sprites import flame_particles_images
+sprite_sheet = flame_particles_images
 attributes = {
-    "size": 32,
+    "size": 8,
     "sprite sheet": sprite_sheet,
-    "rows": 1,
+    "rows": 2,
     "columns": 4
 }
-
 
 # Define colours
 bg = (128, 128, 128)

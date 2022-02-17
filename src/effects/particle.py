@@ -2,6 +2,7 @@ import pygame
 import math
 import random
 from src.utils import get_movement, circle_surf
+from src.sprites import flame_particles_images
 
 
 class Particle:
@@ -42,6 +43,45 @@ class Particle:
             surf = circle_surf(self.size * 2, (20, 20, 20))
             r = surf.get_rect(center=self.rect.center)
             screen.blit(surf, r, special_flags=pygame.BLEND_RGB_ADD)
+
+
+class BezierParticle:
+    def __init__(self, x, y) -> None:
+        self.x, self.y = x, y
+        self.image = random.choice(flame_particles_images)
+        self.rect = self.image.get_rect()
+        self.glow_rect = pygame.Rect(0, 0, 10, 10)
+        self.glow_color = 10
+        self.glow_increment = random.uniform(0.1, 0.3)
+        self.inc_up = True
+
+        self.increment = random.uniform(0.2, 0.8)
+        self.drop = random.uniform(-0.4, 0.4)
+
+    def draw(self, screen: pygame.Surface, speed: float, dt: float) -> None:
+        movement = self.increment * speed * dt
+        self.x += movement
+        self.y += movement
+        self.y += self.drop
+
+        screen.blit(self.image, (self.x, self.y))
+        self.rect.topleft = self.x, self.y
+        self.glow_rect.center = self.rect.center
+
+        # Handle color
+        if self.inc_up:
+            self.glow_color += self.glow_increment * dt
+            if self.glow_color > 60:
+                self.inc_up = False
+        else:
+            self.glow_color -= self.glow_increment * dt
+            if self.glow_color < 10:
+                self.inc_up = True
+
+
+        # Outer circle
+        color = (self.glow_color, self.glow_color, self.glow_color)
+        screen.blit(circle_surf(5, color), self.glow_rect, special_flags=pygame.BLEND_RGB_ADD)
 
 
 class TriangularParticle:

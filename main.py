@@ -3,7 +3,11 @@ import time
 import json
 import pytmx
 from src.display import *
-from src.sprites import cursor_img, background_img, game_border_img, player_size
+from src.sprites import (cursor_img,
+                         background_img,
+                         menu_background_img,
+                         game_border_img, 
+                         player_size)
 from src.world import World
 from src.player import Player
 from src.enemy import Ninja
@@ -13,6 +17,9 @@ from src.effects.exp_circle import ExpandingCircles, ExpandingCircle
 from src.effects.explosion import Explosion
 from src.items import Chest
 from src.spawner import Spawner
+from src.widgets import MenuButton
+from src.effects.particle_effects import MainMenuFlare
+from src.generic_types import EventInfo
 
 
 class Game:
@@ -35,10 +42,17 @@ class Game:
         self.player = Player(*player_start_pos, camera, self.controls["controls"], screen)
         self.world = World(tile_map)
         self.camera = camera
+        self.t_time_passed = 0
 
         # Visuals
         self.translucent_dark = pygame.Surface(screen.get_size())
         self.translucent_dark.set_alpha(125)
+        self.transition_overlay_surface = pygame.Surface(screen.get_size())
+        self.transition_overlay_surface.set_alpha(0)
+        self.transition_overlay_surface_alpha = 0
+        self.transitioning = False
+        self.transition_fade_speed = 5.7
+
         self.expanding_circles = ExpandingCircles(
             init_radius=5, max_radius=40, increment=3, colour=(255, 0, 0), width=10
         )
@@ -51,7 +65,7 @@ class Game:
         self.chests = [Chest(obj.x, obj.y - (32 * 2), pygame.K_f, 7) for obj in tile_map.get_layer_by_name("chests")]
         global spawners
         spawners += [Spawner([obj.x, obj.y], (obj.width, obj.height), 7, (1, 4), Ninja, player_size, 100) for obj
-                         in tile_map.get_layer_by_name("spawners")]
+                     in tile_map.get_layer_by_name("spawners")]
         # spawners = []
 
         self.items = []
@@ -63,14 +77,32 @@ class Game:
             self.player
         )
 
+        self.state = "main menu"
+
+        # User interface
+        self.menu_button_names = ["Start", "Reset", "Exit", "Contents", "Credits"]
+        start = (screen.get_rect().center[0] - (170 / 2), 300)
+        padding = 10
+        self.menu_buttons = [
+            MenuButton(
+                (
+                    start[0],
+                    start[1] + ((30 + padding) * index)
+                ),
+                title=name
+            ) for index, name in enumerate(self.menu_button_names) 
+        ]
+        self.main_menu_flare = MainMenuFlare()
+
     def load_level(self, n):
         # Level data
         tile_map = pytmx.load_pygame(f'assets/data/level_data/level_{n}.tmx')
         self.all_rects = {}
         for index, layer in enumerate(tile_map):
-            for x, y, _ in layer.tiles():
-                tile_properties = tile_map.get_tile_properties(x, y, index)
-                self.all_rects[(x * tile_map.tileheight, y * tile_map.tilewidth)] = tile_properties['type']
+            if layer.name == 'Tile Layer 1':
+                for x, y, _ in layer.tiles():
+                    tile_properties = tile_map.get_tile_properties(x, y, index)
+                    self.all_rects[(x * tile_map.tileheight, y * tile_map.tilewidth)] = tile_properties['type']
 
     def handle_shurikens(self, dt):
         # Shurikens
@@ -140,6 +172,145 @@ class Game:
         self.camera[0] += render_offset[0]
         self.camera[1] += render_offset[1]
 
+    def handle_rust_binding(self, raw_dt):
+        self.t_time_passed += raw_dt
+        if self.t_time_passed > 1:
+            f = open("read_data/player_inv.json", "w")
+            json.dump(self.player.item_count, f, indent=2)
+            self.t_time_passed = 0
+
+    def handle_fade_in(self, dt) -> bool:
+        self.transition_overlay_surface_alpha += self.transition_fade_speed * dt
+        if self.transition_overlay_surface_alpha > 255:
+            self.transition_overlay_surface_alpha = 255
+            return True
+
+        return False
+
+    def handle_fade_out(self, dt) -> bool:
+        self.transition_overlay_surface_alpha -= self.transition_fade_speed * dt
+        if self.transition_overlay_surface_alpha < 0:
+            self.transition_overlay_surface_alpha = 0
+            return True
+
+        return False
+
+    def main_menu(self, event_info: EventInfo) -> None:
+        screen.blit(menu_background_img, (0, 0))
+        self.main_menu_flare.draw(screen, event_info)
+        for menu_btn in self.menu_buttons:
+            menu_btn.update(event_info)
+            menu_btn.draw(screen)
+
+            if menu_btn.title == "Start" and menu_btn.clicked:
+                self.transitioning = True
+
+        if self.transitioning:
+            if self.handle_fade_in(event_info["dt"]):
+                self.state = "level test"
+
+    def level_test(self, event_info: dict, info: dict) -> None:
+        dt = event_info["dt"]
+        mouse_pos = event_info["mouse pos"]
+        events = event_info["events"]
+        mouse_press = event_info["mouse press"]
+
+        # Transitioning
+        if self.transitioning:
+            self.handle_fade_out(dt)
+
+        # Render
+        screen.blit(background_img, (0, 0))
+
+        # Handle spawners
+        for spawner in spawners:
+            spawner.update(event_info)
+            spawner.draw(screen, camera)
+            for enemy in spawner.enemies:
+                if enemy not in self.enemies and enemy.id in enemy_ids:
+                    self.enemies.append(enemy)
+
+                if enemy.id not in enemy_ids:
+                    spawner.enemies.remove(enemy)
+
+        self.world.draw(screen, self.camera)
+        self.camera = self.player.camera
+
+        # Opened chest becomes part of the background
+        for opened_chest in self.opened_chests:
+            opened_chest.draw(screen, self.camera)
+
+        # Line of lighting
+        screen.blit(self.translucent_dark, (0, 0))
+        self.world.draw_grass(screen, self.camera)
+
+        # Decorations
+        self.world.draw_dec(screen, self.camera)
+
+        # Chests
+        for chest in self.chests:
+            chest.draw(screen, self.camera)
+
+            # Removing chest
+            if chest.loading_bar.loaded:
+                self.items += chest.items
+                self.chests.remove(chest)
+                self.opened_chests.append(chest)
+
+        # Player and enemies
+        self.player.update(info, event_info)
+        self.player.draw(screen)
+
+        for spawner in spawners:
+            spawner.draw_spawn(screen, self.camera)
+
+        for enemy in self.enemies:
+            enemy.update(
+                player_pos=self.player.rect.center,
+                info=info,
+                event_info=event_info
+            )
+            enemy.draw(screen, self.camera)
+            if enemy.hp <= 0 or enemy.y > self.tile_map.height * self.tile_map.tileheight:
+                self.enemies.remove(enemy)
+                enemy_ids.remove(enemy.id)
+
+        # Items
+        for item in self.items:
+            item.update(dt)
+            item.draw(screen, self.camera)
+
+        # Shruikens
+        self.handle_shurikens(dt)
+
+        # Handle screen shake
+        self.handle_screen_shake(dt)
+
+        # Explosions
+        for explosion in explosions:
+            explosion.draw(screen, dt)
+
+            if len(explosion.particles) == 0:
+                explosions.remove(explosion)
+
+        # General Info and Achievements
+        if general_info[0] is not None:
+            general_info[0].draw(screen, dt)
+
+        # Inventory and statistics
+        self.statistics.update(mouse_pos, mouse_press, events)
+        self.statistics.draw()
+
+        # Item information
+        self.item_info.update(self.player.colliding_item, events, dt)
+        self.item_info.draw(screen)
+
+        # Click effect
+        self.expanding_circles.update(events, mouse_pos)
+        self.expanding_circles.draw(screen, dt)
+
+        # self.handle_rust_binding(raw_dt)
+
     def main_loop(self):
         start = time.perf_counter()
         while self.run:
@@ -156,6 +327,7 @@ class Game:
             keys = pygame.key.get_pressed()
             mouse_pos = pygame.mouse.get_pos()
             mouse_press = pygame.mouse.get_pressed()
+            screen.fill(0)
 
             info = {
                 "items": self.items,
@@ -175,95 +347,16 @@ class Game:
                 "raw dt": raw_dt
             }
 
-            # Render
-            screen.blit(background_img, (0, 0))
+            if self.state == "main menu":
+                pygame.display.set_caption('Dariyoki | Main Menu')
+                self.main_menu(event_info)
+            elif self.state == "level test":
+                pygame.display.set_caption('Dariyoki | Level Test')
+                self.level_test(event_info, info)
 
-            # Handle spawners
-            for spawner in spawners:
-                spawner.update(event_info)
-                spawner.draw(screen, camera)
-                for enemy in spawner.enemies:
-                    if enemy not in self.enemies and enemy.id in enemy_ids:
-                        self.enemies.append(enemy)
-
-                    if enemy.id not in enemy_ids:
-                        spawner.enemies.remove(enemy)
-
-            self.world.draw(screen, self.camera)
-            self.camera = self.player.camera
-
-            # Opened chest becomes part of the background
-            for opened_chest in self.opened_chests:
-                opened_chest.draw(screen, self.camera)
-
-            # Line of lighting
-            screen.blit(self.translucent_dark, (0, 0))
-            
-            # Decorations
-            self.world.draw_dec(screen, self.camera)
-
-            # Chests
-            for chest in self.chests:
-                chest.draw(screen, self.camera)
-
-                # Removing chest
-                if chest.loading_bar.loaded:
-                    self.items += chest.items
-                    self.chests.remove(chest)
-                    self.opened_chests.append(chest)
-
-            # Player and enemies
-            self.player.update(info, event_info)
-            self.player.draw(screen)
-
-            for spawner in spawners:
-                spawner.draw_spawn(screen, self.camera)
-
-            for enemy in self.enemies:
-                enemy.update(
-                    player_pos=self.player.rect.center,
-                    info=info,
-                    event_info=event_info
-                )
-                enemy.draw(screen, self.camera)
-                if enemy.hp <= 0 or enemy.y > self.tile_map.height * self.tile_map.tileheight:
-                    self.enemies.remove(enemy)
-                    enemy_ids.remove(enemy.id)
-
-            # Items
-            for item in self.items:
-                item.update(dt)
-                item.draw(screen, self.camera)
-
-            # Shruikens
-            self.handle_shurikens(dt)
-
-            # Handle screen shake
-            self.handle_screen_shake(dt)
-
-            # Explosions
-            for explosion in explosions:
-                explosion.draw(screen, dt)
-
-                if len(explosion.particles) == 0:
-                    explosions.remove(explosion)
-
-            # General Info and Achievements
-            if general_info[0] is not None:
-                general_info[0].draw(screen, dt)
-
-            # Inventory and statistics
-            self.statistics.update(mouse_pos, mouse_press, events)
-            self.statistics.draw()
-
-            # Item information
-            self.item_info.update(self.player.colliding_item, events, dt)
-            self.item_info.draw(screen)
-
-            # Click effect
-            self.expanding_circles.update(events, mouse_pos)
-            self.expanding_circles.draw(screen, dt)
-
+            # Touchup
+            self.transition_overlay_surface.set_alpha(self.transition_overlay_surface_alpha)
+            screen.blit(self.transition_overlay_surface, (0, 0))
             screen.blit(game_border_img, (0, 0))
             screen.blit(cursor_img, mouse_pos)
 

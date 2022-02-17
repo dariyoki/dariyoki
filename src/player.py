@@ -14,7 +14,7 @@ from src.utils import circle_surf
 
 
 class Player:
-    JUMP_HEIGHT = 200
+    JUMP_HEIGHT = 210
     DASH_LENGTH = 150
     INVENTORY_SLOTS = 8
 
@@ -109,8 +109,8 @@ class Player:
 
         # Movement speeds
         self.speed = 5
-        self.velocity = 3
-        self.acceleration = 1.7
+        self.velocity = 2
+        self.acceleration = 1.3
         self.dash_mult = 15
 
         # Stacking values

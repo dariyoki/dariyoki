@@ -10,6 +10,18 @@ class World:
             (pygame.transform.scale(obj.image, (obj.width, obj.height)), (obj.x, obj.y)) for obj
             in tile_map.get_layer_by_name("decorations")
         ))
+        self.grass = tuple((
+            (pygame.transform.scale(obj.image, (obj.width, obj.height)), (obj.x, obj.y)) for obj
+            in tile_map.get_layer_by_name("grass")
+        ))
+
+    def draw_grass(self, screen, camera):
+        for image, pos in self.grass:
+            screen.blit(image, (
+                pos[0] - camera[0],
+                pos[1] - camera[1] - (32 * 2) + 2
+            )
+                            )
 
     def draw_dec(self, screen: pygame.Surface, camera: list[int, int]):
         for image, pos in self.decorations:
@@ -21,7 +33,6 @@ class World:
                     pos[1] - camera[1]
                 )
             )
-
 
     def draw(self, screen: pygame.Surface, camera: list[int, int]):
         for x, y, image in self.tile_map.get_layer_by_name("Tile Layer 1").tiles():

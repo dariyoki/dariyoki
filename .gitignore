@@ -5,6 +5,7 @@ __pycache__/
 *.exe
 *.prof
 *.rs
+read_data/
 
 # C extensions
 *.so

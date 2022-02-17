@@ -10,3 +10,6 @@ dash_sfx.set_volume(0.1)
 
 pickup_item_sfx = pygame.mixer.Sound(path + 'pickup_item.wav')
 pickup_item_sfx.set_volume(0.1)
+
+hover_sfx = pygame.mixer.Sound(path + 'hover.wav')
+hover_sfx.set_volume(0.1)
