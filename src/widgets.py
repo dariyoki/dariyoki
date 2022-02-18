@@ -18,9 +18,11 @@ class LoadingBar:
             rect.topleft,
             (self.value, self.rect.height)
         )
+        self.background_surf = pygame.Surface(self.rect.size)
         self.loaded = False
         if _border_img is not None:
             self.border_img = _border_img
+            self.background_surf.set_alpha(100)
         else:
             self.border_img = border_img
 
@@ -33,8 +35,7 @@ class LoadingBar:
                 self.rect.topleft,
                 (self.value, self.rect.height)
             )
-        pygame.draw.rect(screen, self.bg_color, pygame.Rect((self.rect.x - camera[0], self.rect.y - camera[1]),
-                                                            self.rect.size))
+        screen.blit(self.background_surf, (self.rect.x - camera[0], self.rect.y - camera[1]))
 
         self.loaded = self.value >= self.rect.width
 

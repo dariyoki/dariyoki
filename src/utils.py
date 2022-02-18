@@ -54,18 +54,16 @@ def get_movement(angle: float, speed) -> tuple[int, int]:
 
 class Glow:
     def __init__(self, image: pygame.Surface, color, topleft):
-        self.img_rect = image.get_rect(topleft=topleft)
-        average = (self.img_rect.width + self.img_rect.height) // 2
-        radius = average // 1.5
-        self.surf = circle_surf(radius, color)
+        self.img_rect = image.get_bounding_rect()
+        self.img_rect.topleft = topleft
+        self.surf = circle_surf(self.img_rect.height, color)
         self.rect = self.surf.get_rect(center=self.img_rect.center)
 
     def change_pos(self, new_pos):
         self.rect = pygame.Rect(new_pos, self.rect.size)
 
     def draw(self, screen: pygame.Surface, camera):
-        screen.blit(self.surf, pygame.Rect((self.rect.x - camera[0], self.rect.y - camera[1]),
-                                           self.surf.get_size()),
+        screen.blit(self.surf, (self.rect.x - camera[0], self.rect.y - camera[1] + (self.img_rect.height // 2)),
                     special_flags=pygame.BLEND_RGB_ADD)
 
 

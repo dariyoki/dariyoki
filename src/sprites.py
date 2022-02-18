@@ -7,7 +7,9 @@ path = "assets/sprites/"
 
 # Background art
 background_img = pygame.image.load(path + "backgrounds/background.png").convert()
-menu_background_img = pygame.transform.scale(pygame.image.load(path + "backgrounds/red_ski_looks_good.jpeg"), (1100, 650))
+menu_background_img = pygame.transform.scale(pygame.image.load(path + "backgrounds/red_ski_looks_good.jpeg"),
+                                             (1100, 650))
+moon = pygame.image.load(path + "backgrounds/moon.png").convert_alpha()
 
 # Cursor
 cursor_img = pygame.image.load(path + "cursor.png").convert_alpha()
@@ -114,3 +116,8 @@ flame_particles_images = flame_particles_ss.get_images(
     height=8,
     fixer=0.3
 )
+
+# Bush Parallax
+bush_img = pygame.image.load(path + "decoration/bush_parallax.png").convert_alpha()
+r_bush_img = pygame.transform.flip(bush_img, True, False)
+bush_width = bush_img.get_width()

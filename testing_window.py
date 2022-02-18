@@ -7,8 +7,11 @@ screen = pygame.display.set_mode((500, 500))
 clock = pygame.time.Clock()
 fps = 60
 
-from src.sprites import bee_boss_frames
+from src.sprites import bee_boss_frames, bee_tile_set_img
 from src.animation import Animation
+from src.utils import resize
+
+pygame.image.save(resize([bee_tile_set_img], scale=25/32)[0], "assets/sprites/tilesets/parallax_bee_tile_set.png")
 
 bee_boss_walk = Animation(bee_boss_frames, speed=0.09)
 pos = [50, 50]

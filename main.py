@@ -6,7 +6,8 @@ from src.display import *
 from src.sprites import (cursor_img,
                          background_img,
                          menu_background_img,
-                         game_border_img, 
+                         moon,
+                         game_border_img,
                          player_size)
 from src.world import World
 from src.player import Player
@@ -29,17 +30,20 @@ class Game:
             self.controls = json.load(f)
 
         # Level data
-        self.tile_map = pytmx.load_pygame('assets/data/level_data/level_0_test.tmx')
+        self.tile_map = pytmx.load_pygame(
+            'assets/data/level_data/level_0_test.tmx')
         tile_map = self.tile_map
         self.all_rects = {}
         for index, layer in enumerate(tile_map):
             if layer.name == 'Tile Layer 1':
                 for x, y, _ in layer.tiles():
                     tile_properties = tile_map.get_tile_properties(x, y, index)
-                    self.all_rects[(x * tile_map.tileheight, y * tile_map.tilewidth)] = tile_properties['type']
+                    self.all_rects[(x * tile_map.tileheight, y *
+                                    tile_map.tilewidth)] = tile_properties['type']
 
         self.run = True
-        self.player = Player(*player_start_pos, camera, self.controls["controls"], screen)
+        self.player = Player(*player_start_pos, camera,
+                             self.controls["controls"], screen)
         self.world = World(tile_map)
         self.camera = camera
         self.t_time_passed = 0
@@ -60,9 +64,11 @@ class Game:
         self.screen_shake_val = 0
 
         # Levels
-        self.item_info = Info(screen, eval("pygame." + self.controls["controls"]["info toggle"]))
+        self.item_info = Info(screen, eval(
+            "pygame." + self.controls["controls"]["info toggle"]))
         self.opened_chests = []
-        self.chests = [Chest(obj.x, obj.y - (32 * 2), pygame.K_f, 7) for obj in tile_map.get_layer_by_name("chests")]
+        self.chests = [Chest(obj.x, obj.y - (32 * 2), pygame.K_f, 7)
+                       for obj in tile_map.get_layer_by_name("chests")]
         global spawners
         spawners += [Spawner([obj.x, obj.y], (obj.width, obj.height), 7, (1, 4), Ninja, player_size, 100) for obj
                      in tile_map.get_layer_by_name("spawners")]
@@ -80,7 +86,8 @@ class Game:
         self.state = "main menu"
 
         # User interface
-        self.menu_button_names = ["Start", "Reset", "Exit", "Contents", "Credits"]
+        self.menu_button_names = [
+            "Start", "Reset", "Exit", "Contents", "Credits"]
         start = (screen.get_rect().center[0] - (170 / 2), 300)
         padding = 10
         self.menu_buttons = [
@@ -90,9 +97,12 @@ class Game:
                     start[1] + ((30 + padding) * index)
                 ),
                 title=name
-            ) for index, name in enumerate(self.menu_button_names) 
+            ) for index, name in enumerate(self.menu_button_names)
         ]
         self.main_menu_flare = MainMenuFlare()
+        self.moon_bob = [20, 30]
+        self.bob_coord = (20, 40)
+        self.moon_bob_forward = True
 
     def load_level(self, n):
         # Level data
@@ -102,7 +112,8 @@ class Game:
             if layer.name == 'Tile Layer 1':
                 for x, y, _ in layer.tiles():
                     tile_properties = tile_map.get_tile_properties(x, y, index)
-                    self.all_rects[(x * tile_map.tileheight, y * tile_map.tilewidth)] = tile_properties['type']
+                    self.all_rects[(x * tile_map.tileheight, y *
+                                    tile_map.tilewidth)] = tile_properties['type']
 
     def handle_shurikens(self, dt):
         # Shurikens
@@ -124,7 +135,8 @@ class Game:
                         enemy.hp -= shuriken.damage
                         shurikens.remove(shuriken)
                         explosions.append(
-                            Explosion(500, (12, 25), list(shuriken.rect.center), (5, 12), 'white')
+                            Explosion(500, (12, 25), list(
+                                shuriken.rect.center), (5, 12), 'white')
                         )
                         self.expanding_circles.circles.append(
                             ExpandingCircle(
@@ -166,8 +178,10 @@ class Game:
 
         render_offset = [0, 0]
         if self.screen_shake > 0:
-            render_offset[0] = random.randint(0, self.screen_shake_val * 2) - self.screen_shake_val
-            render_offset[1] = random.randint(0, self.screen_shake_val * 2) - self.screen_shake_val
+            render_offset[0] = random.randint(
+                0, self.screen_shake_val * 2) - self.screen_shake_val
+            render_offset[1] = random.randint(
+                0, self.screen_shake_val * 2) - self.screen_shake_val
 
         self.camera[0] += render_offset[0]
         self.camera[1] += render_offset[1]
@@ -197,6 +211,21 @@ class Game:
 
     def main_menu(self, event_info: EventInfo) -> None:
         screen.blit(menu_background_img, (0, 0))
+        moon_motion = 0.4 * event_info["dt"]
+        if self.moon_bob_forward:
+            if self.moon_bob[0] < self.bob_coord[1]:
+                self.moon_bob[0] += moon_motion
+                self.moon_bob[1] += moon_motion
+            else:
+                self.moon_bob_forward = False
+        else:
+            if self.moon_bob[0] > self.bob_coord[0]:
+                self.moon_bob[0] -= moon_motion
+                self.moon_bob[1] -= moon_motion
+            else:
+                self.moon_bob_forward = True
+
+        screen.blit(moon, self.moon_bob)
         self.main_menu_flare.draw(screen, event_info)
         for menu_btn in self.menu_buttons:
             menu_btn.update(event_info)
@@ -233,7 +262,9 @@ class Game:
                 if enemy.id not in enemy_ids:
                     spawner.enemies.remove(enemy)
 
+        self.world.draw_parallax(screen, camera)
         self.world.draw(screen, self.camera)
+        self.world.draw_grass(screen, self.camera)
         self.camera = self.player.camera
 
         # Opened chest becomes part of the background
@@ -242,7 +273,6 @@ class Game:
 
         # Line of lighting
         screen.blit(self.translucent_dark, (0, 0))
-        self.world.draw_grass(screen, self.camera)
 
         # Decorations
         self.world.draw_dec(screen, self.camera)
@@ -355,7 +385,8 @@ class Game:
                 self.level_test(event_info, info)
 
             # Touchup
-            self.transition_overlay_surface.set_alpha(self.transition_overlay_surface_alpha)
+            self.transition_overlay_surface.set_alpha(
+                self.transition_overlay_surface_alpha)
             screen.blit(self.transition_overlay_surface, (0, 0))
             screen.blit(game_border_img, (0, 0))
             screen.blit(cursor_img, mouse_pos)

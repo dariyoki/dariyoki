@@ -77,7 +77,7 @@ class Chest:
         self.open_img = chests[1]
         self.image = self.closed_img
         self.rect = self.image.get_rect(topleft=(x, y))
-        self.glow = Glow(self.image, (50, 50, 50), (x, y))
+        self.glow = Glow(self.image, (40, 40, 20), (x, y))
         self.loading_bar = LoadingBar(value=0,
                                       fg_color='white',
                                       bg_color='black',
