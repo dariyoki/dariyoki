@@ -29,11 +29,11 @@ class Player:
 
         # Controls
         self.controls = controls
-        self.right_control = eval("pygame." + controls["right"])
-        self.left_control = eval("pygame." + controls["left"])
-        self.jump_control = [eval("pygame." + control) for control in controls["jump"]]
-        self.dash_control = eval("pygame." + controls["dash"])
-        self.pickup_control = eval("pygame." + controls["pickup item"])
+        self.right_control = getattr(pygame, controls["right"])
+        self.left_control = getattr(pygame, controls["left"])
+        self.jump_control = [getattr(pygame, control) for control in controls["jump"]]
+        self.dash_control = getattr(pygame, controls["dash"])
+        self.pickup_control = getattr(pygame, controls["pickup item"])
 
         # Inventory
         self.item_count = {
