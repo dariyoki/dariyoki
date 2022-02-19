@@ -1,6 +1,8 @@
 import random
 import time
 import json
+
+import pygame.font
 import pytmx
 from src.display import *
 from src.sprites import (cursor_img,
@@ -47,6 +49,7 @@ class Game:
         self.world = World(tile_map)
         self.camera = camera
         self.t_time_passed = 0
+        self.font = pygame.font.Font("assets/fonts/Roboto-Light.ttf", 16)
 
         # Visuals
         self.translucent_dark = pygame.Surface(screen.get_size())
@@ -328,7 +331,7 @@ class Game:
             general_info[0].draw(screen, dt)
 
         # Inventory and statistics
-        self.statistics.update(mouse_pos, mouse_press, events)
+        self.statistics.update(event_info)
         self.statistics.draw()
 
         # Item information
@@ -391,6 +394,7 @@ class Game:
             screen.blit(game_border_img, (0, 0))
             screen.blit(cursor_img, mouse_pos)
 
+            screen.blit(self.font.render(f"{clock.get_fps():.2f}", True, (200, 174, 0)), (1000, 10))
             # Event handler
             for event in events:
                 if event.type == pygame.QUIT:

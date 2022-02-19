@@ -1,8 +1,10 @@
 import pygame
+import random
 from typing import Any
-from src.generic_types import Pos, Size, ColorValue
+from src.generic_types import Pos, Size, ColorValue, WSurfInfo
 from src.sprites import border_img
 from src.audio import hover_sfx
+from src.sprites import bar_border_img
 
 
 class LoadingBar:
@@ -43,6 +45,52 @@ class LoadingBar:
                                                             (int(self.value), self.rect.height)))
 
         screen.blit(self.border_img, (self.rect.x - camera[0], self.rect.y - camera[1]))
+
+
+class EnergyBar(LoadingBar):
+    GEN_COOLDOWN = 0.3
+
+    def __init__(self, player_obj):
+        width = player_obj.hp * 1.7
+        height = 17
+        super().__init__(
+            value=player_obj.hp,
+            fg_color=(0, 255, 255),
+            bg_color='black',
+            rect=pygame.Rect((970, 40), (width, height)),
+            _border_img=bar_border_img
+        )
+        self.w_surfs: list[WSurfInfo] = []
+        self.time_passed = 0
+        self.b_surf = pygame.Surface((10, 3))
+        self.b_surf.fill('white')
+
+    def update(self, event_info):
+        self.time_passed += event_info["raw dt"]
+        if self.time_passed > self.GEN_COOLDOWN:
+            if self.val_rect.width > 20:
+                self.w_surfs.append(
+                    [[self.val_rect.midright[0] - 10,
+                      random.randrange(self.val_rect.topright[1] + 2, self.val_rect.bottomright[1] - 2)],
+                     255]
+                )
+
+        for w_surf in self.w_surfs:
+            w_surf[0][0] -= 5.3 * event_info["dt"]
+            if self.val_rect.width > 0:
+                w_surf[1] -= 10.3 * event_info["dt"] * (self.rect.width / self.val_rect.width)
+            else:
+                w_surf[1] -= 10.3 * event_info["dt"]
+
+            if w_surf[1] < 0:
+                self.w_surfs.remove(w_surf)
+
+    def draw(self, screen: pygame.Surface, camera, moving: bool = False):
+        super().draw(screen, camera, moving)
+        for w_surf in self.w_surfs:
+            _temp_surf = self.b_surf.copy()
+            _temp_surf.set_alpha(w_surf[1])
+            screen.blit(_temp_surf, w_surf[0])
 
 
 class MenuButton:

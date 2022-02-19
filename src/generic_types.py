@@ -7,4 +7,4 @@ RgbaOutput = Tuple[int, int, int, int]
 ColorValue = Union[pygame.Color, int, str, Tuple[int, int, int], List[int], RgbaOutput]
 Events = List[pygame.event.Event]
 EventInfo = Dict[str, Any]
-
+WSurfInfo = List[Union[List[int], int]]

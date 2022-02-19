@@ -95,6 +95,9 @@ class Player:
         self.soul_energy = 100
         self.current_damage = 0
         self.equipped = None
+        self.costs = {
+            "dash": 15,
+        }
 
         # Weapon data
         self.cooldowns = {
@@ -250,8 +253,12 @@ class Player:
                     self.jump_stack = 0
 
                 if event.key == self.dash_control:
-                    self.dashing = True
-                    self.dash_stack = 0
+                    if self.soul_energy > self.costs["dash"]:
+                        self.dashing = True
+                        self.dash_stack = 0
+                        self.soul_energy -= self.costs["dash"]
+                    else:
+                        general_info[0] = GeneralInfo("Not enough soul energy!", "red")
 
                 if event.key == self.pickup_control:
                     if self.colliding_item is not None:

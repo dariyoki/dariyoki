@@ -1,5 +1,4 @@
 import pygame
-import itertools
 from src.sprites import (border_img,
                          selected_border_img,
                          i_cards,
@@ -10,7 +9,8 @@ from src.sprites import (border_img,
                          sb_img,
                          scythe_img,
                          bar_border_img)
-from src.widgets import Label, LoadingBar
+from src.widgets import LoadingBar, EnergyBar
+from src.generic_types import EventInfo
 
 
 class ItemStats:
@@ -141,13 +141,7 @@ class PlayerStatistics:
                 rect=pygame.Rect((start[0], 610), (width, height)),
                 _border_img=bar_border_img
             )
-        self.se_bar = LoadingBar(
-                value=player_obj.hp,
-                fg_color=(0, 255, 255),
-                bg_color='black',
-                rect=pygame.Rect((970, 40), (width, height)),
-                _border_img=bar_border_img
-            )
+        self.se_bar = EnergyBar(player_obj)
 
         bsize = (50, 50)
         self.bsize = bsize
@@ -177,7 +171,12 @@ class PlayerStatistics:
         # Font
         self.font = pygame.font.SysFont("bahnschrift", 20)
 
-    def update(self, mouse_pos, mouse_press, events):
+    def update(self, event_info: EventInfo):
+        mouse_pos = event_info["mouse pos"]
+        mouse_press = event_info["mouse press"]
+        events = event_info["events"]
+
+        self.se_bar.update(event_info)
         self.screen.blit(self.inventory_surf, (0, 0))
         if mouse_press[0] and self.init_collide:
             name = self.player_obj.inventory[self.init_collide_index]
@@ -223,7 +222,7 @@ class PlayerStatistics:
     def draw(self):
         self.hp_bar.draw(self.screen, [0, 0])
         self.shield_bar.draw(self.screen, [0, 0])
-        self.se_bar.draw(self.screen, [0, 0])
+        self.se_bar.draw(self.screen, [0, 0], moving=True)
 
         for index, vals in enumerate(zip(self.player_obj.inventory, self.inventory_rects)):
             item_name, rect = vals

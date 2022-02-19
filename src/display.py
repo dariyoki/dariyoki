@@ -26,7 +26,7 @@ def _dismiss_splash_screen():
 if compiling:
     _dismiss_splash_screen()
 
-screen = pygame.display.set_mode((screen_width, screen_height), pygame.SCALED | pygame.RESIZABLE)
+screen: pygame.Surface = pygame.display.set_mode((screen_width, screen_height), pygame.SCALED | pygame.RESIZABLE)
 pygame.display.set_caption("dariyoki")
 logo = pygame.image.load("assets/sprites/logo.ico").convert_alpha()
 pygame.display.set_icon(logo)
