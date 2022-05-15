@@ -15,14 +15,14 @@ from src.world import World
 from src.player import Player
 from src.enemy import Ninja
 from src.stats import Info, PlayerStatistics
-from src.globals import enemy_ids, shurikens, explosions, general_info, spawners
+from src._globals import enemy_ids, shurikens, explosions, general_info, spawners
 from src.effects.exp_circle import ExpandingCircles, ExpandingCircle
 from src.effects.explosion import Explosion
 from src.items import Chest
 from src.spawner import Spawner
 from src.widgets import MenuButton
 from src.effects.particle_effects import MainMenuFlare
-from src.generic_types import EventInfo
+from src._types import EventInfo
 
 
 class Game:

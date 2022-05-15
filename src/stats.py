@@ -10,7 +10,7 @@ from src.sprites import (border_img,
                          scythe_img,
                          bar_border_img)
 from src.widgets import LoadingBar, EnergyBar
-from src.generic_types import EventInfo
+from src._types import EventInfo
 
 
 class ItemStats:

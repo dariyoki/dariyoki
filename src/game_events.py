@@ -1,7 +1,7 @@
 import pygame
 from enum import Enum
 from src.sprites import blue_ribbon
-from src.globals import general_info
+from src._globals import general_info
 
 
 class Achievements(Enum):

@@ -2,7 +2,7 @@ import pygame
 import random
 from src.utils import Glow, camerify as c
 from src.sprites import spawner_imgs
-from src.globals import shurikens, spawners
+from src._globals import shurikens, spawners
 from src.player import Player
 from src.widgets import LoadingBar
 

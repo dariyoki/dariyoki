@@ -1,0 +1,28 @@
+{
+  "sprites": {
+    "i_sword.jpeg": {
+      "data": {
+        "sprite sheet": null,
+        "convert alpha": false,
+        "states": ["level"]
+      }
+    },
+    "sword attack.png": {
+      "data": {
+        "sprite sheet": {"rows":  1,
+          "columns": "4",
+          "size": 32,
+          "fixer": 16,
+          "bound": false
+        },
+        "states": ["level"]
+      }
+    }
+  },
+  "audio": {
+
+  },
+  "fonts": {
+
+  }
+}

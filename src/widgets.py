@@ -1,7 +1,7 @@
 import pygame
 import random
 from typing import Any
-from src.generic_types import Pos, Size, ColorValue, WSurfInfo
+from src._types import Pos, Size, ColorValue, WSurfInfo
 from src.sprites import border_img
 from src.audio import hover_sfx
 from src.sprites import bar_border_img

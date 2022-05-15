@@ -6,7 +6,7 @@ from src.audio import dash_sfx, pickup_item_sfx
 from src.animation import Animation
 from src.effects.particle_effects import PlayerAura
 from src.weapons.shurikens import Shuriken
-from src.globals import shurikens, general_info
+from src._globals import shurikens, general_info
 from src.consumables import HealthPotion, ShieldPotion
 from src.game_events import GeneralInfo
 from src.utils import camerify as c

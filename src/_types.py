@@ -8,3 +8,4 @@ ColorValue = Union[pygame.Color, int, str, Tuple[int, int, int], List[int], Rgba
 Events = List[pygame.event.Event]
 EventInfo = Dict[str, Any]
 WSurfInfo = List[Union[List[int], int]]
+Assets = Dict[str, Union[pygame.Surface, Any]]

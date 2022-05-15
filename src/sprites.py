@@ -1,9 +1,42 @@
 import pygame
 import os
+import json
+from pathlib import Path
 from src.sprite_sheet import SpriteSheet
 from src.utils import resize, turn_left
+from src._types import Assets
+from src._globals import METADATA, PARENTS
 
 path = "assets/sprites/"
+
+
+def load_assets(state: str, assets: dict, path: Path = Path()) -> Assets:
+    """
+    Load assets dynamically from given path.
+
+    Parameters:
+        state: Game state to see if sprite is to be loaded.
+        assets: Dictionary to modify in place.
+        path: Path to load assets from.
+    """
+
+    for parent in PARENTS:
+        for file in path.rglob("*"):
+            img_data = METADATA[parent][file.name]["data"]
+            if state not in img_data["state"]:
+                if file.name in assets[parent]:
+                    del assets[file.name]
+                continue
+
+            if img_data["sprite sheet"] is not None:
+                assets[file.name] = SpriteSheet(*img_data["sprite sheet"].values())
+                continue
+
+            assets[file.name] = pygame.image.load(file.absolute().name)
+            assets[file.name].convert_alpha() if img_data["convert alpha"] else assets[file.name].convert()
+
+    return assets
+
 
 # Background art
 background_img = pygame.image.load(path + "backgrounds/background.png").convert()

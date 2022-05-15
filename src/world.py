@@ -1,7 +1,7 @@
 import pygame
 import pytmx
 from src.sprites import bee_tile_set_info, bush_img, r_bush_img, bush_width
-from src.generic_types import EventInfo
+from src._types import EventInfo
 
 Camera = list[int, int]
 

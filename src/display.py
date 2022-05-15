@@ -15,19 +15,14 @@ compiling = False
 
 
 # call any time before set_mode
-def _dismiss_splash_screen():
-    try:
-        import pyi_splash  # special pyinstaller thing - import will not resolve in dev
-        pyi_splash.close()
-    except Exception:
-        pass  # this is expected to throw an exception in non-splash launch contexts.
-
-
-if compiling:
-    _dismiss_splash_screen()
+try:
+    import pyi_splash  # special pyinstaller thing - import will not resolve in dev
+    pyi_splash.close()
+except ImportError:
+    compiling = True  # this is expected to throw an exception in non-splash launch contexts.
 
 screen: pygame.Surface = pygame.display.set_mode((screen_width, screen_height), pygame.SCALED | pygame.RESIZABLE)
-pygame.display.set_caption("dariyoki")
+pygame.display.set_caption("src")
 logo = pygame.image.load("assets/sprites/logo.ico").convert_alpha()
 pygame.display.set_icon(logo)
 

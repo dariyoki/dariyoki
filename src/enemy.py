@@ -4,7 +4,7 @@ import math
 import uuid
 from src.sprites import characters
 from src.widgets import LoadingBar
-from src.globals import enemy_ids, shurikens
+from src._globals import enemy_ids, shurikens
 from src.weapons.shurikens import Shuriken
 
 
