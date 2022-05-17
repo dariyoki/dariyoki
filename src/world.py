@@ -1,9 +1,7 @@
 import pygame
 import pytmx
-from src.sprites import bee_tile_set_info, bush_img, r_bush_img, bush_width
-from src._types import EventInfo
-
-Camera = list[int, int]
+from src.sprites import bush_img, r_bush_img, bush_width
+from src._types import Vec
 
 
 class World:
@@ -26,6 +24,15 @@ class World:
             )
                         )
 
+        self.tiles_background = pygame.Surface((250 * 25, 100 * 25))
+        self.tiles_background.set_colorkey(0)
+        for x, y, image in self.tile_map.get_layer_by_name("Tile Layer 1").tiles():
+            self.tiles_background.blit(image, (
+                (x * self.tile_map.tileheight),
+                (y * self.tile_map.tilewidth)
+            )
+                        )
+
         for obj in self.parallax_tile_map.get_layer_by_name("parallax decorations"):
             obj.image.set_alpha(100)
             self.parallax_background.blit(obj.image, (
@@ -34,7 +41,7 @@ class World:
             ))
         self.parallax_background = self.parallax_background.subsurface(self.parallax_background.get_bounding_rect())
 
-    def draw_grass(self, screen, camera: Camera):
+    def draw_grass(self, screen, camera: Vec):
         for x, y, image in self.tile_map.get_layer_by_name("grass").tiles():
             screen.blit(image, (
                 (x * self.tile_map.tileheight) - camera[0],
@@ -42,7 +49,7 @@ class World:
             )
                         )
 
-    def draw_dec(self, screen: pygame.Surface, camera: Camera):
+    def draw_dec(self, screen: pygame.Surface, camera: Vec):
         for image, pos in self.decorations:
             image.set_alpha(150)
             screen.blit(
@@ -53,7 +60,7 @@ class World:
                 )
             )
 
-    def draw_parallax(self, screen: pygame.Surface, camera: Camera):
+    def draw_parallax(self, screen: pygame.Surface, camera: Vec):
         screen.blit(bush_img, (self.x - camera[0], 450))
         screen.blit(r_bush_img, (self.x - camera[0] + bush_width, 450))
         screen.blit(self.parallax_background, (
@@ -62,9 +69,4 @@ class World:
         ))
 
     def draw(self, screen: pygame.Surface, camera: list[int, int]):
-        for x, y, image in self.tile_map.get_layer_by_name("Tile Layer 1").tiles():
-            screen.blit(image, (
-                (x * self.tile_map.tileheight) - camera[0],
-                (y * self.tile_map.tilewidth) - camera[1]
-            )
-                        )
+        screen.blit(self.tiles_background, (0 - camera[0], 0 - camera[1]))

@@ -1,9 +1,9 @@
 import pygame
-from typing import List
+from src._types import ColorValue
 
 
 class SpriteSheet:
-    def __init__(self, image: pygame.Surface, bg: tuple[int, int, int] = (0, 0, 0)):
+    def __init__(self, image: pygame.Surface, bg: ColorValue = (0, 0, 0)):
         self.bg = bg
         self.sheet = image
 

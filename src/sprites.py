@@ -1,6 +1,5 @@
 import pygame
 import os
-import json
 from pathlib import Path
 from src.sprite_sheet import SpriteSheet
 from src.utils import resize, turn_left
@@ -32,15 +31,17 @@ def load_assets(state: str, assets: dict, path: Path = Path()) -> Assets:
                 assets[file.name] = SpriteSheet(*img_data["sprite sheet"].values())
                 continue
 
-            assets[file.name] = pygame.image.load(file.absolute().name)
-            assets[file.name].convert_alpha() if img_data["convert alpha"] else assets[file.name].convert()
+            if img_data["convert alpha"]:
+                assets[file.name] = pygame.image.load(file).convert_alpha()
+            else:
+                assets[file.name] = pygame.image.load(file).convert()
 
     return assets
 
 
 # Background art
 background_img = pygame.image.load(path + "backgrounds/background.png").convert()
-menu_background_img = pygame.transform.scale(pygame.image.load(path + "backgrounds/red_ski_looks_good.jpeg"),
+menu_background_img = pygame.transform.scale(pygame.image.load(path + "backgrounds/red_ski_looks_good.png").convert(),
                                              (1100, 650))
 moon = pygame.image.load(path + "backgrounds/moon.png").convert_alpha()
 

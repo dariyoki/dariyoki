@@ -3,6 +3,7 @@ import math
 import random
 from src.utils import get_movement, circle_surf
 from src.sprites import flame_particles_images
+from src._types import Vec
 
 
 class Particle:
@@ -47,7 +48,7 @@ class Particle:
 
 class BezierParticle:
     def __init__(self, x, y) -> None:
-        self.x, self.y = x, y
+        self.vec = Vec(x, y)
         self.image = random.choice(flame_particles_images)
         self.rect = self.image.get_rect()
         self.glow_color = 10
@@ -60,12 +61,12 @@ class BezierParticle:
 
     def draw(self, screen: pygame.Surface, speed: float, dt: float) -> None:
         movement = self.increment * speed * dt
-        self.x += movement
-        self.y += movement
-        self.y += self.drop
+        self.vec.x += movement
+        self.vec.y += movement
+        self.vec.y += self.drop
 
-        screen.blit(self.image, (self.x, self.y))
-        self.rect.topleft = self.x, self.y
+        screen.blit(self.image, (self.vec.x, self.vec.y))
+        self.rect.topleft = self.vec.x, self.vec.y
 
         # Handle color
         if self.inc_up:
@@ -83,7 +84,7 @@ class BezierParticle:
         color = (self.glow_color, self.glow_color, self.glow_color)
         glow_surf = circle_surf(self.glow_radius, color)
         glow_rect = glow_surf.get_rect(center=self.rect.center)
-        screen.blit(circle_surf(self.glow_radius, color), glow_rect, special_flags=pygame.BLEND_RGB_ADD)
+        screen.blit(glow_surf, glow_rect, special_flags=pygame.BLEND_RGB_ADD)
 
 
 class TriangularParticle:

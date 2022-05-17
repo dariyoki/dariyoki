@@ -6,6 +6,7 @@ from src.sprites import characters
 from src.widgets import LoadingBar
 from src._globals import enemy_ids, shurikens
 from src.weapons.shurikens import Shuriken
+from src.traits import collide
 
 
 class Ninja:
@@ -117,39 +118,7 @@ class Ninja:
 
             self.image = self.left_img
 
-        # Check collisions
-        for pos in info["tiles"]:
-            stub = pygame.Rect(pos, (32, 32))
-            # Check for right collision
-            if "right" in info["tiles"][pos] and self.last_direction == "left":
-                if stub.colliderect(self.rect):
-                    dx = 0
-
-            # Check for left collision
-            if "left" in info["tiles"][pos] and self.last_direction == "right":
-                if stub.colliderect(self.rect):
-                    dx = 0
-
-            # Check for roof collision
-            if "down" in info["tiles"][pos]:
-                if stub.colliderect(self.rect):
-                    self.jumping = False
-
-        for pos in info["tiles"]:
-            stub = pygame.Rect(pos, (32, 32))
-            # Check for floor collision
-            if "up" in info["tiles"][pos]:
-                if stub.collidepoint(self.rect.midbottom) and self.rect.y < pos[1]:
-                    self.image = self.right_img if self.last_direction == "right" else self.left_img
-                    self.touched_ground = True
-                    self.angle = 0
-                    dy = stub.top - self.rect.bottom
-                    # self.velocity = 5
-                    break
-        else:
-            if not self.jumping:
-                self.velocity += self.acceleration * dt
-                dy += self.velocity * dt
+        dx, dy = collide(self, info, event_info, dx, dy)
 
         # Gravity control
         if self.jumping:

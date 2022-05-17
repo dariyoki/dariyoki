@@ -22,31 +22,42 @@ from src.items import Chest
 from src.spawner import Spawner
 from src.widgets import MenuButton
 from src.effects.particle_effects import MainMenuFlare
-from src._types import EventInfo
+from src._types import EventInfo, Vec
 
 
 class Game:
+    TILE_SIZE = 32
+    PARALLAX_TILE_SIZE = 16
+    TOTAL_ROWS = 250
+    TOTAL_COLS = 100
+    CHUNK_SIZE = 5
+
+    CHUNKS_INFO = tuple(((x * 32, y * 32)
+                         for x, y in zip(range(0, TOTAL_ROWS, CHUNK_SIZE), range(0, TOTAL_COLS, CHUNK_SIZE))))
+
     def __init__(self):
         # Controls
         with open('assets/data/controls.json') as f:
             self.controls = json.load(f)
 
+        pygame.mouse.set_cursor((0, 0), cursor_img)
+        # pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_CROSSHAIR)
+
         # Level data
-        self.tile_map = pytmx.load_pygame(
-            'assets/data/level_data/level_0_test.tmx')
-        tile_map = self.tile_map
+        self.tile_map = pytmx.TiledMap()
+        self.current_chunk_index = 0
+        self.current_chunk = (0, 0)
+        self.all_chunks = {}
         self.all_rects = {}
-        for index, layer in enumerate(tile_map):
-            if layer.name == 'Tile Layer 1':
-                for x, y, _ in layer.tiles():
-                    tile_properties = tile_map.get_tile_properties(x, y, index)
-                    self.all_rects[(x * tile_map.tileheight, y *
-                                    tile_map.tilewidth)] = tile_properties['type']
+        self.load_level(0)
+        # print(self.all_chunks)
+        # self.all_rects = self.all_chunks[self.current_chunk]
+        # print(self.all_rects)
 
         self.run = True
         self.player = Player(*player_start_pos, camera,
                              self.controls["controls"], screen)
-        self.world = World(tile_map)
+        self.world = World(self.tile_map)
         self.camera = camera
         self.t_time_passed = 0
         self.font = pygame.font.Font("assets/fonts/Roboto-Light.ttf", 16)
@@ -71,10 +82,10 @@ class Game:
             "pygame." + self.controls["controls"]["info toggle"]))
         self.opened_chests = []
         self.chests = [Chest(obj.x, obj.y - (32 * 2), pygame.K_f, 7)
-                       for obj in tile_map.get_layer_by_name("chests")]
+                       for obj in self.tile_map.get_layer_by_name("chests")]
         global spawners
         spawners += [Spawner([obj.x, obj.y], (obj.width, obj.height), 7, (1, 4), Ninja, player_size, 100) for obj
-                     in tile_map.get_layer_by_name("spawners")]
+                     in self.tile_map.get_layer_by_name("spawners")]
         # spawners = []
 
         self.items = []
@@ -109,14 +120,26 @@ class Game:
 
     def load_level(self, n):
         # Level data
-        tile_map = pytmx.load_pygame(f'assets/data/level_data/level_{n}.tmx')
-        self.all_rects = {}
+        self.tile_map = pytmx.load_pygame(
+            f'assets/data/level_data/level_{n}_test.tmx')
+        tile_map = self.tile_map
         for index, layer in enumerate(tile_map):
             if layer.name == 'Tile Layer 1':
                 for x, y, _ in layer.tiles():
                     tile_properties = tile_map.get_tile_properties(x, y, index)
-                    self.all_rects[(x * tile_map.tileheight, y *
-                                    tile_map.tilewidth)] = tile_properties['type']
+                    tile_pos = (x * tile_map.tileheight, y * tile_map.tilewidth)
+                    self.all_rects[tile_pos] = (tile_properties["type"],
+                                                pygame.Rect(tile_pos,
+                                                            (self.TILE_SIZE, self.TILE_SIZE))
+                                                )
+                    # previous_chunk = (0, 0)
+                    # for chunk in self.CHUNKS_INFO:
+                    #     self.all_chunks[chunk] = {}
+                    #     if previous_chunk[0] > tile_pos[0] and previous_chunk[1] > tile_pos[1] and \
+                    #             tile_pos[0] < chunk[0] and tile_pos[1] < chunk[1]:
+                    #         self.all_chunks[chunk][tile_pos] = tile_properties["type"]
+                    #     previous_chunk = chunk
+                break
 
     def handle_shurikens(self, dt):
         # Shurikens
@@ -246,6 +269,16 @@ class Game:
         mouse_pos = event_info["mouse pos"]
         events = event_info["events"]
         mouse_press = event_info["mouse press"]
+
+        # previous_chunk = (0, 0)
+        # for i, chunk in enumerate(self.CHUNKS_INFO):
+        #     if self.player.x > previous_chunk[0] and self.player.y > previous_chunk[1] \
+        #             and self.player.x < chunk[0] and self.player.y < chunk[1]:
+        #         self.current_chunk = chunk
+        #         self.current_chunk_index = i
+        #         print(self.all_rects)
+        #
+        # self.all_rects = self.all_chunks[self.current_chunk]
 
         # Transitioning
         if self.transitioning:
@@ -392,7 +425,7 @@ class Game:
                 self.transition_overlay_surface_alpha)
             screen.blit(self.transition_overlay_surface, (0, 0))
             screen.blit(game_border_img, (0, 0))
-            screen.blit(cursor_img, mouse_pos)
+            # screen.blit(cursor_img, mouse_pos)
 
             screen.blit(self.font.render(f"{clock.get_fps():.2f}", True, (200, 174, 0)), (1000, 10))
             # Event handler

@@ -63,7 +63,7 @@ class MainMenuFlare:
         for particle in self.particles:
             particle.draw(screen, self.wind, dt)
 
-            if particle.x > 1100 or particle.y > 650:
+            if particle.vec.x > 1100 or particle.vec.y > 650:
                 self.particles.remove(particle)
 
 

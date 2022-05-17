@@ -28,9 +28,8 @@ pygame.display.set_icon(logo)
 
 # camera = [-(screen_width // 2 - 60), -(screen_height // 2)]
 camera = [100, 100]
-player_start_pos = (32*4, -200)
+player_start_pos = (950, -200)
 
-pygame.mouse.set_visible(False)
 
 # Game boundary
 start_x = -1000

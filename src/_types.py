@@ -1,4 +1,5 @@
 import pygame
+from pygame import Vector2 as Vec
 from typing import List, Tuple, Union, Dict, Any
 
 Pos = Union[Tuple[int, int], List[int], pygame.Vector2]
