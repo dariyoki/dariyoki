@@ -5,7 +5,7 @@ import pygame
 
 from src._globals import METADATA, PARENTS
 from src._types import Assets
-from src.sprite_sheet import SpriteSheet
+from src.sprite_sheet import SpriteSheet, get_images
 from src.utils import resize, turn_left
 
 path = "assets/sprites/"
@@ -54,20 +54,18 @@ cursor_img = pygame.image.load(path + "cursor.png").convert_alpha()
 cursor_img = resize([cursor_img], 0.5)[0]
 
 ss = pygame.image.load(path + "player/characters.png").convert_alpha()
-characters_ss = SpriteSheet(ss)
-characters = characters_ss.get_images(4, 4, 32, 32, fixer=8)
+characters = get_images(ss, 4, 4, 32, fixer=8)
 characters = resize(characters, scale=2)
 player_size = characters[0].get_size()
 
 sword_attack_img = pygame.image.load(path + "player/sword attack.png").convert_alpha()
-sword_attack_ss = SpriteSheet(sword_attack_img)
-sword_attack = sword_attack_ss.get_images(1, 4, 32, 32, 16)
+sword_attack = get_images(sword_attack_img, 1, 4, 32, 16)
 sword_attack = resize(sword_attack, scale=3)
 lsword_attack = turn_left(sword_attack)
 
 chest_img = pygame.image.load(path + "items/chest.png").convert_alpha()
 chest_ss = SpriteSheet(chest_img)
-chests = chest_ss.get_images(1, 2, 32, 32, fixer=8, bound=False)
+chests = get_images(chest_img, rows=1, columns=2, size=32, bound=False)
 chests = resize(chests, scale=2)
 
 # Border art

@@ -1,4 +1,6 @@
 import pygame
+import json
+from pathlib import Path
 from src.animation import Animation
 from src.sprite_sheet import get_images
 from src.utils import turn_left
@@ -7,8 +9,35 @@ pygame.init()
 screen = pygame.display.set_mode((16 * 40, 9 * 40))
 clock = pygame.time.Clock()
 
-sheet = pygame.image.load("assets/sprites/boss/bee_queen.png").convert_alpha()
-frames = get_images(sheet, 1, 5, 64, fixer=16)
+def load_assets(state: str) -> dict:
+    assets = {}
+    path = Path("assets/sprites/")
+    for metadata_f in path.rglob("*.json"):
+        metadata = json.loads(metadata_f.read_text())
+        for file, data in metadata.items():
+            if state not in data["states"]:
+                continue
+
+            complete_path = metadata_f.parent / file
+            print("\n", complete_path, "\n")
+            
+            if data["convert_alpha"]:
+                image = pygame.image.load(complete_path).convert_alpha()
+            else:
+                image = pygame.image.load(complete_path).convert()
+
+            if data["sprite_sheet"] is None:    
+                asset = image
+            else:
+                asset = get_images(image, *data["sprite_sheet"].values())
+
+            assets[file[:-4]] = asset
+
+    return assets
+
+# sheet = pygame.image.load("assets/sprites/boss/bee_queen.png").convert_alpha()
+assets = load_assets("level")
+frames = assets["bee_queen"]
 left_frames = turn_left(frames)
 bee_animation_speed = 0.00005
 bee_queen_idle_animation_right = Animation(frames, bee_animation_speed)

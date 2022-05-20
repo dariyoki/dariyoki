@@ -1,0 +1,17 @@
+{
+	"bee.png": {
+        "sprite_sheet": null,
+        "convert_alpha": true,
+        "states": ["level"]
+	},
+	"bee_queen.png": {
+        "sprite_sheet": {
+        	"rows": 1,
+        	"columns": 5,
+        	"size": 64,
+        	"bound": false
+        },
+        "convert_alpha": true,
+        "states": ["level"]
+	}
+}

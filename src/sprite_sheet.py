@@ -73,26 +73,22 @@ def get_images(
     rows: int,
     columns: int,
     size: float,
-    fixer: float = 1,
     bound=True,
 ):
 
     images = []
 
-    for i in range(rows):
-        # _rows = []
-        for e in range(columns):
+    for row in range(rows):
+        for col in range(columns):
             # Mod image
             image = sheet.subsurface(
-                pygame.Rect((e * size), ((i * fixer) * columns), size, size)
+                pygame.Rect((col * size), ((row * size)), size, size)
             )
             if bound:
                 r = image.get_bounding_rect()
                 image = image.subsurface(r)
 
             images.append(image)
-        #     _rows.append(image)
-        # self.rows.append(_rows)
 
     return images
 

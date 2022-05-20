@@ -1,0 +1,23 @@
+{
+	"bee_spawners.png": {
+        "sprite_sheet": {
+        	"rows": 1,
+        	"columns": 2,
+        	"size": 32,
+        	"bound": false
+        },
+        "convert_alpha": true,
+        "states": ["level"]
+	},
+	"spawner_shadow_ninja.png": {
+        "sprite_sheet": null,
+        "convert_alpha": true,
+        "states": ["level"]	
+	},
+	"spawning_shadow_ninja.png": {
+        "sprite_sheet": null,
+        "convert_alpha": true,
+        "states": ["level"]	
+	}
+}
+
