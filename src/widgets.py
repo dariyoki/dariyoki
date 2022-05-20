@@ -1,14 +1,23 @@
-import pygame
 import random
 from typing import Any
-from src._types import Pos, Size, ColorValue, WSurfInfo
-from src.sprites import border_img
+
+import pygame
+
+from src._types import ColorValue, Pos, Size, WSurfInfo
 from src.audio import hover_sfx
-from src.sprites import bar_border_img
+from src.sprites import bar_border_img, border_img
 
 
 class LoadingBar:
-    def __init__(self, value, fg_color, bg_color, rect: pygame.Rect, max_value=100, _border_img=None):
+    def __init__(
+        self,
+        value,
+        fg_color,
+        bg_color,
+        rect: pygame.Rect,
+        max_value=100,
+        _border_img=None,
+    ):
         self.value = value
         self.sfg_color = fg_color
         self.sbg_color = bg_color
@@ -16,10 +25,7 @@ class LoadingBar:
         self.bg_color = bg_color
         self.rect = rect
         self.rect.center = self.rect.topleft
-        self.val_rect = pygame.Rect(
-            rect.topleft,
-            (self.value, self.rect.height)
-        )
+        self.val_rect = pygame.Rect(rect.topleft, (self.value, self.rect.height))
         self.background_surf = pygame.Surface(self.rect.size)
         self.loaded = False
         if _border_img is not None:
@@ -34,15 +40,22 @@ class LoadingBar:
     def draw(self, screen: pygame.Surface, camera, moving: bool = False):
         if moving:
             self.val_rect = pygame.Rect(
-                self.rect.topleft,
-                (self.value, self.rect.height)
+                self.rect.topleft, (self.value, self.rect.height)
             )
-        screen.blit(self.background_surf, (self.rect.x - camera[0], self.rect.y - camera[1]))
+        screen.blit(
+            self.background_surf, (self.rect.x - camera[0], self.rect.y - camera[1])
+        )
 
         self.loaded = self.value >= self.rect.width
 
-        pygame.draw.rect(screen, self.fg_color, pygame.Rect((self.val_rect.x - camera[0], self.val_rect.y - camera[1]),
-                                                            (int(self.value), self.rect.height)))
+        pygame.draw.rect(
+            screen,
+            self.fg_color,
+            pygame.Rect(
+                (self.val_rect.x - camera[0], self.val_rect.y - camera[1]),
+                (int(self.value), self.rect.height),
+            ),
+        )
 
         screen.blit(self.border_img, (self.rect.x - camera[0], self.rect.y - camera[1]))
 
@@ -56,29 +69,38 @@ class EnergyBar(LoadingBar):
         super().__init__(
             value=player_obj.hp,
             fg_color=(0, 255, 255),
-            bg_color='black',
+            bg_color="black",
             rect=pygame.Rect((970, 40), (width, height)),
-            _border_img=bar_border_img
+            _border_img=bar_border_img,
         )
         self.w_surfs: list[WSurfInfo] = []
         self.time_passed = 0
         self.b_surf = pygame.Surface((10, 3))
-        self.b_surf.fill('white')
+        self.b_surf.fill("white")
 
     def update(self, event_info):
         self.time_passed += event_info["raw dt"]
         if self.time_passed > self.GEN_COOLDOWN:
             if self.val_rect.width > 20:
                 self.w_surfs.append(
-                    [[self.val_rect.midright[0] - 10,
-                      random.randrange(self.val_rect.topright[1] + 2, self.val_rect.bottomright[1] - 2)],
-                     255]
+                    [
+                        [
+                            self.val_rect.midright[0] - 10,
+                            random.randrange(
+                                self.val_rect.topright[1] + 2,
+                                self.val_rect.bottomright[1] - 2,
+                            ),
+                        ],
+                        255,
+                    ]
                 )
 
         for w_surf in self.w_surfs:
             w_surf[0][0] -= 5.3 * event_info["dt"]
             if self.val_rect.width > 0:
-                w_surf[1] -= 10.3 * event_info["dt"] * (self.rect.width / self.val_rect.width)
+                w_surf[1] -= (
+                    10.3 * event_info["dt"] * (self.rect.width / self.val_rect.width)
+                )
             else:
                 w_surf[1] -= 10.3 * event_info["dt"]
 
@@ -97,6 +119,7 @@ class MenuButton:
     """
     Nice looking minimalistic button for the main menu.
     """
+
     def __init__(self, pos: Pos, title: str) -> None:
         self.pos = pos
         self.size = (170, 30)
@@ -105,7 +128,7 @@ class MenuButton:
         self.hover = False
         self.font = pygame.font.Font("assets/fonts/Roboto/Roboto-Regular.ttf", 17)
         self.rect = pygame.Rect(self.pos, self.size)
-        self.text_surf = self.font.render(title, True, 'white')
+        self.text_surf = self.font.render(title, True, "white")
         self.text_surf_rect = self.text_surf.get_rect(center=self.pos)
         self.text_surf_rect.center = self.rect.center
         self.hover_surf = pygame.Surface(self.size)
@@ -146,7 +169,7 @@ class MenuButton:
             self.once = True
 
         # Border
-        pygame.draw.rect(screen, 'white', self.rect, width=3)
+        pygame.draw.rect(screen, "white", self.rect, width=3)
 
         # Actual text
         screen.blit(self.text_surf, self.text_surf_rect)
@@ -156,6 +179,7 @@ class Label:
     """
     Label widget used to display information about other widgets
     """
+
     def __init__(
         self,
         position: Pos,

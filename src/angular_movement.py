@@ -1,5 +1,6 @@
-import pygame
 import math
+
+import pygame
 
 
 class Angle:
@@ -50,4 +51,3 @@ class Angle:
 
         # Increasing amount moved
         self.distance += math.sqrt(((self.dx * dt) ** 2) + ((self.dy * dt) ** 2))
-

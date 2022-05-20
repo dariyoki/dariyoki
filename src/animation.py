@@ -2,7 +2,7 @@ import pygame
 
 
 class Animation:
-    def __init__(self, frames: list[pygame.surface], speed: float):
+    def __init__(self, frames: list[pygame.surface.Surface], speed: float):
         self.frames = frames
         self.speed = speed
 
@@ -20,6 +20,3 @@ class Animation:
     def play(self, screen, pos, dt):
         self.update(dt)
         self.draw(screen, pos)
-
-
-

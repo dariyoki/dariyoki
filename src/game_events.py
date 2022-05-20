@@ -1,7 +1,9 @@
-import pygame
 from enum import Enum
-from src.sprites import blue_ribbon
+
+import pygame
+
 from src._globals import general_info
+from src.sprites import blue_ribbon
 
 
 class Achievements(Enum):
@@ -19,7 +21,7 @@ class GeneralInfo:
         self.color = color
         self.font = pygame.font.SysFont("arialrounded", 18)
         self.text = self.font.render(msg, True, color)
-        self.text_rect = self.text.get_rect(center=(1100//2, 270))
+        self.text_rect = self.text.get_rect(center=(1100 // 2, 270))
         self.pos = list(self.text_rect.topleft)
         self.alpha = 0
         self.size = 18
@@ -46,5 +48,3 @@ class GeneralInfo:
         self.text = self.font.render(self.msg, True, self.color)
         self.text.set_alpha(self.alpha)
         screen.blit(self.text, self.pos)
-
-

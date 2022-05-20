@@ -1,7 +1,9 @@
-import pygame
 import random
-from src.effects.particle import SoulParticle, BezierParticle
+
+import pygame
+
 from src._types import EventInfo
+from src.effects.particle import BezierParticle, SoulParticle
 
 
 class MainMenuFlare:
@@ -99,7 +101,7 @@ class PlayerAura:
                     [size, size],
                     self.colour,
                     (-2.5, 2.5),
-                    size_reduction=0.9
+                    size_reduction=0.9,
                 )
             )
             self.count = 0
@@ -137,9 +139,7 @@ class ShurikenContrail:
                     [size, size],
                     self.colour,
                     (-1.3, 1.3),
-                    size_reduction=0.5
+                    size_reduction=0.5,
                 )
             )
             self.count = 0
-
-

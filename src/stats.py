@@ -1,16 +1,10 @@
 import pygame
-from src.sprites import (border_img,
-                         selected_border_img,
-                         i_cards,
-                         sword_img,
-                         shuriken_img,
-                         health_potion_img,
-                         shield_potion_img,
-                         sb_img,
-                         scythe_img,
-                         bar_border_img)
-from src.widgets import LoadingBar, EnergyBar
+
 from src._types import EventInfo
+from src.sprites import (bar_border_img, border_img, health_potion_img,
+                         i_cards, sb_img, scythe_img, selected_border_img,
+                         shield_potion_img, shuriken_img, sword_img)
+from src.widgets import EnergyBar, LoadingBar
 
 
 class ItemStats:
@@ -128,19 +122,19 @@ class PlayerStatistics:
         width = player_obj.hp * 1.7
         height = 17
         self.hp_bar = LoadingBar(
-                value=player_obj.hp,
-                fg_color='green',
-                bg_color='black',
-                rect=pygame.Rect((start[0], 610 - height - 5), (width, height)),
-                _border_img=bar_border_img
-            )
+            value=player_obj.hp,
+            fg_color="green",
+            bg_color="black",
+            rect=pygame.Rect((start[0], 610 - height - 5), (width, height)),
+            _border_img=bar_border_img,
+        )
         self.shield_bar = LoadingBar(
-                value=player_obj.hp,
-                fg_color=(0, 0, 255),
-                bg_color='black',
-                rect=pygame.Rect((start[0], 610), (width, height)),
-                _border_img=bar_border_img
-            )
+            value=player_obj.hp,
+            fg_color=(0, 0, 255),
+            bg_color="black",
+            rect=pygame.Rect((start[0], 610), (width, height)),
+            _border_img=bar_border_img,
+        )
         self.se_bar = EnergyBar(player_obj)
 
         bsize = (50, 50)
@@ -148,10 +142,12 @@ class PlayerStatistics:
         self.border_img = pygame.transform.scale(border_img, bsize)
         self.selected_border_img = pygame.transform.scale(selected_border_img, bsize)
         brect = self.border_img.get_rect()
-        self.inventory_rects = [pygame.Rect(
-                     ((brect.height + 5) * col + 300, (brect.width + 5) * 0 + 30),
-                     brect.size
-                 ) for col in range(8)]
+        self.inventory_rects = [
+            pygame.Rect(
+                ((brect.height + 5) * col + 300, (brect.width + 5) * 0 + 30), brect.size
+            )
+            for col in range(8)
+        ]
         self.init_inventory_rects = list(self.inventory_rects)
         self.order = {
             "shuriken": pygame.transform.scale(shuriken_img, bsize),
@@ -195,7 +191,13 @@ class PlayerStatistics:
 
                     if event.type == pygame.MOUSEBUTTONUP and self.init_collide:
                         if hover_index != self.init_collide_index:
-                            self.player_obj.inventory[self.init_collide_index], self.player_obj.inventory[hover_index] = self.player_obj.inventory[hover_index], self.player_obj.inventory[self.init_collide_index]
+                            (
+                                self.player_obj.inventory[self.init_collide_index],
+                                self.player_obj.inventory[hover_index],
+                            ) = (
+                                self.player_obj.inventory[hover_index],
+                                self.player_obj.inventory[self.init_collide_index],
+                            )
 
                         self.init_collide = False
 
@@ -208,7 +210,9 @@ class PlayerStatistics:
                             i_rect = pygame.Rect(i_rect.x + 10, i_rect.y, *i_rect.size)
                         else:
                             center = i_rect.center
-                            i_rect = pygame.Rect(*i_rect.topleft, i_rect.width + 5, i_rect.height + 5)
+                            i_rect = pygame.Rect(
+                                *i_rect.topleft, i_rect.width + 5, i_rect.height + 5
+                            )
                             i_rect.center = center
                         copy_rects.append(i_rect)
 
@@ -224,7 +228,9 @@ class PlayerStatistics:
         self.shield_bar.draw(self.screen, [0, 0])
         self.se_bar.draw(self.screen, [0, 0], moving=True)
 
-        for index, vals in enumerate(zip(self.player_obj.inventory, self.inventory_rects)):
+        for index, vals in enumerate(
+            zip(self.player_obj.inventory, self.inventory_rects)
+        ):
             item_name, rect = vals
             if item_name is not None:
                 quantity = self.player_obj.item_count[item_name]

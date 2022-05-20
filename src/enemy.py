@@ -1,12 +1,15 @@
-import pygame
-import random
 import math
+import random
 import uuid
-from src.sprites import characters
-from src.widgets import LoadingBar
+
+import pygame
+
 from src._globals import enemy_ids, shurikens
+from src.sprites import characters, bee_img
+from src.traits import collide, jump
 from src.weapons.shurikens import Shuriken
-from src.traits import collide
+from src.widgets import LoadingBar
+from src._types import Vec
 
 
 class Ninja:
@@ -64,18 +67,15 @@ class Ninja:
         self.hp_bar = LoadingBar(
             value=self.hp,
             fg_color=(179, 2, 43),
-            bg_color='black',
-            rect=pygame.Rect((0, 0), self.hp_bar_size)
+            bg_color="black",
+            rect=pygame.Rect((0, 0), self.hp_bar_size),
         )
         self.camera = [0, 0]
 
     def handle_shurikens(self, target):
-        shurikens.append(Shuriken(
-            start=self.rect.center,
-            target=target,
-            speed=6,
-            launcher=self
-        ))
+        shurikens.append(
+            Shuriken(start=self.rect.center, target=target, speed=6, launcher=self)
+        )
 
         # # Clean up
         # for shuriken in self.shurikens:
@@ -120,41 +120,23 @@ class Ninja:
 
         dx, dy = collide(self, info, event_info, dx, dy)
 
-        # Gravity control
-        if self.jumping:
-            self.angle += 200 * dt
-
-            self.image = pygame.transform.rotozoom(self.right_img, int(self.angle), 1)
-            self.velocity -= self.acceleration * dt
-            dy -= self.velocity * dt
-            self.jump_stack += abs(dy)
-
-            if dy == abs(dy):
-                dy = -dy
-
-            if self.jump_stack > self.JUMP_HEIGHT:
-                self.jumping = False
-                self.jump_stack = 0
-                self.velocity = 5
-
-            self.touched_ground = False
+        dy = jump(self, dt, dy)
 
         self.x += dx
         self.y += dy
 
         # Handle idle distance
         if not self.chasing:
-            self.idle_distance += abs(math.sqrt(dx ** 2 + dy ** 2))
+            self.idle_distance += abs(math.sqrt(dx**2 + dy**2))
             if self.idle_distance > 40:
-                self.idle_movement_direction = random.choice(("right", "left", "right", "left", "jump"))
+                self.idle_movement_direction = random.choice(
+                    ("right", "left", "right", "left", "jump")
+                )
                 self.idle_distance = 0
 
         self.rect = self.right_img.get_rect(topleft=(self.x, self.y))
         self.hp_bar.value = self.hp * (self.hp_bar_size[0] / self.max_hp)
-        self.hp_bar.rect.center = (
-            self.rect.midtop[0],
-            self.rect.midtop[1] - 10
-        )
+        self.hp_bar.rect.center = (self.rect.midtop[0], self.rect.midtop[1] - 10)
 
     def draw(self, screen: pygame.Surface, camera):
         self.camera = camera
@@ -162,7 +144,7 @@ class Ninja:
         self.hp_bar.draw(screen, camera, moving=True)
         denotion_pos = (
             self.hp_bar.rect.midtop[0] - camera[0],
-            self.hp_bar.rect.y - camera[1] - self.hp_bar.rect.height * 2
+            self.hp_bar.rect.y - camera[1] - self.hp_bar.rect.height * 2,
         )
         if self.chasing:
             screen.blit(self.exclamation_mark, denotion_pos)
@@ -174,3 +156,23 @@ class Ninja:
         #     self.rect.y - camera[1],
         #     *self.rect.size
         # ), width=3)
+
+
+class Bee:
+    SPEED = 1.2
+
+    def __init__(self, player_instance, vec: Vec):
+        self.player_instance = player_instance
+        self.vec = vec
+        self.image = bee_img.copy()
+
+    def update(self):
+        self.vec.move_towards(self.player_instance.vec, self.SPEED)
+        angle = self.vec.angle_to(self.player_instance.vec)
+        self.image = pygame.transform.rotate(bee_img, angle)
+
+
+
+    def draw(self, screen: pygame.Surface, camera: Vec):
+        screen.blit(self.image, self.vec - camera)
+

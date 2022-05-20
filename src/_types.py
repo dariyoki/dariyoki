@@ -1,6 +1,7 @@
+from typing import Any, Dict, List, Tuple, Union
+
 import pygame
-from pygame import Vector2 as Vec
-from typing import List, Tuple, Union, Dict, Any
+import math
 
 Pos = Union[Tuple[int, int], List[int], pygame.Vector2]
 Size = Tuple[int, int]
@@ -10,3 +11,13 @@ Events = List[pygame.event.Event]
 EventInfo = Dict[str, Any]
 WSurfInfo = List[Union[List[int], int]]
 Assets = Dict[str, Union[pygame.Surface, Any]]
+
+
+class Vec(pygame.math.Vector2):
+	def move_towards(self, target, speed: float):
+		# angle = self.angle_to(target)
+		# self.x += math.cos(math.radians(angle)) * speed
+		# self.y += math.sin(math.radians(angle)) * speed
+
+		# return angle
+		self += (target - self).normalize() * speed

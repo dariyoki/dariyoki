@@ -1,5 +1,6 @@
-import pygame
 import math
+import time
+import pygame
 
 
 def circle_surf(radius, color):
@@ -63,8 +64,27 @@ class Glow:
         self.rect = pygame.Rect(new_pos, self.rect.size)
 
     def draw(self, screen: pygame.Surface, camera):
-        screen.blit(self.surf, (self.rect.x - camera[0], self.rect.y - camera[1] + (self.img_rect.height // 2)),
-                    special_flags=pygame.BLEND_RGB_ADD)
+        screen.blit(
+            self.surf,
+            (
+                self.rect.x - camera[0],
+                self.rect.y - camera[1] + (self.img_rect.height // 2),
+            ),
+            special_flags=pygame.BLEND_RGB_ADD,
+        )
 
 
+class Time:
+    """
+    Class to check if time has passed.
+    """
 
+    def __init__(self, time_to_pass: float):
+        self.time_to_pass = time_to_pass
+        self.start = time.perf_counter()
+
+    def update(self) -> bool:
+        if time.perf_counter() - self.start > self.time_to_pass:
+            self.start = time.perf_counter()
+            return True
+        return False

@@ -28,7 +28,9 @@ def collide(self, info, event_info, dx, dy):
         # Check for floor collision
         if "up" in tile_type:
             if stub.collidepoint(self.rect.midbottom) and self.rect.y < pos[1]:
-                self.image = self.right_img if self.last_direction == "right" else self.left_img
+                self.image = (
+                    self.right_img if self.last_direction == "right" else self.left_img
+                )
                 self.touched_ground = True
                 self.angle = 0
                 dy = stub.top - self.rect.bottom
@@ -40,3 +42,26 @@ def collide(self, info, event_info, dx, dy):
             dy += self.velocity * dt
 
     return dx, dy
+
+
+def jump(self, dt, dy):
+    # Gravity control
+    if self.jumping:
+        self.angle += 200 * dt
+
+        self.image = pygame.transform.rotozoom(self.right_img, int(self.angle), 1)
+        self.velocity -= self.acceleration * dt
+        dy -= self.velocity * dt
+        self.jump_stack += abs(dy)
+
+        if dy == abs(dy):
+            dy = -dy
+
+        if self.jump_stack > self.JUMP_HEIGHT:
+            self.jumping = False
+            self.jump_stack = 0
+            self.velocity = 5
+
+        self.touched_ground = False
+
+    return dy

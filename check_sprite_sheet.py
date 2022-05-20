@@ -1,4 +1,5 @@
 import pygame
+from src.sprite_sheet import get_images
 
 pygame.init()
 
@@ -9,17 +10,15 @@ screen_width = 1100
 screen_height = 600
 
 screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption('Sprite Sheet Preview')
+pygame.display.set_caption("Sprite Sheet Preview")
 
-'''Sprite Sheet'''
-from src.sprites import flame_particles_images
-sprite_sheet = flame_particles_images
-attributes = {
-    "size": 8,
-    "sprite sheet": sprite_sheet,
-    "rows": 2,
-    "columns": 4
-}
+"""Sprite Sheet"""
+# from src.sprites import flame_particles_images
+
+sheet = pygame.image.load("assets/sprites/boss/bee_queen.png").convert_alpha()
+frames = get_images(sheet, 1, 5, 64, 16)
+sprite_sheet = frames
+attributes = {"size": 64, "sprite sheet": sprite_sheet, "rows": 1, "columns": 5}
 
 # Define colours
 bg = (128, 128, 128)
@@ -28,11 +27,21 @@ white = (255, 255, 255)
 
 def draw_grid(size, rows):
     for line in range(rows):
-        pygame.draw.line(screen, white, (0, line * size), (screen.get_width(), line * size))
-        pygame.draw.line(screen, white, (line * size, 0), (line * size, screen.get_height()))
+        pygame.draw.line(
+            screen, white, (0, line * size), (screen.get_width(), line * size)
+        )
+        pygame.draw.line(
+            screen, white, (line * size, 0), (line * size, screen.get_height())
+        )
 
 
-def check_sprite_sheet(size: float, sprites: list[pygame.Surface], rows: int, columns: int, space: float = 20) -> None:
+def check_sprite_sheet(
+    size: float,
+    sprites: list[pygame.Surface],
+    rows: int,
+    columns: int,
+    space: float = 20,
+) -> None:
     size += space
     index = 0
 
@@ -46,7 +55,7 @@ def check_sprite_sheet(size: float, sprites: list[pygame.Surface], rows: int, co
 # Set screen res
 # width = int(attributes["size"] * attributes["columns"])
 # height = int(attributes["size"] * attributes["rows"])
-pygame.display.set_mode((64*5 + 20, 64*5 + 20))
+pygame.display.set_mode((64 * 5 + 20, 64 * 5 + 20))
 
 run = True
 while run:

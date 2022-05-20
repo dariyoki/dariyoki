@@ -1,13 +1,16 @@
-import pygame
 import random
 from enum import Enum
+
+import pygame
+from pygame.constants import HAT_DOWN
+
 from src.sprites import chests, items
-from src.utils import circle_surf, Glow
+from src.utils import Glow, circle_surf
 from src.widgets import LoadingBar
 
 
 class HoverDirection(Enum):
-    UP = "UP",
+    UP = ("UP",)
     DOWN = "DOWN"
 
 
@@ -35,7 +38,7 @@ class Item:
         # Hover
         self.hover_movement = 0
         self.hover_speed = 1
-        self.hover_direction = HoverDirection.UP.name
+        self.hover_direction = HoverDirection.UP
         self.i_radius = 0
 
     def update(self, dt):
@@ -48,26 +51,27 @@ class Item:
             self.slide_speed = 0
 
         self.pos = list(self.init_pos)
-        if self.hover_direction == "UP":
+        if self.hover_direction == HoverDirection.UP:
             self.hover_movement -= self.hover_speed * dt
             self.i_radius -= (self.hover_speed * dt) / 4
             if self.hover_movement < 0:
-                self.hover_direction = HoverDirection.DOWN.name
-        elif self.hover_direction == "DOWN":
+                self.hover_direction = HoverDirection.DOWN
+        elif self.hover_direction == HoverDirection.DOWN:
             self.hover_movement += self.hover_speed * dt
             self.i_radius += (self.hover_speed * dt) / 4
             if self.hover_movement > 20:
-                self.hover_direction = HoverDirection.UP.name
+                self.hover_direction = HoverDirection.UP
 
         self.pos[1] += self.hover_movement
         self.rect = self.image.get_rect(topleft=(self.pos[0], self.pos[1]))
 
     def draw(self, screen, camera):
         screen.blit(self.image, (self.pos[0] - camera[0], self.pos[1] - camera[1]))
-        screen.blit(circle_surf(radius=self.rect.height + self.i_radius, color=self.color),
-                    (self.pos[0] - 12 - camera[0],
-                     self.pos[1] - 11 - camera[1]),
-                    special_flags=pygame.BLEND_RGB_ADD)
+        screen.blit(
+            circle_surf(radius=self.rect.height + self.i_radius, color=self.color),
+            (self.pos[0] - 12 - camera[0], self.pos[1] - 11 - camera[1]),
+            special_flags=pygame.BLEND_RGB_ADD,
+        )
 
 
 class Chest:
@@ -78,13 +82,12 @@ class Chest:
         self.image = self.closed_img
         self.rect = self.image.get_rect(topleft=(x, y))
         self.glow = Glow(self.image, (40, 40, 20), (x, y))
-        self.loading_bar = LoadingBar(value=0,
-                                      fg_color='white',
-                                      bg_color='black',
-                                      rect=pygame.Rect(
-                                          (self.rect.center[0], y + 10),
-                                          (150 / 2, 20 / 2)
-                                      ))
+        self.loading_bar = LoadingBar(
+            value=0,
+            fg_color="white",
+            bg_color="black",
+            rect=pygame.Rect((self.rect.center[0], y + 10), (150 / 2, 20 / 2)),
+        )
         self.load_control = load_control
         self.load_speed = load_speed
 
@@ -97,7 +100,7 @@ class Chest:
             30: "shuriken",
             10: "sword",
             5: "smoke bomb",
-            1: "scythe"
+            1: "scythe",
         }
 
         for _ in range(n_items):
@@ -127,6 +130,3 @@ class Chest:
             self.image = self.open_img
         else:
             self.glow.draw(screen, camera)
-
-
-

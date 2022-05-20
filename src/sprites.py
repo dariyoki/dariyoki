@@ -1,10 +1,12 @@
-import pygame
 import os
 from pathlib import Path
+
+import pygame
+
+from src._globals import METADATA, PARENTS
+from src._types import Assets
 from src.sprite_sheet import SpriteSheet
 from src.utils import resize, turn_left
-from src._types import Assets
-from src._globals import METADATA, PARENTS
 
 path = "assets/sprites/"
 
@@ -41,8 +43,10 @@ def load_assets(state: str, assets: dict, path: Path = Path()) -> Assets:
 
 # Background art
 background_img = pygame.image.load(path + "backgrounds/background.png").convert()
-menu_background_img = pygame.transform.scale(pygame.image.load(path + "backgrounds/red_ski_looks_good.png").convert(),
-                                             (1100, 650))
+menu_background_img = pygame.transform.scale(
+    pygame.image.load(path + "backgrounds/red_ski_looks_good.png").convert(),
+    (1100, 650),
+)
 moon = pygame.image.load(path + "backgrounds/moon.png").convert_alpha()
 
 # Cursor
@@ -68,7 +72,9 @@ chests = resize(chests, scale=2)
 
 # Border art
 border_img = pygame.image.load(path + "borders/border.png").convert_alpha()
-selected_border_img = pygame.image.load(path + "borders/selected_border.png").convert_alpha()
+selected_border_img = pygame.image.load(
+    path + "borders/selected_border.png"
+).convert_alpha()
 
 # Items
 health_potion_img = pygame.image.load(path + "items/health_potion.png").convert_alpha()
@@ -85,14 +91,18 @@ items = {
     "shuriken": pygame.transform.scale(shuriken_img, item_size),
     "smoke bomb": pygame.transform.scale(sb_img, item_size),
     "sword": pygame.transform.scale(sword_img, item_size),
-    "scythe": pygame.transform.scale(scythe_img, item_size)
+    "scythe": pygame.transform.scale(scythe_img, item_size),
 }
 
 game_border_img = pygame.image.load(path + "borders/game_border.png").convert_alpha()
 
 # Information cards
-i_cards = {i_card[2:-5].replace('_', ' '): pygame.image.load(path + f"icards/{i_card}").convert() for i_card in
-           os.listdir(path + "icards/")}
+i_cards = {
+    i_card[2:-5]
+    .replace("_", " "): pygame.image.load(path + f"icards/{i_card}")
+    .convert()
+    for i_card in os.listdir(path + "icards/")
+}
 
 
 # Tile sets
@@ -108,13 +118,18 @@ bee_tile_set_info = {
     "right": bee_tile_set[5],
     "downleft": pygame.transform.flip(upleft, False, True),
     "down": pygame.transform.flip(bee_tile_set[1], False, True),
-    "downright": pygame.transform.flip(bee_tile_set[2], False, True)
+    "downright": pygame.transform.flip(bee_tile_set[2], False, True),
 }
 
 # Spawners
 spawner_imgs = [
     pygame.image.load(path + "spawners/spawner_shadow_ninja.png").convert_alpha(),
-    pygame.image.load(path + "spawners/spawning_shadow_ninja.png").convert_alpha()
+    pygame.image.load(path + "spawners/spawning_shadow_ninja.png").convert_alpha(),
+]
+bee_spawner_img = pygame.image.load(path + "spawners/bee_spawners.png").convert_alpha()
+bee_spawner_imgs = [
+    bee_spawner_img.subsurface(0, 0, 32, 32),
+    bee_spawner_img.subsurface(32, 0, 32, 32),   
 ]
 
 # The Blue Ribbon
@@ -126,11 +141,7 @@ bar_border_img = pygame.image.load(path + "borders/bar_border.png").convert_alph
 # Shield
 shield_ss_img = pygame.image.load(path + "player/shield_bubble.png").convert_alpha()
 shield_ss = SpriteSheet(shield_ss_img)
-shield_frames = shield_ss.get_images(rows=1,
-                                     columns=4,
-                                     width=32,
-                                     height=32,
-                                     fixer=16)
+shield_frames = shield_ss.get_images(rows=1, columns=4, width=32, height=32, fixer=16)
 shield_frames = resize(shield_frames, scale=3)
 player_shield_img = shield_frames[0]
 
@@ -141,17 +152,18 @@ bee_boss_frames = bee_boss_ss.get_images(1, 4, 64, 64, fixer=1)
 bee_boss_frames = resize(bee_boss_frames, scale=2)
 
 # Flame particles
-flame_particles_ss_img = pygame.image.load(path + "decoration/flame_particles.png").convert_alpha()
+flame_particles_ss_img = pygame.image.load(
+    path + "decoration/flame_particles.png"
+).convert_alpha()
 flame_particles_ss = SpriteSheet(flame_particles_ss_img)
 flame_particles_images = flame_particles_ss.get_images(
-    rows=2,
-    columns=4,
-    width=8,
-    height=8,
-    fixer=0.3
+    rows=2, columns=4, width=8, height=8, fixer=0.3
 )
 
 # Bush Parallax
 bush_img = pygame.image.load(path + "decoration/bush_parallax.png").convert_alpha()
 r_bush_img = pygame.transform.flip(bush_img, True, False)
 bush_width = bush_img.get_width()
+
+
+bee_img = pygame.image.load(path + "boss/bee.png").convert_alpha()

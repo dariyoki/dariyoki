@@ -1,20 +1,26 @@
 import pygame
 import random
 from src.utils import Glow, camerify as c
-from src.sprites import spawner_imgs
+from src.sprites import spawner_imgs, bee_spawner_imgs
 from src._globals import shurikens, spawners
 from src.player import Player
 from src.widgets import LoadingBar
 
 
 class Spawner:
-    def __init__(self, location, size, cool_down, number_of_enemies, enemy, enemy_size, hp) -> None:
+    def __init__(
+        self, location, size, cool_down, number_of_enemies, enemy, enemy_size, hp,
+        spawning_images = None
+    ) -> None:
         self.location = location
         self.size = size
-        self.spawn_images = [
-            pygame.transform.scale(spawner_imgs[0], size),
-            pygame.transform.scale(spawner_imgs[1], size),
-        ]
+        if spawning_images is None:
+            self.spawn_images = [
+                pygame.transform.scale(spawner_imgs[0], size),
+                pygame.transform.scale(spawner_imgs[1], size),
+            ]
+        else:
+            self.spawn_images = spawning_images
         self.init_spawn_images = list(self.spawn_images)
         self.image = self.spawn_images[0]
         self.damage_surf = pygame.Surface(size)
@@ -46,34 +52,39 @@ class Spawner:
         self.hp_bar = LoadingBar(
             value=self.hp,
             fg_color=(179, 2, 43),
-            bg_color='black',
-            rect=pygame.Rect((0, 0), self.hp_bar_size)
+            bg_color="black",
+            rect=pygame.Rect((0, 0), self.hp_bar_size),
         )
 
     def spawn(self, n):
         if len(self.spawning_rects) < n - 1:
-            self.spawning_rects = [pygame.Rect(
-                self.location[0] + random.randrange(self.size[0]),
-                self.location[1],
-                300,
-                300
-            ) for _ in range(n)]
+            self.spawning_rects = [
+                pygame.Rect(
+                    self.location[0] + random.randrange(self.size[0]),
+                    self.location[1],
+                    300,
+                    300,
+                )
+                for _ in range(n)
+            ]
 
     def spawn_enemies(self, n):
-        self.enemies += [self.enemy(
-            self.location[0] + random.randrange(self.size[0]),
-            self.location[1],
-            weapon=None,
-            clan="shadow",
-            speed=1.7,
-        ) for _ in range(n)]
+        self.enemies += [
+            self.enemy(
+                self.location[0] + random.randrange(self.size[0]),
+                self.location[1],
+                weapon=None,
+                clan="shadow",
+                speed=1.7,
+            )
+            for _ in range(n)
+        ]
 
     def handle_shuriken_collision(self):
         for shuriken in shurikens:
-            if isinstance(shuriken.launcher, Player) and shuriken.rect.colliderect((
-                c(self.init_rect.topleft, self.camera),
-                self.size
-            )):
+            if isinstance(shuriken.launcher, Player) and shuriken.rect.colliderect(
+                (c(self.init_rect.topleft, self.camera), self.size)
+            ):
                 self.hp -= shuriken.damage
                 shurikens.remove(shuriken)
                 self.damage_alpha = 100
@@ -132,18 +143,16 @@ class Spawner:
 
         self.rect = self.image.get_rect(topleft=self.rect.topleft)
         self.hp_bar.value = self.hp * (self.hp_bar_size[0] / self.max_hp)
-        self.hp_bar.rect.center = (
-            self.rect.midtop[0],
-            self.rect.midtop[1] - 10
-        )
+        self.hp_bar.rect.center = (self.rect.midtop[0], self.rect.midtop[1] - 10)
 
     def draw_spawn(self, screen, camera):
         for rect in self.spawning_rects:
-            pygame.draw.rect(screen, 'red', (
-                rect.x - camera[0],
-                rect.y - camera[1],
-                *rect.size
-            ), width=3)
+            pygame.draw.rect(
+                screen,
+                "red",
+                (rect.x - camera[0], rect.y - camera[1], *rect.size),
+                width=3,
+            )
 
     def draw(self, screen: pygame.Surface, camera):
         self.camera = camera
@@ -164,3 +173,10 @@ class Spawner:
         screen.blit(self.image, pos)
         self.glow.draw(screen, camera)
         self.hp_bar.draw(screen, camera, moving=True)
+
+class BeeSpawner(Spawner):
+    def __init__(self, location, size, cool_down, number_of_enemies, enemy, enemy_size, hp) -> None:
+        super().__init__(location, size, cool_down, number_of_enemies, enemy, enemy_size, hp, spawning_images=bee_spawner_imgs)
+
+
+    

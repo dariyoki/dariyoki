@@ -1,5 +1,7 @@
-import pygame
 import random
+
+import pygame
+
 from src.effects.particle import Particle
 
 
@@ -8,15 +10,18 @@ class Explosion:
         self.n_particles = n_particles
         self.n_size = n_size
 
-        self.particles = [Particle(
-            pos=pos,
-            color=color,
-            size=random.randrange(*n_size),
-            speed=random.uniform(*speed),
-            shape="square",
-            glow=True,
-            size_reduction=size_reduction
-        ) for _ in range(n_particles)]
+        self.particles = [
+            Particle(
+                pos=pos,
+                color=color,
+                size=random.randrange(*n_size),
+                speed=random.uniform(*speed),
+                shape="square",
+                glow=True,
+                size_reduction=size_reduction,
+            )
+            for _ in range(n_particles)
+        ]
 
     def draw(self, screen, dt):
         for particle in self.particles:

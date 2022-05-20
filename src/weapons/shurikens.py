@@ -1,8 +1,10 @@
-import pygame
 import uuid
-from src.sprites import items, item_size
+
+import pygame
+
 from src.angular_movement import Angle
 from src.effects.particle_effects import ShurikenContrail
+from src.sprites import item_size, items
 from src.utils import circle_surf
 
 
@@ -29,26 +31,14 @@ class Shuriken(Angle):
 
         self.image = pygame.transform.rotozoom(self.shuriken_img, int(self.angle), 1)
         self.contrail.update(
-            self.rect.center[0] - camera[0],
-            self.rect.center[1] - camera[1],
-            screen,
-            dt
+            self.rect.center[0] - camera[0], self.rect.center[1] - camera[1], screen, dt
         )
-        screen.blit(self.image, (
-            self.rect.x - camera[0],
-            self.rect.y - camera[1]
-        ))
+        screen.blit(self.image, (self.rect.x - camera[0], self.rect.y - camera[1]))
 
         surf = circle_surf(self.glow_radius, (31, 32, 34))
         rect = surf.get_rect(center=self.rect.center)
         screen.blit(
             surf,
-            (
-                rect.x - camera[0],
-                rect.y - camera[1]
-            ),
-            special_flags=pygame.BLEND_RGB_ADD
+            (rect.x - camera[0], rect.y - camera[1]),
+            special_flags=pygame.BLEND_RGB_ADD,
         )
-
-
-

@@ -1,4 +1,5 @@
 import pygame
+from src._types import Vec
 
 pygame.init()
 pygame.font.init()
@@ -17,17 +18,22 @@ compiling = False
 # call any time before set_mode
 try:
     import pyi_splash  # special pyinstaller thing - import will not resolve in dev
+
     pyi_splash.close()
 except ImportError:
-    compiling = True  # this is expected to throw an exception in non-splash launch contexts.
+    compiling = (
+        True  # this is expected to throw an exception in non-splash launch contexts.
+    )
 
-screen: pygame.Surface = pygame.display.set_mode((screen_width, screen_height), pygame.SCALED | pygame.RESIZABLE)
+screen: pygame.Surface = pygame.display.set_mode(
+    (screen_width, screen_height), pygame.SCALED | pygame.RESIZABLE
+)
 pygame.display.set_caption("src")
 logo = pygame.image.load("assets/sprites/logo.ico").convert_alpha()
 pygame.display.set_icon(logo)
 
 # camera = [-(screen_width // 2 - 60), -(screen_height // 2)]
-camera = [100, 100]
+camera = Vec(100, 100)
 player_start_pos = (950, -200)
 
 
@@ -36,5 +42,3 @@ start_x = -1000
 end_x = -1000 + (32 * 600)
 start_y = 500
 end_y = 500 - (32 * 120)
-
-

@@ -1,6 +1,5 @@
 import json
 
-
 enemy_ids = []
 shurikens = []
 explosions = []

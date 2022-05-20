@@ -1,17 +1,21 @@
-import pygame
 import math
 from typing import Optional
-from src.sprites import characters, sword_attack, lsword_attack, items, shield_frames, player_shield_img
-from src.audio import dash_sfx, pickup_item_sfx
+
+import pygame
+
+from src._globals import general_info, shurikens
+from src._types import Vec
 from src.animation import Animation
-from src.effects.particle_effects import PlayerAura
-from src.weapons.shurikens import Shuriken
-from src._globals import shurikens, general_info
+from src.audio import dash_sfx, pickup_item_sfx
 from src.consumables import HealthPotion, ShieldPotion
+from src.effects.particle_effects import PlayerAura
 from src.game_events import GeneralInfo
+from src.sprites import (characters, items, lsword_attack, player_shield_img,
+                         shield_frames, sword_attack)
+from src.traits import collide, jump
 from src.utils import camerify as c
 from src.utils import circle_surf
-from src.traits import collide
+from src.weapons.shurikens import Shuriken
 
 
 class Player:
@@ -22,6 +26,7 @@ class Player:
     def __init__(self, x, y, camera, controls, screen: pygame.Surface):
         # Constructor objects
         self.x, self.y = x, y
+        self.vec = Vec(self.x, self.y)
         self.right_img = characters[0]
         self.left_img = pygame.transform.flip(self.right_img, True, False)
         self.image = self.right_img
@@ -48,7 +53,9 @@ class Player:
             "soul bomb": 0,
             "soul sword": 0,
         }
-        self.inventory: list[Optional[str]] = [None for _ in range(self.INVENTORY_SLOTS)]
+        self.inventory: list[Optional[str]] = [
+            None for _ in range(self.INVENTORY_SLOTS)
+        ]
         self.item_pickup_circle_radius = self.rect.height
         self.item_pickup_circle_width = 5
         self.item_pickup_start = False
@@ -81,8 +88,12 @@ class Player:
         self.chest_index = -1
         self.info = {}
         self.equip_items = items.copy()
-        self.equip_items["sword"] = pygame.transform.rotate(pygame.transform.scale2x(self.equip_items["sword"]), -45)
-        self.equip_items["scythe"] = pygame.transform.rotate(pygame.transform.scale2x(self.equip_items["scythe"]), -45)
+        self.equip_items["sword"] = pygame.transform.rotate(
+            pygame.transform.scale2x(self.equip_items["sword"]), -45
+        )
+        self.equip_items["scythe"] = pygame.transform.rotate(
+            pygame.transform.scale2x(self.equip_items["scythe"]), -45
+        )
 
         # Consumables
         self.health_potion = HealthPotion(self)
@@ -101,10 +112,7 @@ class Player:
         }
 
         # Weapon data
-        self.cooldowns = {
-            "shuriken": 0.3,
-            "glock": 0.6
-        }
+        self.cooldowns = {"shuriken": 0.3, "glock": 0.6}
         self.attack_cd = 0
 
         # Movement vars
@@ -127,15 +135,17 @@ class Player:
         self.dx, self.dy = 0, 0
 
     def handle_shurikens(self, target):
-        shurikens.append(Shuriken(
-            start=(
-                self.rect.center[0] - self.camera[0],
-                self.rect.center[1] - self.camera[1]
-            ),
-            target=target,
-            speed=12,
-            launcher=self
-        ))
+        shurikens.append(
+            Shuriken(
+                start=(
+                    self.rect.center[0] - self.camera[0],
+                    self.rect.center[1] - self.camera[1],
+                ),
+                target=target,
+                speed=12,
+                launcher=self,
+            )
+        )
         if self.item_count["shuriken"] > 0:
             self.item_count["shuriken"] -= 1
         else:
@@ -143,12 +153,7 @@ class Player:
 
     def handle_health_potion(self):
         self.health_potion.loading_bar.rect = pygame.Rect(
-            pygame.Rect(
-                self.rect.midtop[0],
-                self.rect.midtop[1] - 10,
-                50,
-                12
-            )
+            pygame.Rect(self.rect.midtop[0], self.rect.midtop[1] - 10, 50, 12)
         )
         self.health_potion.loading_bar.value += 0.9 * self.dt
         self.health_potion.draw(self.screen, self.camera)
@@ -161,12 +166,7 @@ class Player:
 
     def handle_shield_potion(self):
         self.shield_potion.loading_bar.rect = pygame.Rect(
-            pygame.Rect(
-                self.rect.midtop[0],
-                self.rect.midtop[1] - 10,
-                50,
-                12
-            )
+            pygame.Rect(self.rect.midtop[0], self.rect.midtop[1] - 10, 50, 12)
         )
         self.shield_potion.loading_bar.value += 0.5 * self.dt
         self.shield_potion.draw(self.screen, self.camera)
@@ -194,10 +194,16 @@ class Player:
 
         # Drawing item pickup circle
         if self.item_pickup_start:
-            pygame.draw.circle(self.screen, 'white', (
-                self.rect.center[0] - self.camera[0],
-                self.rect.center[1] - self.camera[1]
-            ), radius=self.item_pickup_circle_radius, width=int(self.item_pickup_circle_width))
+            pygame.draw.circle(
+                self.screen,
+                "white",
+                (
+                    self.rect.center[0] - self.camera[0],
+                    self.rect.center[1] - self.camera[1],
+                ),
+                radius=self.item_pickup_circle_radius,
+                width=int(self.item_pickup_circle_width),
+            )
             self.item_pickup_circle_radius -= 3 * self.dt
             self.item_pickup_circle_width -= 0.3 * self.dt
             if self.item_pickup_circle_radius < 1:
@@ -233,7 +239,11 @@ class Player:
 
             self.image = self.left_img
 
-        if event_info["mouse press"][0] and self.equipped is not None and event_info["mouse pos"][1] > 130:
+        if (
+            event_info["mouse press"][0]
+            and self.equipped is not None
+            and event_info["mouse pos"][1] > 130
+        ):
             self.attack_cd += event_info["raw dt"]
             if self.equipped in self.cooldowns:
                 if self.attack_cd >= self.cooldowns[self.equipped]:
@@ -271,11 +281,15 @@ class Player:
                                 quantity = 1
 
                         if self.inventory.count(None) < 1:
-                            general_info[0] = GeneralInfo(f"Out of inventory slots! (MAX:8)", "red")
+                            general_info[0] = GeneralInfo(
+                                f"Out of inventory slots! (MAX:8)", "red"
+                            )
                         else:
                             info["items"].remove(self.colliding_item)
                             self.item_count[name] += quantity
-                            general_info[0] = GeneralInfo(f"+{quantity} {name} picked up!", "white")
+                            general_info[0] = GeneralInfo(
+                                f"+{quantity} {name} picked up!", "white"
+                            )
                             pickup_item_sfx.play()
                             if name not in self.inventory:
                                 for index, item in enumerate(self.inventory):
@@ -306,25 +320,7 @@ class Player:
             self.dash_images.append([d_img, (self.x, self.y), 150])
 
         dx, dy = collide(self, info, event_info, dx, dy)
-
-        # Gravity control
-        if self.jumping:
-            self.angle += 200 * dt
-
-            self.image = pygame.transform.rotozoom(self.right_img, int(self.angle), 1)
-            self.velocity -= self.acceleration * dt
-            dy -= self.velocity * dt
-            self.jump_stack += abs(dy)
-
-            if dy == abs(dy):
-                dy = -dy
-
-            if self.jump_stack > self.JUMP_HEIGHT:
-                self.jumping = False
-                self.jump_stack = 0
-                self.velocity = 5
-
-            self.touched_ground = False
+        dy = jump(self, dt, dy)
 
         # Handle chests
         self.rs = [r.rect for r in info["chests"]]
@@ -347,6 +343,7 @@ class Player:
         # Update player coord
         self.x += dx
         self.y += dy
+        self.vec += (dx, dy)
 
         # Update Camera coord
         self.dx, self.dy = dx, dy
@@ -373,25 +370,29 @@ class Player:
         if self.shield < 1 or self.glow_surf_alpha <= 0:
             self.aura.update(
                 self.rect.center[0] - self.camera[0],
-                self.rect.center[1] - self.camera[1], screen, self.dt)
+                self.rect.center[1] - self.camera[1],
+                screen,
+                self.dt,
+            )
 
         # Draw player
-        screen.blit(self.image, (self.x - self.camera[0], self.y - self.camera[1]))
+        screen.blit(self.image, self.vec - self.camera)
 
         # Draw player weapon
         if self.equipped is not None:
             stub = self.equip_items[self.equipped].get_rect(center=self.rect.center)
             if self.last_direction == "right":
-                screen.blit(self.equip_items[self.equipped], (
-                    stub.x + 20 - self.camera[0],
-                    stub.y - self.camera[1]
-                ))
+                screen.blit(
+                    self.equip_items[self.equipped],
+                    (stub.x + 20 - self.camera[0], stub.y - self.camera[1]),
+                )
             elif self.last_direction == "left":
-                img = pygame.transform.flip(self.equip_items[self.equipped], True, False)
-                screen.blit(img, (
-                    stub.x - 20 - self.camera[0],
-                    stub.y - self.camera[1]
-                ))
+                img = pygame.transform.flip(
+                    self.equip_items[self.equipped], True, False
+                )
+                screen.blit(
+                    img, (stub.x - 20 - self.camera[0], stub.y - self.camera[1])
+                )
 
         # Draw loading bar
         if self.standing_near_chest and len(self.info["chests"]) != 0:
@@ -408,13 +409,17 @@ class Player:
                 player_shield_img.set_alpha(self.glow_surf_alpha)
                 self.glow_surf.set_alpha(self.glow_surf_alpha)
                 screen.blit(player_shield_img, shield_pos)
-                screen.blit(self.glow_surf, shield_pos, special_flags=pygame.BLEND_RGB_ADD)
+                screen.blit(
+                    self.glow_surf, shield_pos, special_flags=pygame.BLEND_RGB_ADD
+                )
         elif self.shield_break:
-            if self.shield_breaking_animation.index > self.shield_breaking_animation.f_len - 1:
+            if (
+                self.shield_breaking_animation.index
+                > self.shield_breaking_animation.f_len - 1
+            ):
                 self.shield_break = False
                 self.info["expanding circles"].add(
-                    pos=c(player_shield_rect.center, self.camera),
-                    color=(0, 20, 200)
+                    pos=c(player_shield_rect.center, self.camera), color=(0, 20, 200)
                 )
             else:
                 self.shield_breaking_animation.play(screen, shield_pos, self.dt)

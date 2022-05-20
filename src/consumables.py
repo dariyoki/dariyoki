@@ -1,7 +1,8 @@
 import pygame
-from src.widgets import LoadingBar
+
 from src._globals import explosions
 from src.effects.explosion import Explosion
+from src.widgets import LoadingBar
 
 
 class HealthPotion:
@@ -10,14 +11,11 @@ class HealthPotion:
         self.player_obj = player_obj
         self.loading_bar = LoadingBar(
             value=0,
-            fg_color='white',
-            bg_color='black',
+            fg_color="white",
+            bg_color="black",
             rect=pygame.Rect(
-                player_obj.rect.midtop[0],
-                player_obj.rect.midtop[1] - 10,
-                50,
-                12
-            )
+                player_obj.rect.midtop[0], player_obj.rect.midtop[1] - 10, 50, 12
+            ),
         )
 
     def draw(self, screen: pygame.Surface, camera):
@@ -28,10 +26,19 @@ class HealthPotion:
                 self.player_obj.hp = self.player_obj.max_hp
             else:
                 self.player_obj.hp += self.health
-            explosions.append(Explosion(400, (4, 15), [
-                self.player_obj.rect.center[0] - camera[0],
-                self.player_obj.rect.center[1] - camera[1]
-            ], (2.5, 8.6), 'green', size_reduction=0.6))
+            explosions.append(
+                Explosion(
+                    400,
+                    (4, 15),
+                    [
+                        self.player_obj.rect.center[0] - camera[0],
+                        self.player_obj.rect.center[1] - camera[1],
+                    ],
+                    (2.5, 8.6),
+                    "green",
+                    size_reduction=0.6,
+                )
+            )
 
 
 class ShieldPotion:
@@ -40,14 +47,11 @@ class ShieldPotion:
         self.player_obj = player_obj
         self.loading_bar = LoadingBar(
             value=0,
-            fg_color='white',
-            bg_color='black',
+            fg_color="white",
+            bg_color="black",
             rect=pygame.Rect(
-                player_obj.rect.midtop[0],
-                player_obj.rect.midtop[1] - 10,
-                50,
-                12
-            )
+                player_obj.rect.midtop[0], player_obj.rect.midtop[1] - 10, 50, 12
+            ),
         )
 
     def draw(self, screen: pygame.Surface, camera):
@@ -58,9 +62,16 @@ class ShieldPotion:
                 self.player_obj.shield = self.player_obj.max_shield
             else:
                 self.player_obj.shield += self.shield
-            explosions.append(Explosion(400, (4, 15), [
-                self.player_obj.rect.center[0] - camera[0],
-                self.player_obj.rect.center[1] - camera[1]
-            ], (2.5, 8.6), (0, 255, 255), size_reduction=0.6))
-
-
+            explosions.append(
+                Explosion(
+                    400,
+                    (4, 15),
+                    [
+                        self.player_obj.rect.center[0] - camera[0],
+                        self.player_obj.rect.center[1] - camera[1],
+                    ],
+                    (2.5, 8.6),
+                    (0, 255, 255),
+                    size_reduction=0.6,
+                )
+            )
