@@ -11,7 +11,7 @@
   },
   "characters.png": {
     "sprite_sheet": {
-      "rows": 2,
+      "rows": 4,
       "columns": 4,
       "size": 32,
       "bound": true
@@ -21,7 +21,7 @@
   },
   "shield_bubble.png": {
     "sprite_sheet": {
-      "rows": 2,
+      "rows": 1,
       "columns": 4,
       "size": 32,
       "bound": true

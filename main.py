@@ -54,7 +54,7 @@ class Game:
         self.current_chunk = (0, 0)
         self.all_chunks = {}
         self.all_rects = {}
-        self.load_level(1)
+        self.load_level(0)
 
         self.run = True
         self.t_time_passed = 0
@@ -210,7 +210,8 @@ class Game:
                         self.player.rect.size,
                         100,
                         border_image=self.assets["border"],
-                        spawn_images=[self.assets["spawner_shadow_ninja"], self.assets["spawning_shadow_ninja"]]
+                        spawn_images=[self.assets["spawner_shadow_ninja"], self.assets["spawning_shadow_ninja"]],
+                        characters=self.assets["characters"]
                     )
                     for obj in self.tile_map.get_layer_by_name("spawners")
                 ]
@@ -227,9 +228,9 @@ class Game:
                 self.i_cards = {
                     "ak47": self.assets["i_ak47"],
                     "glock": self.assets["i_glock"],
-                    "health_potion": self.assets["i_health_potion"],
+                    "health potion": self.assets["i_health_potion"],
                     "scythe": self.assets["i_scythe"],
-                    "shield_potion": self.assets["i_shield_potion"],
+                    "shield potion": self.assets["i_shield_potion"],
                     "shuriken": self.assets["i_shuriken"],
                     "smoke_bomb": self.assets["i_smoke_bomb"],
                     "sword": self.assets["i_sword"],

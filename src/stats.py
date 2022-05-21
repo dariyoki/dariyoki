@@ -136,8 +136,8 @@ class PlayerStatistics:
 
         bsize = (50, 50)
         self.bsize = bsize
-        self.border_img = pygame.transform.scale(assets["border_img"], bsize)
-        self.selected_border_img = pygame.transform.scale(assets["selected_border_img"], bsize)
+        self.border_img = pygame.transform.scale(assets["border"], bsize)
+        self.selected_border_img = pygame.transform.scale(assets["selected_border"], bsize)
         brect = self.border_img.get_rect()
         self.inventory_rects = [
             pygame.Rect(

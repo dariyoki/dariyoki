@@ -22,7 +22,9 @@ class Spawner:
         hp,
         spawn_images: Sequence[pygame.Surface],
         border_image: pygame.Surface,
+        characters
     ) -> None:
+        self.border_image = border_image
         self.location = location
         self.size = size
         self.spawn_images = spawn_images
@@ -46,6 +48,7 @@ class Spawner:
         self.max_hp = hp
         self.camera = [0, 0]
         self.dt = 0
+        self.characters = characters
 
         self.spawning_rects = []
         self.spawn_it = False
@@ -82,6 +85,8 @@ class Spawner:
                 weapon=None,
                 clan="shadow",
                 speed=1.7,
+                characters=self.characters,
+                border_image=self.border_image
             )
             for _ in range(n)
         ]
