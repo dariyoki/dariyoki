@@ -3,23 +3,17 @@ from enum import Enum
 import pygame
 
 from src._globals import general_info
-from src.sprites import blue_ribbon
 
 
 class Achievements(Enum):
     ...
 
 
-class Achievement:
-    def __init__(self):
-        self.image = blue_ribbon.copy()
-
-
 class GeneralInfo:
     def __init__(self, msg, color):
         self.msg = msg
         self.color = color
-        self.font = pygame.font.SysFont("arialrounded", 18)
+        self.font = pygame.font.Font(None, 18)
         self.text = self.font.render(msg, True, color)
         self.text_rect = self.text.get_rect(center=(1100 // 2, 270))
         self.pos = list(self.text_rect.topleft)

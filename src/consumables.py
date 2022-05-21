@@ -6,7 +6,7 @@ from src.widgets import LoadingBar
 
 
 class HealthPotion:
-    def __init__(self, player_obj):
+    def __init__(self, player_obj, border_image: pygame.Surface):
         self.health = 40
         self.player_obj = player_obj
         self.loading_bar = LoadingBar(
@@ -16,6 +16,7 @@ class HealthPotion:
             rect=pygame.Rect(
                 player_obj.rect.midtop[0], player_obj.rect.midtop[1] - 10, 50, 12
             ),
+            border_image=border_image
         )
 
     def draw(self, screen: pygame.Surface, camera):
@@ -42,7 +43,7 @@ class HealthPotion:
 
 
 class ShieldPotion:
-    def __init__(self, player_obj):
+    def __init__(self, player_obj, border_image: pygame.Surface):
         self.shield = 50
         self.player_obj = player_obj
         self.loading_bar = LoadingBar(
@@ -52,6 +53,7 @@ class ShieldPotion:
             rect=pygame.Rect(
                 player_obj.rect.midtop[0], player_obj.rect.midtop[1] - 10, 50, 12
             ),
+            border_image=border_image
         )
 
     def draw(self, screen: pygame.Surface, camera):

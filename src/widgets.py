@@ -5,7 +5,6 @@ import pygame
 
 from src._types import ColorValue, Pos, Size, WSurfInfo
 from src.audio import hover_sfx
-from src.sprites import bar_border_img, border_img
 
 
 class LoadingBar:
@@ -15,8 +14,8 @@ class LoadingBar:
         fg_color,
         bg_color,
         rect: pygame.Rect,
+        border_image: pygame.Surface,
         max_value=100,
-        _border_img=None,
     ):
         self.value = value
         self.sfg_color = fg_color
@@ -28,13 +27,7 @@ class LoadingBar:
         self.val_rect = pygame.Rect(rect.topleft, (self.value, self.rect.height))
         self.background_surf = pygame.Surface(self.rect.size)
         self.loaded = False
-        if _border_img is not None:
-            self.border_img = _border_img
-            self.background_surf.set_alpha(100)
-        else:
-            self.border_img = border_img
-
-        self.border_img = pygame.transform.scale(self.border_img, rect.size)
+        self.border_img = pygame.transform.scale(border_image, rect.size)
         self.max_value = max_value
 
     def draw(self, screen: pygame.Surface, camera, moving: bool = False):
@@ -63,7 +56,7 @@ class LoadingBar:
 class EnergyBar(LoadingBar):
     GEN_COOLDOWN = 0.3
 
-    def __init__(self, player_obj):
+    def __init__(self, player_obj, bar_border_img: pygame.Surface):
         width = player_obj.hp * 1.7
         height = 17
         super().__init__(
@@ -71,7 +64,7 @@ class EnergyBar(LoadingBar):
             fg_color=(0, 255, 255),
             bg_color="black",
             rect=pygame.Rect((970, 40), (width, height)),
-            _border_img=bar_border_img,
+            border_image=bar_border_img,
         )
         self.w_surfs: list[WSurfInfo] = []
         self.time_passed = 0

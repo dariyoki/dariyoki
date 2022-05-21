@@ -2,15 +2,13 @@ import uuid
 
 import pygame
 
-from src.angular_movement import Angle
+from src.angular_movement import Projectile
 from src.effects.particle_effects import ShurikenContrail
-from src.sprites import item_size, items
 from src.utils import circle_surf
 
 
-# TODO: Work on shurikens
-class Shuriken(Angle):
-    def __init__(self, start, target, speed, launcher):
+class Shuriken(Projectile):
+    def __init__(self, start, target, speed, launcher, items, item_size):
         super().__init__(start, target, speed, item_size)
         self.shuriken_img = items["shuriken"]
         self.image = self.shuriken_img.copy()

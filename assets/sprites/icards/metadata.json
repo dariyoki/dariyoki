@@ -1,0 +1,58 @@
+{
+  "i_ak47.jpeg": {
+    "sprite_sheet": null,
+    "convert_alpha": false,
+    "states": [
+      "level"
+    ]
+  },
+  "i_glock.jpeg": {
+    "sprite_sheet": null,
+    "convert_alpha": false,
+    "states": [
+      "level"
+    ]
+  },
+  "i_health_potion.jpeg": {
+    "sprite_sheet": null,
+    "convert_alpha": false,
+    "states": [
+      "level"
+    ]
+  },
+  "i_scythe.jpeg": {
+    "sprite_sheet": null,
+    "convert_alpha": false,
+    "states": [
+      "level"
+    ]
+  },
+  "i_shield_potion.jpeg": {
+    "sprite_sheet": null,
+    "convert_alpha": false,
+    "states": [
+      "level"
+    ]
+  },
+  "i_shuriken.jpeg": {
+    "sprite_sheet": null,
+    "convert_alpha": false,
+    "states": [
+      "level"
+    ]
+  },
+  "i_smoke_bomb.jpeg": {
+    "sprite_sheet": null,
+    "convert_alpha": false,
+    "states": [
+      "level"
+    ]
+  },
+  "i_sword.jpeg": {
+    "sprite_sheet": null,
+    "convert_alpha": false,
+    "states": [
+      "level"
+    ]
+  }
+}

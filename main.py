@@ -1,29 +1,25 @@
+import asyncio
 import json
 import random
-from sys import base_exec_prefix
 import time
-from numpy import newaxis
 
-import pygame
 import pytmx
 
-from src._globals import (enemy_ids, explosions, general_info, shurikens,
-                          spawners)
-from src._types import EventInfo, Vec
+from src._globals import enemy_ids, explosions, general_info, shurikens, spawners
+from src._types import EventInfo
 from src.display import *
 from src.effects.exp_circle import ExpandingCircle, ExpandingCircles
 from src.effects.explosion import Explosion
 from src.effects.particle_effects import MainMenuFlare
-from src.enemy import Ninja, Bee
+from src.enemy import Bee, Ninja
 from src.items import Chest
 from src.player import Player
 from src.spawner import Spawner
-from src.sprites import (background_img, cursor_img, game_border_img,
-                         menu_background_img, moon, player_size)
+from src.sprites import load_assets
 from src.stats import Info, PlayerStatistics
+from src.utils import Time
 from src.widgets import MenuButton
 from src.world import World
-from src.utils import Time
 
 
 class Game:
@@ -31,23 +27,25 @@ class Game:
     PARALLAX_TILE_SIZE = 16
     TOTAL_ROWS = 250
     TOTAL_COLS = 100
-    CHUNK_SIZE = 5
-
-    CHUNKS_INFO = tuple(
-        (
-            (x * 32, y * 32)
-            for x, y in zip(
-                range(0, TOTAL_ROWS, CHUNK_SIZE), range(0, TOTAL_COLS, CHUNK_SIZE)
-            )
-        )
-    )
 
     def __init__(self):
+        self.items = None
+        self.i_cards = None
+        self.bee_gen_time = None
+        self.bees = None
+        self.statistics = None
+        self.enemies = None
+        self.chests = None
+        self.opened_chests = None
+        self.item_info = None
+        self.state = "main menu"
+        self.assets = load_assets(self.state)
+
         # Controls
         with open("assets/data/controls.json") as f:
             self.controls = json.load(f)
 
-        pygame.mouse.set_cursor((0, 0), cursor_img)
+        pygame.mouse.set_cursor((0, 0), self.assets["cursor"])
         # pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_CROSSHAIR)
 
         # Level data
@@ -56,17 +54,9 @@ class Game:
         self.current_chunk = (0, 0)
         self.all_chunks = {}
         self.all_rects = {}
-        self.load_level(0)
-        # print(self.all_chunks)
-        # self.all_rects = self.all_chunks[self.current_chunk]
-        # print(self.all_rects)
+        self.load_level(1)
 
         self.run = True
-        self.player = Player(
-            *player_start_pos, camera, self.controls["controls"], screen
-        )
-        self.world = World(self.tile_map)
-        self.camera = camera
         self.t_time_passed = 0
         self.font = pygame.font.Font("assets/fonts/Roboto-Light.ttf", 16)
 
@@ -85,38 +75,6 @@ class Game:
         self.screen_shake = 0
         self.screen_shake_val = 0
 
-        # Levels
-        self.item_info = Info(
-            screen, eval("pygame." + self.controls["controls"]["info toggle"])
-        )
-        self.opened_chests = []
-        self.chests = [
-            Chest(obj.x, obj.y - (32 * 2), pygame.K_f, 7)
-            for obj in self.tile_map.get_layer_by_name("chests")
-        ]
-        global spawners
-        spawners += [
-            Spawner(
-                [obj.x, obj.y],
-                (obj.width, obj.height),
-                7,
-                (1, 4),
-                Ninja,
-                player_size,
-                100,
-            )
-            for obj in self.tile_map.get_layer_by_name("spawners")
-        ]
-        # spawners = []
-
-        self.items = []
-        self.enemies: list[Ninja] = []
-
-        # Inventory
-        self.statistics = PlayerStatistics(screen, self.player)
-
-        self.state = "main menu"
-
         # User interface
         self.menu_button_names = ["Start", "Reset", "Exit", "Contents", "Credits"]
         start = (screen.get_rect().center[0] - (170 / 2), 300)
@@ -125,13 +83,12 @@ class Game:
             MenuButton((start[0], start[1] + ((30 + padding) * index)), title=name)
             for index, name in enumerate(self.menu_button_names)
         ]
-        self.main_menu_flare = MainMenuFlare()
+        self.main_menu_flare = MainMenuFlare(self.assets["flame_particles"])
         self.moon_bob = [20, 30]
         self.bob_coord = (20, 40)
         self.moon_bob_forward = True
 
-        self.bees: list[Bee] = []
-        self.bee_gen_time = Time(random.uniform(4, 6))
+        self.last_state = self.state 
 
     def load_level(self, n):
         # Level data
@@ -146,13 +103,6 @@ class Game:
                         tile_properties["type"],
                         pygame.Rect(tile_pos, (self.TILE_SIZE, self.TILE_SIZE)),
                     )
-                    # previous_chunk = (0, 0)
-                    # for chunk in self.CHUNKS_INFO:
-                    #     self.all_chunks[chunk] = {}
-                    #     if previous_chunk[0] > tile_pos[0] and previous_chunk[1] > tile_pos[1] and \
-                    #             tile_pos[0] < chunk[0] and tile_pos[1] < chunk[1]:
-                    #         self.all_chunks[chunk][tile_pos] = tile_properties["type"]
-                    #     previous_chunk = chunk
                 break
 
     def handle_shurikens(self, dt):
@@ -220,6 +170,71 @@ class Game:
             if shuriken.distance > 800:
                 shurikens.remove(shuriken)
 
+    def selective_load(self):
+        match self.state:
+            case "level":
+                item_size = (25, 25)
+                self._items = {
+                    "health potion": pygame.transform.scale(self.assets["health_potion"], item_size),
+                    "shield potion": pygame.transform.scale(self.assets["shield_potion"], item_size),
+                    "shuriken": pygame.transform.scale(self.assets["shuriken"], item_size),
+                    "smoke bomb": pygame.transform.scale(self.assets["smoke_bomb"], item_size),
+                    "sword": pygame.transform.scale(self.assets["sword"], item_size),
+                    "scythe": pygame.transform.scale(self.assets["scythe"], item_size),
+                }
+                self.player = Player(
+                    *player_start_pos, camera, self.controls["controls"], screen,
+                    assets=self.assets, items=self._items
+                )
+                self.world = World(self.tile_map, self.assets["bush_parallax"])
+                self.camera = camera
+                # Levels
+                self.item_info = Info(
+                    screen, eval("pygame." + self.controls["controls"]["info toggle"])
+                )
+                self.items = []
+                self.opened_chests = []
+                self.chests = [
+                    Chest(obj.x, obj.y - (32 * 2), pygame.K_f, 7, border_image=self.assets["border"],
+                          chests=self.assets["chest"], items=self._items)
+                    for obj in self.tile_map.get_layer_by_name("chests")
+                ]
+                global spawners
+                spawners += [
+                    Spawner(
+                        [obj.x, obj.y],
+                        (obj.width, obj.height),
+                        7,
+                        (1, 4),
+                        Ninja,
+                        self.player.rect.size,
+                        100,
+                        border_image=self.assets["border"],
+                        spawn_images=[self.assets["spawner_shadow_ninja"], self.assets["spawning_shadow_ninja"]]
+                    )
+                    for obj in self.tile_map.get_layer_by_name("spawners")
+                ]
+                # spawners = []
+
+                self.enemies: list[Ninja] = []
+        
+                # Inventory
+                self.statistics = PlayerStatistics(screen, self.player, self.assets)
+        
+                self.bees: list[Bee] = []
+                self.bee_gen_time = Time(random.uniform(4, 6))
+        
+                self.i_cards = {
+                    "ak47": self.assets["i_ak47"],
+                    "glock": self.assets["i_glock"],
+                    "health_potion": self.assets["i_health_potion"],
+                    "scythe": self.assets["i_scythe"],
+                    "shield_potion": self.assets["i_shield_potion"],
+                    "shuriken": self.assets["i_shuriken"],
+                    "smoke_bomb": self.assets["i_smoke_bomb"],
+                    "sword": self.assets["i_sword"],
+                }
+
     def handle_screen_shake(self, dt):
         # Handle screen shake
         if self.screen_shake > 0:
@@ -261,7 +276,7 @@ class Game:
         return False
 
     def main_menu(self, event_info: EventInfo) -> None:
-        screen.blit(menu_background_img, (0, 0))
+        screen.blit(self.assets["red_ski_looks_good"], (0, 0))
         moon_motion = 0.4 * event_info["dt"]
         if self.moon_bob_forward:
             if self.moon_bob[0] < self.bob_coord[1]:
@@ -276,7 +291,7 @@ class Game:
             else:
                 self.moon_bob_forward = True
 
-        screen.blit(moon, self.moon_bob)
+        screen.blit(self.assets["moon"], self.moon_bob)
         self.main_menu_flare.draw(screen, event_info)
         for menu_btn in self.menu_buttons:
             menu_btn.update(event_info)
@@ -287,7 +302,7 @@ class Game:
 
         if self.transitioning:
             if self.handle_fade_in(event_info["dt"]):
-                self.state = "level test"
+                self.state = "level"
 
     def level_test(self, event_info: dict, info: dict) -> None:
         dt = event_info["dt"]
@@ -295,22 +310,12 @@ class Game:
         events = event_info["events"]
         mouse_press = event_info["mouse press"]
 
-        # previous_chunk = (0, 0)
-        # for i, chunk in enumerate(self.CHUNKS_INFO):
-        #     if self.player.x > previous_chunk[0] and self.player.y > previous_chunk[1] \
-        #             and self.player.x < chunk[0] and self.player.y < chunk[1]:
-        #         self.current_chunk = chunk
-        #         self.current_chunk_index = i
-        #         print(self.all_rects)
-        #
-        # self.all_rects = self.all_chunks[self.current_chunk]
-
         # Transitioning
         if self.transitioning:
             self.handle_fade_out(dt)
 
         # Render
-        screen.blit(background_img, (0, 0))
+        screen.blit(self.assets["background"], (0, 0))
 
         # Handle spawners
         for spawner in spawners:
@@ -368,8 +373,10 @@ class Game:
                 enemy_ids.remove(enemy.id)
 
         if self.bee_gen_time.update():
-            print(self.bee_gen_time.time_to_pass)
-            new_bee = Bee(self.player, Vec(random.randrange(0, 300), random.randrange(0, 300)))
+            new_bee = Bee(
+                self.player, Vec(random.randrange(0, 300), random.randrange(0, 300)),
+                bee_img=self.assets["bee"]
+            )
             self.bees.append(new_bee)
 
         for bee in self.bees:
@@ -404,7 +411,7 @@ class Game:
 
         # Item information
         self.item_info.update(self.player.colliding_item, events, dt)
-        self.item_info.draw(screen)
+        self.item_info.draw(screen, self.i_cards)
 
         # Click effect
         self.expanding_circles.update(events, mouse_pos)
@@ -412,10 +419,11 @@ class Game:
 
         # self.handle_rust_binding(raw_dt)
 
-    def main_loop(self):
+    async def main_loop(self):
         start = time.perf_counter()
         while self.run:
             clock.tick()
+            self.last_state = self.state
 
             # Calc
             end = time.perf_counter()
@@ -451,7 +459,7 @@ class Game:
             if self.state == "main menu":
                 pygame.display.set_caption("Dariyoki | Main Menu")
                 self.main_menu(event_info)
-            elif self.state == "level test":
+            elif self.state == "level":
                 pygame.display.set_caption("Dariyoki | Level Test")
                 self.level_test(event_info, info)
 
@@ -460,7 +468,7 @@ class Game:
                 self.transition_overlay_surface_alpha
             )
             screen.blit(self.transition_overlay_surface, (0, 0))
-            screen.blit(game_border_img, (0, 0))
+            screen.blit(self.assets["game_border"], (0, 0))
             # screen.blit(cursor_img, mouse_pos)
 
             screen.blit(
@@ -473,10 +481,15 @@ class Game:
                     self.run = False
 
             pygame.display.update()
+            if self.last_state != self.state:
+                print("STATE SWITCH")
+                self.assets = load_assets(self.state)
+                self.selective_load()
+            await asyncio.sleep(0)
 
         pygame.quit()
 
 
 if __name__ == "__main__":
     game = Game()
-    game.main_loop()
+    asyncio.run(game.main_loop())

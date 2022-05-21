@@ -1,0 +1,23 @@
+{
+  "bar_border.png": {
+    "sprite_sheet": null,
+    "convert_alpha": true,
+    "states": ["level"]
+  },
+  "border.png": {
+    "sprite_sheet": null,
+    "convert_alpha": true,
+    "states": ["level"]
+  },
+  "game_border.png": {
+    "sprite_sheet": null,
+    "convert_alpha": true,
+    "states": ["level", "main menu"]
+  },
+  "selected_border.png": {
+    "sprite_sheet": null,
+    "convert_alpha": true,
+    "states": ["level"]
+  }
+}
+

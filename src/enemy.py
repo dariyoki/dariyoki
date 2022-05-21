@@ -5,18 +5,17 @@ import uuid
 import pygame
 
 from src._globals import enemy_ids, shurikens
-from src.sprites import characters, bee_img
+from src._types import Vec
 from src.traits import collide, jump
 from src.weapons.shurikens import Shuriken
 from src.widgets import LoadingBar
-from src._types import Vec
 
 
 class Ninja:
     JUMP_HEIGHT = 200
     PLAYER_CHASE_RANGE = 400
 
-    def __init__(self, x, y, weapon, clan: str, speed):
+    def __init__(self, x, y, weapon, clan: str, speed, characters, border_image):
         self.x, self.y = x, y
         self.PLAYER_DIST = random.randrange(100, 200)
         self.weapon = weapon
@@ -69,6 +68,7 @@ class Ninja:
             fg_color=(179, 2, 43),
             bg_color="black",
             rect=pygame.Rect((0, 0), self.hp_bar_size),
+            border_image=border_image
         )
         self.camera = [0, 0]
 
@@ -161,18 +161,16 @@ class Ninja:
 class Bee:
     SPEED = 1.2
 
-    def __init__(self, player_instance, vec: Vec):
+    def __init__(self, player_instance, vec: Vec, bee_img: pygame.Surface):
         self.player_instance = player_instance
         self.vec = vec
+        self.bee_img = bee_img
         self.image = bee_img.copy()
 
     def update(self):
         self.vec.move_towards(self.player_instance.vec, self.SPEED)
         angle = self.vec.angle_to(self.player_instance.vec)
-        self.image = pygame.transform.rotate(bee_img, angle)
-
-
+        self.image = pygame.transform.rotate(self.bee_img, angle)
 
     def draw(self, screen: pygame.Surface, camera: Vec):
         screen.blit(self.image, self.vec - camera)
-

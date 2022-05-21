@@ -10,11 +10,9 @@ from src.audio import dash_sfx, pickup_item_sfx
 from src.consumables import HealthPotion, ShieldPotion
 from src.effects.particle_effects import PlayerAura
 from src.game_events import GeneralInfo
-from src.sprites import (characters, items, lsword_attack, player_shield_img,
-                         shield_frames, sword_attack)
 from src.traits import collide, jump
 from src.utils import camerify as c
-from src.utils import circle_surf
+from src.utils import circle_surf, turn_left
 from src.weapons.shurikens import Shuriken
 
 
@@ -23,11 +21,11 @@ class Player:
     DASH_LENGTH = 150
     INVENTORY_SLOTS = 8
 
-    def __init__(self, x, y, camera, controls, screen: pygame.Surface):
+    def __init__(self, x, y, camera, controls, screen: pygame.Surface, assets: dict, items: dict):
         # Constructor objects
         self.x, self.y = x, y
         self.vec = Vec(self.x, self.y)
-        self.right_img = characters[0]
+        self.right_img = assets["dari"][0]
         self.left_img = pygame.transform.flip(self.right_img, True, False)
         self.image = self.right_img
         self.rect = self.image.get_rect()
@@ -61,9 +59,11 @@ class Player:
         self.item_pickup_start = False
 
         # Animations
+        sword_attack = assets["sword attack"]
+        lsword_attack = turn_left(sword_attack)
         self.sword_attack_animation = Animation(sword_attack, speed=0.4)
         self.lsword_attack_animation = Animation(lsword_attack, speed=0.4)
-        self.shield_breaking_animation = Animation(shield_frames, speed=0.2)
+        self.shield_breaking_animation = Animation(assets["shield_bubble"], speed=0.2)
         self.aura = PlayerAura((0, 0, 0), 2)
 
         # Flags
@@ -94,10 +94,11 @@ class Player:
         self.equip_items["scythe"] = pygame.transform.rotate(
             pygame.transform.scale2x(self.equip_items["scythe"]), -45
         )
+        self.player_shield_img = assets["shield_bubble"][0]
 
         # Consumables
-        self.health_potion = HealthPotion(self)
-        self.shield_potion = ShieldPotion(self)
+        self.health_potion = HealthPotion(self, assets["border"])
+        self.shield_potion = ShieldPotion(self, assets["border"])
 
         # Statistics
         self.max_hp, self.max_soul_energy, self.max_shield = 100, 100, 100
@@ -365,7 +366,7 @@ class Player:
             screen.blit(dasher[0], c(dasher[1], self.camera))
 
         # Draw player aura
-        player_shield_rect = player_shield_img.get_rect(center=self.rect.center)
+        player_shield_rect = self.player_shield_img.get_rect(center=self.rect.center)
         shield_pos = c(player_shield_rect.topleft, self.camera)
         if self.shield < 1 or self.glow_surf_alpha <= 0:
             self.aura.update(
@@ -406,9 +407,9 @@ class Player:
 
             if self.glow_surf_alpha > 0:
                 self.glow_surf_alpha -= 2.3 * self.dt
-                player_shield_img.set_alpha(self.glow_surf_alpha)
+                self.player_shield_img.set_alpha(self.glow_surf_alpha)
                 self.glow_surf.set_alpha(self.glow_surf_alpha)
-                screen.blit(player_shield_img, shield_pos)
+                screen.blit(self.player_shield_img, shield_pos)
                 screen.blit(
                     self.glow_surf, shield_pos, special_flags=pygame.BLEND_RGB_ADD
                 )

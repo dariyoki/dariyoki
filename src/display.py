@@ -1,4 +1,5 @@
 import pygame
+
 from src._types import Vec
 
 pygame.init()

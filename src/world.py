@@ -2,12 +2,14 @@ import pygame
 import pytmx
 
 from src._types import Vec
-from src.sprites import bush_img, bush_width, r_bush_img
 
 
 class World:
-    def __init__(self, tile_map: pytmx.TiledMap):
+    def __init__(self, tile_map: pytmx.TiledMap, bush_img: pygame.Surface):
         self.tile_map = tile_map
+        self.bush_img = bush_img
+        self.r_bush_img = pygame.transform.flip(bush_img, True, False)
+        self.bush_width = self.bush_img.get_width()
         self.decorations = tuple(
             (
                 (
@@ -67,8 +69,8 @@ class World:
             screen.blit(image, (pos[0] - camera[0], pos[1] - camera[1]))
 
     def draw_parallax(self, screen: pygame.Surface, camera: Vec):
-        screen.blit(bush_img, (self.x - camera[0], 450))
-        screen.blit(r_bush_img, (self.x - camera[0] + bush_width, 450))
+        screen.blit(self.bush_img, (self.x - camera[0], 450))
+        screen.blit(self.r_bush_img, (self.x - camera[0] + self.bush_width, 450))
         screen.blit(
             self.parallax_background,
             (100 - (camera[0] * self.f), 100 - (camera[1] * self.f)),

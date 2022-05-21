@@ -1,0 +1,72 @@
+{
+  "ak_47.png": {
+    "sprite_sheet": null,
+    "convert_alpha": true,
+    "states": ["level"]
+  },
+  "chest.png": {
+    "sprite_sheet": {
+      "rows": 1,
+      "columns": 2,
+      "size": 32
+    },
+    "convert_alpha": true,
+    "states": ["level"]
+  },  "glock.png": {
+    "sprite_sheet": null,
+    "convert_alpha": true,
+    "states": ["level"]
+  },  "health_potion.png": {
+    "sprite_sheet": null,
+    "convert_alpha": true,
+    "states": ["level"]
+  },  "rocket_launcher.png": {
+    "sprite_sheet": null,
+    "convert_alpha": true,
+    "states": ["level"]
+  },  "scythe.png": {
+    "sprite_sheet": null,
+    "convert_alpha": true,
+    "states": ["level"]
+  },  "shield_potion.png": {
+    "sprite_sheet": null,
+    "convert_alpha": true,
+    "states": ["level"]
+  },  "shotgun.png": {
+    "sprite_sheet": null,
+    "convert_alpha": true,
+    "states": ["level"]
+  },  "shuriken.png": {
+    "sprite_sheet": null,
+    "convert_alpha": true,
+    "states": ["level"]
+  },  "smoke_bomb.png": {
+    "sprite_sheet": null,
+    "convert_alpha": true,
+    "states": ["level"]
+  },  "soul_bomb.png": {
+    "sprite_sheet": null,
+    "convert_alpha": true,
+    "states": ["level"]
+  },  "soul_scythe.png": {
+    "sprite_sheet": null,
+    "convert_alpha": true,
+    "states": ["level"]
+  },  "soul_shuriken.png": {
+    "sprite_sheet": null,
+    "convert_alpha": true,
+    "states": ["level"]
+  },  "soul_sword.png": {
+    "sprite_sheet": null,
+    "convert_alpha": true,
+    "states": ["level"]
+  },  "sword.png": {
+    "sprite_sheet": null,
+    "convert_alpha": true,
+    "states": ["level"]
+  },  "uzi.png": {
+    "sprite_sheet": null,
+    "convert_alpha": true,
+    "states": ["level"]
+  }
+}

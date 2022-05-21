@@ -4,7 +4,6 @@ import random
 import pygame
 
 from src._types import Vec
-from src.sprites import flame_particles_images
 from src.utils import circle_surf, get_movement
 
 
@@ -53,9 +52,9 @@ class Particle:
 
 
 class BezierParticle:
-    def __init__(self, x, y) -> None:
+    def __init__(self, x, y, flame_particles) -> None:
         self.vec = Vec(x, y)
-        self.image = random.choice(flame_particles_images)
+        self.image = random.choice(flame_particles)
         self.rect = self.image.get_rect()
         self.glow_color = 10
         self.glow_increment = random.uniform(0.1, 0.3)

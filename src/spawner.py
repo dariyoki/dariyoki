@@ -1,26 +1,31 @@
-import pygame
 import random
-from src.utils import Glow, camerify as c
-from src.sprites import spawner_imgs, bee_spawner_imgs
+
+import pygame
+from typing import Sequence
+
 from src._globals import shurikens, spawners
 from src.player import Player
+from src.utils import Glow
+from src.utils import camerify as c
 from src.widgets import LoadingBar
 
 
 class Spawner:
     def __init__(
-        self, location, size, cool_down, number_of_enemies, enemy, enemy_size, hp,
-        spawning_images = None
+        self,
+        location,
+        size,
+        cool_down,
+        number_of_enemies,
+        enemy,
+        enemy_size,
+        hp,
+        spawn_images: Sequence[pygame.Surface],
+        border_image: pygame.Surface,
     ) -> None:
         self.location = location
         self.size = size
-        if spawning_images is None:
-            self.spawn_images = [
-                pygame.transform.scale(spawner_imgs[0], size),
-                pygame.transform.scale(spawner_imgs[1], size),
-            ]
-        else:
-            self.spawn_images = spawning_images
+        self.spawn_images = spawn_images
         self.init_spawn_images = list(self.spawn_images)
         self.image = self.spawn_images[0]
         self.damage_surf = pygame.Surface(size)
@@ -54,6 +59,7 @@ class Spawner:
             fg_color=(179, 2, 43),
             bg_color="black",
             rect=pygame.Rect((0, 0), self.hp_bar_size),
+            border_image=border_image,
         )
 
     def spawn(self, n):
@@ -174,9 +180,28 @@ class Spawner:
         self.glow.draw(screen, camera)
         self.hp_bar.draw(screen, camera, moving=True)
 
+
 class BeeSpawner(Spawner):
-    def __init__(self, location, size, cool_down, number_of_enemies, enemy, enemy_size, hp) -> None:
-        super().__init__(location, size, cool_down, number_of_enemies, enemy, enemy_size, hp, spawning_images=bee_spawner_imgs)
-
-
-    
+    def __init__(
+        self,
+        location,
+        size,
+        cool_down,
+        number_of_enemies,
+        enemy,
+        enemy_size,
+        hp,
+        bee_spawner_imgs,
+        border_image: pygame.Surface,
+    ) -> None:
+        super().__init__(
+            location,
+            size,
+            cool_down,
+            number_of_enemies,
+            enemy,
+            enemy_size,
+            hp,
+            spawn_images=bee_spawner_imgs,
+            border_image=border_image,
+        )

@@ -1,7 +1,4 @@
 import random
-
-import pygame
-
 from src.effects.particle import Particle
 
 

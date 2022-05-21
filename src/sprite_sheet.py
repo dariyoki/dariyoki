@@ -1,9 +1,4 @@
-from typing import Optional
-
 import pygame
-
-from src._types import ColorValue
-from src.animation import Animation
 
 
 class SpriteSheet:
@@ -82,7 +77,7 @@ def get_images(
         for col in range(columns):
             # Mod image
             image = sheet.subsurface(
-                pygame.Rect((col * size), ((row * size)), size, size)
+                pygame.Rect((col * size), (row * size), size, size)
             )
             if bound:
                 r = image.get_bounding_rect()
@@ -91,5 +86,3 @@ def get_images(
             images.append(image)
 
     return images
-
-

@@ -1,9 +1,6 @@
 import pygame
 
 from src._types import EventInfo
-from src.sprites import (bar_border_img, border_img, health_potion_img,
-                         i_cards, sb_img, scythe_img, selected_border_img,
-                         shield_potion_img, shuriken_img, sword_img)
 from src.widgets import EnergyBar, LoadingBar
 
 
@@ -100,7 +97,7 @@ class Info:
         # self.label.change_pos((self.pos[0] + 77, self.pos[1]))
         self.rect = self.surf.get_rect(topleft=tuple(self.pos))
 
-    def draw(self, screen):
+    def draw(self, screen, i_cards: dict):
         if self.item is not None:
             self.surf = i_cards[self.item.name]
             self.surf.set_alpha(self.ALPHA)
@@ -110,7 +107,7 @@ class Info:
 
 
 class PlayerStatistics:
-    def __init__(self, screen, player_obj):
+    def __init__(self, screen, player_obj, assets: dict):
         self.screen = screen
         self.player_obj = player_obj
 
@@ -126,21 +123,21 @@ class PlayerStatistics:
             fg_color="green",
             bg_color="black",
             rect=pygame.Rect((start[0], 610 - height - 5), (width, height)),
-            _border_img=bar_border_img,
+            border_image=assets["bar_border"],
         )
         self.shield_bar = LoadingBar(
             value=player_obj.hp,
             fg_color=(0, 0, 255),
             bg_color="black",
             rect=pygame.Rect((start[0], 610), (width, height)),
-            _border_img=bar_border_img,
+            border_image=assets["bar_border"],
         )
-        self.se_bar = EnergyBar(player_obj)
+        self.se_bar = EnergyBar(player_obj, assets["bar_border"])
 
         bsize = (50, 50)
         self.bsize = bsize
-        self.border_img = pygame.transform.scale(border_img, bsize)
-        self.selected_border_img = pygame.transform.scale(selected_border_img, bsize)
+        self.border_img = pygame.transform.scale(assets["border_img"], bsize)
+        self.selected_border_img = pygame.transform.scale(assets["selected_border_img"], bsize)
         brect = self.border_img.get_rect()
         self.inventory_rects = [
             pygame.Rect(
@@ -150,12 +147,12 @@ class PlayerStatistics:
         ]
         self.init_inventory_rects = list(self.inventory_rects)
         self.order = {
-            "shuriken": pygame.transform.scale(shuriken_img, bsize),
-            "sword": pygame.transform.scale(sword_img, bsize),
-            "scythe": pygame.transform.scale(scythe_img, bsize),
-            "health potion": pygame.transform.scale(health_potion_img, bsize),
-            "shield potion": pygame.transform.scale(shield_potion_img, bsize),
-            "smoke bomb": pygame.transform.scale(sb_img, bsize),
+            "shuriken": pygame.transform.scale(assets["shuriken"], bsize),
+            "sword": pygame.transform.scale(assets["sword"], bsize),
+            "scythe": pygame.transform.scale(assets["scythe"], bsize),
+            "health potion": pygame.transform.scale(assets["health_potion"], bsize),
+            "shield potion": pygame.transform.scale(assets["shield_potion"], bsize),
+            "smoke bomb": pygame.transform.scale(assets["smoke_bomb"], bsize),
         }
 
         # Indices

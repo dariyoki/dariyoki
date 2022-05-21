@@ -2,9 +2,7 @@ import random
 from enum import Enum
 
 import pygame
-from pygame.constants import HAT_DOWN
 
-from src.sprites import chests, items
 from src.utils import Glow, circle_surf
 from src.widgets import LoadingBar
 
@@ -75,7 +73,7 @@ class Item:
 
 
 class Chest:
-    def __init__(self, x, y, load_control, load_speed):
+    def __init__(self, x, y, load_control, load_speed, chests, items: dict, border_image):
         self.x, self.y = x, y
         self.closed_img = chests[0]
         self.open_img = chests[1]
@@ -87,6 +85,7 @@ class Chest:
             fg_color="white",
             bg_color="black",
             rect=pygame.Rect((self.rect.center[0], y + 10), (150 / 2, 20 / 2)),
+            border_image=border_image
         )
         self.load_control = load_control
         self.load_speed = load_speed

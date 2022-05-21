@@ -7,7 +7,8 @@ from src.effects.particle import BezierParticle, SoulParticle
 
 
 class MainMenuFlare:
-    def __init__(self) -> None:
+    def __init__(self, flame_particles) -> None:
+        self.flame_particles = flame_particles
         self.particles: list[BezierParticle] = []
 
         # Wind
@@ -31,7 +32,7 @@ class MainMenuFlare:
         if self.count > self.generation_rate:
             type_one = (random.randrange(0, 1100), 0)
             type_two = (0, random.randrange(0, 650))
-            self.particles.append(BezierParticle(*random.choice((type_one, type_two))))
+            self.particles.append(BezierParticle(*random.choice((type_one, type_two)), self.flame_particles))
             self.count = 0
 
         self.time_passed += raw_dt

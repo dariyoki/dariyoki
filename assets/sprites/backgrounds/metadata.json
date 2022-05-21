@@ -1,0 +1,18 @@
+{
+  "background.png": {
+    "sprite_sheet": null,
+    "convert_alpha": false,
+    "states": ["main menu"]
+  },
+  "moon.png": {
+    "sprite_sheet": null,
+    "convert_alpha": true,
+    "states": ["main menu"]
+  },
+  "red_ski_looks_good.png": {
+    "sprite_sheet": null,
+    "convert_alpha": false,
+    "states": ["main menu"]
+  }
+}
+

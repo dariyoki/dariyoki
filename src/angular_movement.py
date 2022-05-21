@@ -3,7 +3,7 @@ import math
 import pygame
 
 
-class Angle:
+class Projectile:
     def __init__(self, start, target, speed, size):
         self.x, self.y = start
         self.target_x, self.target_y = target

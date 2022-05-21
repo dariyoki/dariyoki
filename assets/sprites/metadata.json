@@ -3,7 +3,12 @@
         "sprite_sheet": null,
         "convert_alpha": true,
         "states": ["level"]
-    }
+    },
+  "cursor.png": {
+      "sprite_sheet": null,
+      "convert_alpha": true,
+    "states": ["level", "main menu"]
+  }
 }
 
 

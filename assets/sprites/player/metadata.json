@@ -1,0 +1,42 @@
+{
+  "dari.png": {
+    "sprite_sheet": {
+      "rows": 1,
+      "columns": 4,
+      "size": 64,
+      "bound": true
+    },
+    "convert_alpha": true,
+    "states": ["level"]
+  },
+  "characters.png": {
+    "sprite_sheet": {
+      "rows": 2,
+      "columns": 4,
+      "size": 32,
+      "bound": true
+    },
+    "convert_alpha": true,
+    "states": ["level"]
+  },
+  "shield_bubble.png": {
+    "sprite_sheet": {
+      "rows": 2,
+      "columns": 4,
+      "size": 32,
+      "bound": true
+    },
+    "convert_alpha": true,
+    "states": ["level"]
+  },
+  "sword attack.png": {
+    "sprite_sheet": {
+      "rows": 1,
+      "columns": 4,
+      "size": 32,
+      "bound": false
+    },
+    "convert_alpha": true,
+    "states": ["level"]
+  }
+}
