@@ -5,7 +5,7 @@ import uuid
 import pygame
 
 from src._globals import enemy_ids, shurikens
-from src._types import Vec
+from src.generics import Vec
 from src.entities.traits import collide, jump
 from src.ui.widgets import LoadingBar
 from src.weapons.shurikens import Shuriken

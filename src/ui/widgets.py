@@ -3,7 +3,7 @@ from typing import Any
 
 import pygame
 
-from src._types import ColorValue, Pos, Size, WSurfInfo
+from src.generics import ColorValue, Pos, Size, WSurfInfo
 from src.audio import hover_sfx
 
 

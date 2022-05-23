@@ -1,6 +1,6 @@
 import pygame
 
-from src._types import EventInfo
+from src.generics import EventInfo
 from src.ui.widgets import EnergyBar, LoadingBar
 
 

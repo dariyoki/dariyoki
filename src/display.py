@@ -1,7 +1,10 @@
 import pygame
 import logging
+import os
+import json
 
-from src._types import Vec
+from src.generics import Vec
+from src._globals import LOGGING_CONFIG_PATH
 
 pygame.init()
 pygame.font.init()
@@ -14,8 +17,7 @@ fps = 60
 screen_width = 1100
 screen_height = 650
 
-compiling = False
-
+compiling = True
 
 # call any time before set_mode
 try:
@@ -24,7 +26,7 @@ try:
     pyi_splash.close()
 except ImportError:
     compiling = (
-        True  # this is expected to throw an exception in non-splash launch contexts.
+        False  # this is expected to throw an exception in non-splash launch contexts.
     )
 
 screen: pygame.Surface = pygame.display.set_mode(
@@ -38,12 +40,27 @@ pygame.display.set_icon(logo)
 camera = Vec(100, 100)
 player_start_pos = (950, -200)
 
-
 # Game boundary
 start_x = -1000
 end_x = -1000 + (32 * 600)
 start_y = 500
 end_y = 500 - (32 * 120)
 
+logging.basicConfig()
 logger = logging.getLogger(name="log")
-logger.setLevel("NOTSET") if compiling else logger.setLevel("CRITICAL")
+
+if os.path.exists(LOGGING_CONFIG_PATH):
+    with open(LOGGING_CONFIG_PATH) as f:
+        log_config = json.load(f)
+else:
+    log_config = {"AVAILABLE_OPTIONS": ["CRITICAL", "ERROR", "WARNING", "DEBUG", "INFO", "NOTSET"],
+                  "LOGGING_LEVEL": "DEBUG"}
+    with open(LOGGING_CONFIG_PATH, "w") as f:
+        json.dump(log_config, fp=f, indent=2)
+
+if compiling:
+    logger.setLevel("CRITICAL")
+else:
+    logger.setLevel(log_config["LOGGING_LEVEL"])
+
+

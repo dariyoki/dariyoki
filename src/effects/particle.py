@@ -3,7 +3,7 @@ import random
 
 import pygame
 
-from src._types import Vec
+from src.generics import Vec
 from src.utils import circle_surf, get_movement
 
 

@@ -4,7 +4,7 @@ from typing import Optional
 import pygame
 
 from src._globals import general_info, shurikens
-from src._types import Vec
+from src.generics import Vec
 from src.animation import Animation
 from src.audio import dash_sfx, pickup_item_sfx
 from src.consumables import HealthPotion, ShieldPotion

@@ -1,6 +1,6 @@
 import pygame
 
-from src._types import EventInfo, Vec
+from src.generics import EventInfo, Vec
 from src.effects.particle_effects import MainMenuFlare
 from src.states.game_state import GameState
 from src.ui.widgets import MenuButton
@@ -48,7 +48,7 @@ class MainMenu(GameState):
 
         if self.transitioning:
             if self.handle_fade_in(event_info["dt"]):
-                self.next_state = "level"
+                self.next_state = "level selector"
 
     def draw(self, event_info: EventInfo):
         self.screen.blit(self.assets["red_ski_looks_good"], (0, 0))
@@ -56,3 +56,4 @@ class MainMenu(GameState):
 
         for menu_btn in self.menu_buttons:
             menu_btn.draw(self.screen)
+        self.screen.blit(self.assets["game_border"], (0, 0))

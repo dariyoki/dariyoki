@@ -1,7 +1,7 @@
 import pygame
 import pytmx
 
-from src._types import Vec
+from src.generics import Vec
 
 
 class World:

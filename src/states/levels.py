@@ -6,8 +6,8 @@ import pygame
 import pytmx
 
 from src._globals import enemy_ids, explosions, general_info, shurikens, spawners
-from src._types import Vec
-from src.display import camera, player_start_pos
+from src.generics import Vec
+from src.display import camera, player_start_pos, screen_width, screen_height
 from src.effects.exp_circle import ExpandingCircle, ExpandingCircles
 from src.effects.explosion import Explosion
 from src.entities.enemy import Bee, Ninja
@@ -21,8 +21,17 @@ from src.world import World
 
 
 class LevelSelector(GameState):
-    def __init__(self, screen: pygame.Surface):
+    def __init__(self, screen: pygame.Surface, assets: dict):
         super().__init__("level selector", screen)
+        self.assets = assets
+        self.mod_assets()
+        self.next_state = None
+
+    def mod_assets(self):
+        self.assets["level_map_cr"] = pygame.transform.scale(self.assets["level_map_cr"], (screen_width, screen_height))
+
+    def draw(self):
+        self.screen.blit(self.assets["level_map_cr"], (0, 0))
 
 
 class Level(GameState):
@@ -348,3 +357,5 @@ class Level(GameState):
         # Click effect
         self.expanding_circles.update(events, mouse_pos)
         self.expanding_circles.draw(self.screen, dt)
+        self.screen.blit(self.assets["game_border"], (0, 0))
+
