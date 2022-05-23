@@ -1,7 +1,7 @@
 import pygame
 
 from src._types import EventInfo
-from src.widgets import EnergyBar, LoadingBar
+from src.ui.widgets import EnergyBar, LoadingBar
 
 
 class ItemStats:
@@ -137,7 +137,9 @@ class PlayerStatistics:
         bsize = (50, 50)
         self.bsize = bsize
         self.border_img = pygame.transform.scale(assets["border"], bsize)
-        self.selected_border_img = pygame.transform.scale(assets["selected_border"], bsize)
+        self.selected_border_img = pygame.transform.scale(
+            assets["selected_border"], bsize
+        )
         brect = self.border_img.get_rect()
         self.inventory_rects = [
             pygame.Rect(

@@ -1,4 +1,5 @@
 import pygame
+import logging
 
 from src._types import Vec
 
@@ -43,3 +44,6 @@ start_x = -1000
 end_x = -1000 + (32 * 600)
 start_y = 500
 end_y = 500 - (32 * 120)
+
+logger = logging.getLogger(name="log")
+logger.setLevel("NOTSET") if compiling else logger.setLevel("CRITICAL")

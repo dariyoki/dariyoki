@@ -8,9 +8,9 @@ from src.utils import circle_surf
 
 
 class Shuriken(Projectile):
-    def __init__(self, start, target, speed, launcher, items, item_size):
-        super().__init__(start, target, speed, item_size)
-        self.shuriken_img = items["shuriken"]
+    def __init__(self, start, target, speed, launcher, items):
+        self.shuriken_img: pygame.Surface = items["shuriken"]
+        super().__init__(start, target, speed, self.shuriken_img.get_size())
         self.image = self.shuriken_img.copy()
         self.damage = 30
         self.id = uuid.uuid1()

@@ -1,5 +1,6 @@
 import math
 import time
+from typing import Sequence
 
 import pygame
 
@@ -27,7 +28,7 @@ def rotate(extract, angle):
     return dump
 
 
-def resize(extract: list[pygame.Surface], scale: float):
+def resize(extract: Sequence[pygame.Surface], scale: float):
     width, height = extract[0].get_width() * scale, extract[0].get_height() * scale
     scaled = [pygame.transform.scale(img, (width, height)) for img in extract]
 

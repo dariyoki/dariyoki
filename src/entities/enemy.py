@@ -6,16 +6,17 @@ import pygame
 
 from src._globals import enemy_ids, shurikens
 from src._types import Vec
-from src.traits import collide, jump
+from src.entities.traits import collide, jump
+from src.ui.widgets import LoadingBar
 from src.weapons.shurikens import Shuriken
-from src.widgets import LoadingBar
 
 
 class Ninja:
     JUMP_HEIGHT = 200
     PLAYER_CHASE_RANGE = 400
 
-    def __init__(self, x, y, weapon, clan: str, speed, characters, border_image):
+    def __init__(self, x, y, weapon, clan: str, speed, characters, border_image, items):
+        self.items = items
         self.x, self.y = x, y
         self.PLAYER_DIST = random.randrange(100, 200)
         self.weapon = weapon
@@ -68,13 +69,13 @@ class Ninja:
             fg_color=(179, 2, 43),
             bg_color="black",
             rect=pygame.Rect((0, 0), self.hp_bar_size),
-            border_image=border_image
+            border_image=border_image,
         )
         self.camera = [0, 0]
 
     def handle_shurikens(self, target):
         shurikens.append(
-            Shuriken(start=self.rect.center, target=target, speed=6, launcher=self)
+            Shuriken(start=self.rect.center, target=target, speed=6, launcher=self, items=self.items)
         )
 
         # # Clean up

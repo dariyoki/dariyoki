@@ -1,4 +1,5 @@
 import random
+
 from src.effects.particle import Particle
 
 

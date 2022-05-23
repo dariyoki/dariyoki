@@ -15,9 +15,4 @@ Assets = Dict[str, Union[pygame.Surface, Any]]
 
 class Vec(pygame.math.Vector2):
     def move_towards(self, target, speed: float):
-        # angle = self.angle_to(target)
-        # self.x += math.cos(math.radians(angle)) * speed
-        # self.y += math.sin(math.radians(angle)) * speed
-
-        # return angle
         self += (target - self).normalize() * speed

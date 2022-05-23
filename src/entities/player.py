@@ -9,8 +9,8 @@ from src.animation import Animation
 from src.audio import dash_sfx, pickup_item_sfx
 from src.consumables import HealthPotion, ShieldPotion
 from src.effects.particle_effects import PlayerAura
-from src.game_events import GeneralInfo
-from src.traits import collide, jump
+from src.entities.traits import collide, jump
+from src.ui.game_events import GeneralInfo
 from src.utils import camerify as c
 from src.utils import circle_surf, turn_left
 from src.weapons.shurikens import Shuriken
@@ -21,7 +21,9 @@ class Player:
     DASH_LENGTH = 150
     INVENTORY_SLOTS = 8
 
-    def __init__(self, x, y, camera, controls, screen: pygame.Surface, assets: dict, items: dict):
+    def __init__(
+        self, x, y, camera, controls, screen: pygame.Surface, assets: dict, items: dict
+    ):
         # Constructor objects
         self.x, self.y = x, y
         self.vec = Vec(self.x, self.y)
@@ -87,6 +89,7 @@ class Player:
         self.rs = []
         self.chest_index = -1
         self.info = {}
+        self.items = items
         self.equip_items = items.copy()
         self.equip_items["sword"] = pygame.transform.rotate(
             pygame.transform.scale2x(self.equip_items["sword"]), -45
@@ -145,6 +148,7 @@ class Player:
                 target=target,
                 speed=12,
                 launcher=self,
+                items=self.items,
             )
         )
         if self.item_count["shuriken"] > 0:

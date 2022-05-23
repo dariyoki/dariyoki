@@ -2,7 +2,7 @@ import pygame
 
 from src._globals import explosions
 from src.effects.explosion import Explosion
-from src.widgets import LoadingBar
+from src.ui.widgets import LoadingBar
 
 
 class HealthPotion:
@@ -16,7 +16,7 @@ class HealthPotion:
             rect=pygame.Rect(
                 player_obj.rect.midtop[0], player_obj.rect.midtop[1] - 10, 50, 12
             ),
-            border_image=border_image
+            border_image=border_image,
         )
 
     def draw(self, screen: pygame.Surface, camera):
@@ -53,7 +53,7 @@ class ShieldPotion:
             rect=pygame.Rect(
                 player_obj.rect.midtop[0], player_obj.rect.midtop[1] - 10, 50, 12
             ),
-            border_image=border_image
+            border_image=border_image,
         )
 
     def draw(self, screen: pygame.Surface, camera):

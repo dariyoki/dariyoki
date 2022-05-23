@@ -1,13 +1,14 @@
 import random
-
-import pygame
 from typing import Sequence
 
+import pygame
+
 from src._globals import shurikens, spawners
-from src.player import Player
+from src.entities.player import Player
+from src.entities.enemy import Ninja
+from src.ui.widgets import LoadingBar
 from src.utils import Glow
 from src.utils import camerify as c
-from src.widgets import LoadingBar
 
 
 class Spawner:
@@ -17,17 +18,18 @@ class Spawner:
         size,
         cool_down,
         number_of_enemies,
-        enemy,
         enemy_size,
         hp,
         spawn_images: Sequence[pygame.Surface],
         border_image: pygame.Surface,
-        characters
+        characters,
+        items,
     ) -> None:
+        self.items = items
         self.border_image = border_image
         self.location = location
         self.size = size
-        self.spawn_images = spawn_images
+        self.spawn_images = [pygame.transform.scale(img, size) for img in spawn_images]
         self.init_spawn_images = list(self.spawn_images)
         self.image = self.spawn_images[0]
         self.damage_surf = pygame.Surface(size)
@@ -38,11 +40,10 @@ class Spawner:
         self.rect = self.image.get_rect()
         self.angle = 0
         self.glow = Glow(self.image, (11, 3, 25), self.location)
-        self.enemies: list[enemy] = []
+        self.enemies: list[Ninja] = []
         self.time_passed = 0
         self.cool_down = cool_down
         self.number_of_enemies = number_of_enemies
-        self.enemy = enemy
         self.enemy_size = enemy_size
         self.hp = hp
         self.max_hp = hp
@@ -79,14 +80,15 @@ class Spawner:
 
     def spawn_enemies(self, n):
         self.enemies += [
-            self.enemy(
+            Ninja(
                 self.location[0] + random.randrange(self.size[0]),
                 self.location[1],
                 weapon=None,
                 clan="shadow",
                 speed=1.7,
                 characters=self.characters,
-                border_image=self.border_image
+                border_image=self.border_image,
+                items=self.items
             )
             for _ in range(n)
         ]
