@@ -8,6 +8,11 @@
       "sprite_sheet": null,
       "convert_alpha": true,
     "states": ["level", "main menu"]
+  },
+  "level_icon.png": {
+    "sprite_sheet": null,
+    "convert_alpha": true,
+    "states": ["level selector"]
   }
 }
 

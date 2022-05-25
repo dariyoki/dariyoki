@@ -5,8 +5,8 @@ import uuid
 import pygame
 
 from src._globals import enemy_ids, shurikens
-from src.generics import Vec
 from src.entities.traits import collide, jump
+from src.generics import Vec
 from src.ui.widgets import LoadingBar
 from src.weapons.shurikens import Shuriken
 
@@ -75,7 +75,13 @@ class Ninja:
 
     def handle_shurikens(self, target):
         shurikens.append(
-            Shuriken(start=self.rect.center, target=target, speed=6, launcher=self, items=self.items)
+            Shuriken(
+                start=self.rect.center,
+                target=target,
+                speed=6,
+                launcher=self,
+                items=self.items,
+            )
         )
 
         # # Clean up

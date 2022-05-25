@@ -1,27 +1,21 @@
-import asyncio
+import json
 import logging
 import time
 
-from src.display import *
+import pygame
+
+from src.display import clock, fps, screen
 from src.sprites import load_assets
-from src.states.levels import LevelSelector, Level
-from src.states.main_menu import MainMenu
-from src.states.generics import GameStates
+from src.states.enums import States
+from src.states.generics import GameStates, Level, LevelSelector, MainMenu
 
-
-logger = logging.getLogger("log")
+logger = logging.getLogger()
 
 
 class Game:
-    TILE_SIZE = 32
-    PARALLAX_TILE_SIZE = 16
-    TOTAL_ROWS = 250
-    TOTAL_COLS = 100
-
     def __init__(self):
-        self.state = "main menu"
-        self.last_state = self.state
-        self.assets = load_assets(self.state)
+        self.state: States = States.MAIN_MENU
+        self.assets = load_assets(self.state.value)
         self.current_state: GameStates = MainMenu(screen, self.assets)
         # Controls
         with open("assets/data/controls.json") as f:
@@ -35,31 +29,30 @@ class Game:
 
     def selective_load(self):
         match self.state:
-            case "level":
-                self.current_state = Level(0, screen, self.assets)
-            case "main menu":
+            case States.MAIN_MENU:
                 self.current_state = MainMenu(screen, self.assets)
-            case "level selector":
+            case States.LEVEL:
+                self.current_state = Level(0, screen, self.assets)
+            case States.LEVEL_SELECTOR:
                 self.current_state = LevelSelector(screen, self.assets)
 
     def selective_process(self, event_info):
-
-        if self.state == "main menu":
+        if self.state == States.MAIN_MENU:
             pygame.display.set_caption("Dariyoki | Main Menu")
             self.current_state.update(event_info)
             self.current_state.draw(event_info)
-        elif self.state == "level":
+        elif self.state == States.LEVEL:
             pygame.display.set_caption("Dariyoki | Level Test")
             self.current_state.update(event_info)
-        elif self.state == "level selector":
+        elif self.state == States.LEVEL_SELECTOR:
             pygame.display.set_caption("Dariyoki | Level Selector")
+            self.current_state.update(event_info)
             self.current_state.draw()
 
-    async def main_loop(self):
+    def main_loop(self):
         start = time.perf_counter()
         while self.run:
             clock.tick()
-            self.last_state = self.state
 
             # Calc
             end = time.perf_counter()
@@ -85,7 +78,7 @@ class Game:
 
             self.selective_process(event_info)
 
-            # Touchup
+            # Touch up
             self.current_state.transition_overlay_surface.set_alpha(
                 self.current_state.transition_overlay_surface_alpha
             )
@@ -100,17 +93,16 @@ class Game:
                 if event.type == pygame.QUIT:
                     self.run = False
 
-            pygame.display.flip()
             if self.current_state.next_state is not None:
                 self.state = self.current_state.next_state
-            if self.last_state != self.state:
-                self.assets = load_assets(self.state)
+                self.assets = load_assets(self.state.value)
                 self.selective_load()
-            await asyncio.sleep(0)
+
+            pygame.display.flip()
 
         pygame.quit()
 
 
 if __name__ == "__main__":
     game = Game()
-    asyncio.run(game.main_loop())
+    game.main_loop()

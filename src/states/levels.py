@@ -6,16 +6,18 @@ import pygame
 import pytmx
 
 from src._globals import enemy_ids, explosions, general_info, shurikens, spawners
-from src.generics import Vec
-from src.display import camera, player_start_pos, screen_width, screen_height
+from src.display import camera, player_start_pos, screen_height, screen_width
 from src.effects.exp_circle import ExpandingCircle, ExpandingCircles
 from src.effects.explosion import Explosion
 from src.entities.enemy import Bee, Ninja
 from src.entities.player import Player
+from src.generics import EventInfo, Vec
 from src.items import Chest
 from src.spawner import Spawner
+from src.states.enums import States
 from src.states.game_state import GameState
 from src.ui.stats import Info, PlayerStatistics
+from src.ui.widgets import FloatyText, LevelIcon
 from src.utils import Time, resize
 from src.world import World
 
@@ -25,13 +27,42 @@ class LevelSelector(GameState):
         super().__init__("level selector", screen)
         self.assets = assets
         self.mod_assets()
-        self.next_state = None
+        self.next_state: Optional[States] = None
+        self.camera = Vec()
+        self.current_territory = "Bee Territory"
+        self.floaty_title_text = FloatyText(
+            self.current_territory, screen.get_rect().midtop + Vec(0, 50), 40, "yellow"
+        )
+        self.level_icon = pygame.Surface((85, 85))
+        self.level_icon.fill("blue")
+        self.level_icons = {
+            "Bee Territory": tuple((LevelIcon(n, self.assets["level_icon"]) for n in range(1, 6))),
+            "Electri City": tuple((LevelIcon(n, self.assets["level_icon"]) for n in range(6, 11))),
+        }
 
     def mod_assets(self):
-        self.assets["level_map_cr"] = pygame.transform.scale(self.assets["level_map_cr"], (screen_width, screen_height))
+        self.assets["bee_territory_level_map"] = pygame.transform.scale(
+            self.assets["bee_territory_level_map"], (screen_width, screen_height)
+        )
+        pass
+
+    def update(self, event_info: EventInfo):
+        self.floaty_title_text.update(event_info["dt"])
+        for level_icon in self.level_icons[self.current_territory]:
+            level_icon.update(event_info)
+            if level_icon.is_clicked:
+                self.next_state = States.LEVEL
+                path = "assets/audio/"
+                pygame.mixer.music.load(path + "two_worlds_pre_chorus.mp3")
+                pygame.mixer.music.play(-1, fade_ms=5000)
 
     def draw(self):
-        self.screen.blit(self.assets["level_map_cr"], (0, 0))
+        self.screen.blit(self.assets["bee_territory_level_map"], -self.camera)
+        self.floaty_title_text.draw(self.screen, self.camera)
+        for level_icon in self.level_icons[self.current_territory]:
+            level_icon.draw(self.screen, self.camera)
+
+        self.screen.blit(self.assets["game_border"], (0, 0))
 
 
 class Level(GameState):
@@ -49,6 +80,7 @@ class Level(GameState):
         self.load_level(n)
         self.assets = assets
         self.assets["chest"] = resize(self.assets["chest"], 2.0)
+        self.assets["characters"] = resize(self.assets["characters"], 2.0)
         item_size = (25, 25)
         self._items = {
             "health potion": pygame.transform.scale(
@@ -105,7 +137,7 @@ class Level(GameState):
                     self.assets["spawning_shadow_ninja"],
                 ),
                 characters=self.assets["characters"],
-                items=self.items
+                items=self._items,
             )
             for obj in self.tile_map.get_layer_by_name("spawners")
         ]
@@ -358,4 +390,3 @@ class Level(GameState):
         self.expanding_circles.update(events, mouse_pos)
         self.expanding_circles.draw(self.screen, dt)
         self.screen.blit(self.assets["game_border"], (0, 0))
-

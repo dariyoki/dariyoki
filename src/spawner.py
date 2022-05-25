@@ -4,8 +4,8 @@ from typing import Sequence
 import pygame
 
 from src._globals import shurikens, spawners
-from src.entities.player import Player
 from src.entities.enemy import Ninja
+from src.entities.player import Player
 from src.ui.widgets import LoadingBar
 from src.utils import Glow
 from src.utils import camerify as c
@@ -88,7 +88,7 @@ class Spawner:
                 speed=1.7,
                 characters=self.characters,
                 border_image=self.border_image,
-                items=self.items
+                items=self.items,
             )
             for _ in range(n)
         ]

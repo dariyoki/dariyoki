@@ -1,10 +1,11 @@
-import pygame
+import json
 import logging
 import os
-import json
 
-from src.generics import Vec
+import pygame
+
 from src._globals import LOGGING_CONFIG_PATH
+from src.generics import Vec
 
 pygame.init()
 pygame.font.init()
@@ -47,14 +48,23 @@ start_y = 500
 end_y = 500 - (32 * 120)
 
 logging.basicConfig()
-logger = logging.getLogger(name="log")
+logger = logging.getLogger()
 
 if os.path.exists(LOGGING_CONFIG_PATH):
     with open(LOGGING_CONFIG_PATH) as f:
         log_config = json.load(f)
 else:
-    log_config = {"AVAILABLE_OPTIONS": ["CRITICAL", "ERROR", "WARNING", "DEBUG", "INFO", "NOTSET"],
-                  "LOGGING_LEVEL": "DEBUG"}
+    log_config = {
+        "AVAILABLE_OPTIONS": [
+            "CRITICAL",
+            "ERROR",
+            "WARNING",
+            "DEBUG",
+            "INFO",
+            "NOTSET",
+        ],
+        "LOGGING_LEVEL": "DEBUG",
+    }
     with open(LOGGING_CONFIG_PATH, "w") as f:
         json.dump(log_config, fp=f, indent=2)
 
@@ -63,4 +73,4 @@ if compiling:
 else:
     logger.setLevel(log_config["LOGGING_LEVEL"])
 
-
+logger.info("Display initialized")

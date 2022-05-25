@@ -4,12 +4,12 @@ from typing import Optional
 import pygame
 
 from src._globals import general_info, shurikens
-from src.generics import Vec
 from src.animation import Animation
 from src.audio import dash_sfx, pickup_item_sfx
 from src.consumables import HealthPotion, ShieldPotion
 from src.effects.particle_effects import PlayerAura
 from src.entities.traits import collide, jump
+from src.generics import Vec
 from src.ui.game_events import GeneralInfo
 from src.utils import camerify as c
 from src.utils import circle_surf, turn_left
@@ -20,6 +20,7 @@ class Player:
     JUMP_HEIGHT = 210
     DASH_LENGTH = 150
     INVENTORY_SLOTS = 8
+    AUTO_ITEM_INFO_TIME = 1
 
     def __init__(
         self, x, y, camera, controls, screen: pygame.Surface, assets: dict, items: dict
@@ -66,6 +67,9 @@ class Player:
         self.sword_attack_animation = Animation(sword_attack, speed=0.4)
         self.lsword_attack_animation = Animation(lsword_attack, speed=0.4)
         self.shield_breaking_animation = Animation(assets["shield_bubble"], speed=0.2)
+        self.run_right_animation = Animation(assets["dari"][1:], speed=0.15)
+        self.run_left_animation = Animation(turn_left(assets["dari"][1:]), speed=0.15)
+
         self.aura = PlayerAura((0, 0, 0), 2)
 
         # Flags
@@ -189,7 +193,7 @@ class Player:
         if (index := self.rect.collidelist(stub_rx)) != -1:
             self.item_collide_stack += raw_dt
             self.colliding_item = info["items"][index]
-            if not info["item info"].o_lock and self.item_collide_stack > 1.5:
+            if not info["item info"].o_lock and self.item_collide_stack > self.AUTO_ITEM_INFO_TIME:
                 info["item info"].opening = True
         else:
             self.item_collide_stack = 0
@@ -381,7 +385,14 @@ class Player:
             )
 
         # Draw player
-        screen.blit(self.image, self.vec - self.camera)
+        if self.dx > 0 and not self.dy:
+            self.run_right_animation.update(self.dt)
+            self.run_right_animation.draw(screen, self.vec - self.camera)
+        elif self.dx < 0 and not self.dy:
+            self.run_left_animation.update(self.dt)
+            self.run_left_animation.draw(screen, self.vec - self.camera)
+        else:
+            screen.blit(self.image, self.vec - self.camera)
 
         # Draw player weapon
         if self.equipped is not None:

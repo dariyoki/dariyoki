@@ -90,3 +90,24 @@ class Time:
             self.start = time.perf_counter()
             return True
         return False
+
+
+class Expansion:
+    """
+    Number expansion and contraption
+    """
+
+    def __init__(self, number: float, lower_limit: float, upper_limit: float, speed: float):
+        self.number = number
+        self.lower_limit = lower_limit
+        self.upper_limit = upper_limit
+        self.speed = speed
+
+    def update(self, cond: bool, dt: float):
+        if cond:
+            if self.number < self.upper_limit:
+                self.number += self.speed * dt
+        else:
+            if self.number > self.lower_limit:
+                self.number -= self.speed * dt
+

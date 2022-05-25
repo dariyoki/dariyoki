@@ -4,48 +4,6 @@ from src.generics import EventInfo
 from src.ui.widgets import EnergyBar, LoadingBar
 
 
-class ItemStats:
-    def __init__(self, item):
-        self.name = item.name
-        self.hp = None
-        self.shield = None
-        self.damage = None
-        self.other_benefits = None
-        self.description = None
-        match item.name:
-            case "health potion":
-                self.hp = 40
-                self.description = f"""
-                A health potion brewed in the Bee territory. 
-                It gives you {self.hp} Health!
-                """
-            case "shield potion":
-                self.shield = 50
-                self.description = f"""
-                A shield potion made from the nectar of the rich blue Gylops plants found 
-                commonly in the Davis territory.
-                It gives you {self.shield} shield!
-                """
-            case "shuriken":
-                self.damage = 30
-                self.description = f"""
-                A basic but deadly shuriken forged in the depths of Valhalla.
-                It causes {self.damage} damage!
-                """
-            case "sword":
-                self.damage = 60
-                self.description = f"""
-                An almost fatal blow sword. But we weary as it can only be used in close 
-                range! 
-                It causes {self.damage} damage!
-                """
-            case "smoke bomb":
-                self.shield = 10
-                self.description = """
-                A smoke bomb that ninjas use to disappear and then reappear in another place.
-                """
-
-
 class Info:
     ALPHA = 150
 
@@ -67,15 +25,6 @@ class Info:
         self.o_lock = False
         self.item_stats = None
         self.item = None
-        #
-        # self.label = Label(
-        #     position=self.pos,
-        #     size=(140, 35),
-        #     content="Click [ i ] to open/close",
-        #     colour='black',
-        #     border_colour='white',
-        #     txt_colour='purple',
-        # )
 
     def update(self, colliding_item, events, dt):
         if colliding_item is not None:
@@ -94,7 +43,6 @@ class Info:
             if self.pos[0] > -self.width:
                 self.pos[0] -= 8 * dt
 
-        # self.label.change_pos((self.pos[0] + 77, self.pos[1]))
         self.rect = self.surf.get_rect(topleft=tuple(self.pos))
 
     def draw(self, screen, i_cards: dict):
@@ -103,7 +51,6 @@ class Info:
             self.surf.set_alpha(self.ALPHA)
         screen.blit(self.surf, tuple(self.pos))
 
-        # self.label.draw(screen)
 
 
 class PlayerStatistics:

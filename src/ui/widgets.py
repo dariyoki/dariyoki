@@ -1,21 +1,25 @@
+import logging
 import random
 from typing import Any
 
 import pygame
 
-from src.generics import ColorValue, Pos, Size, WSurfInfo
 from src.audio import hover_sfx
+from src.generics import ColorValue, Pos, Size, Vec, WSurfInfo, EventInfo
+from src.utils import Expansion
+
+logger = logging.getLogger()
 
 
 class LoadingBar:
     def __init__(
-        self,
-        value,
-        fg_color,
-        bg_color,
-        rect: pygame.Rect,
-        border_image: pygame.Surface,
-        max_value=100,
+            self,
+            value,
+            fg_color,
+            bg_color,
+            rect: pygame.Rect,
+            border_image: pygame.Surface,
+            max_value=100,
     ):
         self.value = value
         self.sfg_color = fg_color
@@ -92,7 +96,7 @@ class EnergyBar(LoadingBar):
             w_surf[0][0] -= 5.3 * event_info["dt"]
             if self.val_rect.width > 0:
                 w_surf[1] -= (
-                    10.3 * event_info["dt"] * (self.rect.width / self.val_rect.width)
+                        10.3 * event_info["dt"] * (self.rect.width / self.val_rect.width)
                 )
             else:
                 w_surf[1] -= 10.3 * event_info["dt"]
@@ -174,14 +178,14 @@ class Label:
     """
 
     def __init__(
-        self,
-        position: Pos,
-        size: Size,
-        content: str,
-        colour: ColorValue = None,
-        border_colour: ColorValue = None,
-        txt_colour: ColorValue = (255, 255, 255),
-        shape: str = "rectangle",
+            self,
+            position: Pos,
+            size: Size,
+            content: str,
+            colour: ColorValue = None,
+            border_colour: ColorValue = None,
+            txt_colour: ColorValue = (255, 255, 255),
+            shape: str = "rectangle",
     ):
         """
         Initialize the Label Widget.
@@ -258,3 +262,112 @@ class Label:
 
         screen.blit(self.surface, self.rect)
         screen.blit(self.t, self.t.get_rect(center=self.rect.center))
+
+
+class FloatyText:
+    """
+    Makes some nice floaty text.
+    """
+
+    FLOATY_SIZE_MAX_SCALE = 1.5
+    FLOATY_SCALE_SPEED = 0.45
+    FLOATY_MAX_ANGLE = 15
+    FLOATY_ROTATE_SPEED = 0.3
+
+    def __init__(
+            self, title: str, center_pos: Vec, size: int, color: ColorValue
+    ) -> None:
+        self.title = title
+        self.center_pos = center_pos
+        self.original_size = size
+        self.size = size
+        self.color = color
+        self.font = pygame.font.Font(None, size)
+        self.original_surf = self.font.render(title, True, color)
+        self.surf = self.original_surf.copy()
+        self.rect = self.original_surf.get_rect(center=center_pos)
+        self.angle = 0
+        self.scaling_up = True
+        self.turning_right = True
+
+    def floaty_algo(self, dt):
+        if self.scaling_up:
+            if self.size < self.original_size * self.FLOATY_SIZE_MAX_SCALE:
+                self.size += self.FLOATY_SCALE_SPEED * dt
+            else:
+                self.scaling_up = False
+        else:
+            if self.size > self.original_size:
+                self.size -= self.FLOATY_SCALE_SPEED * dt
+            else:
+                self.scaling_up = True
+
+        if self.turning_right:
+            if self.angle < self.FLOATY_MAX_ANGLE:
+                self.angle += self.FLOATY_ROTATE_SPEED * dt
+            else:
+                self.turning_right = False
+        else:
+            if self.angle > -self.FLOATY_MAX_ANGLE:
+                self.angle -= self.FLOATY_ROTATE_SPEED * dt
+            else:
+                self.turning_right = True
+
+    def update(self, dt):
+        self.floaty_algo(dt)
+        self.original_surf = pygame.font.Font(None, int(self.size)).render(
+            self.title, True, "yellow"
+        )
+        self.surf = pygame.transform.rotate(self.original_surf, self.angle)
+        self.rect = self.surf.get_rect(center=self.center_pos)
+
+    def draw(self, screen: pygame.Surface, camera: Vec):
+        screen.blit(self.surf, self.rect.topleft - camera)
+
+
+class LevelIcon:
+    """
+    Nice looking Level Icons to click on.
+    """
+    PAD_X = 50
+    FONT = pygame.font.Font(None, 30)
+
+    def __init__(self, level_number: int, image: pygame.Surface) -> None:
+        self.level_number = level_number
+        self.org_image = image
+        self.image = image
+        self.size = self.image.get_width()
+        upper_expansion_limit = self.size * 1.2
+        self.vec = Vec((
+                            ((level_number % 5) or 5) *
+                            (self.size + self.PAD_X)
+                       ) + 100,
+                       303)
+        self.rect = self.image.get_rect(topleft=self.vec)
+        self.level_number_surf = self.FONT.render(str(level_number), True, "yellow")
+        self.level_number_surf_rect = self.level_number_surf.get_rect(center=self.rect.center)
+        self.hover = False
+        self.is_clicked = False
+        self.expansion = Expansion(self.size,
+                                   lower_limit=self.size,
+                                   upper_limit=upper_expansion_limit,
+                                   speed=2.3)
+
+    def update(self, event_info: EventInfo):
+        self.hover = self.rect.collidepoint(event_info["mouse pos"])
+        self.expansion.update(self.hover, event_info["dt"])
+        self.image = pygame.transform.scale(self.org_image, (self.expansion.number, self.expansion.number))
+
+        for event in event_info["events"]:
+            if event.type == pygame.MOUSEBUTTONDOWN and self.hover:
+                self.is_clicked = True
+            else:
+                self.is_clicked = False
+
+        self.rect = self.image.get_rect(center=self.rect.center)
+        self.level_number_surf_rect.center = self.rect.center
+        self.vec = Vec(self.rect.topleft)
+
+    def draw(self, screen: pygame.Surface, camera: Vec) -> None:
+        screen.blit(self.image, self.vec - camera)
+        screen.blit(self.level_number_surf, self.level_number_surf_rect)

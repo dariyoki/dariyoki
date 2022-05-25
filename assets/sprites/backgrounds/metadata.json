@@ -14,7 +14,7 @@
     "convert_alpha": false,
     "states": ["main menu"]
   },
-  "level_map_cr.png": {
+  "bee_territory_level_map.png": {
     "sprite_sheet": null,
     "convert_alpha": false,
     "states": ["level selector"]

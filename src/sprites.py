@@ -1,12 +1,12 @@
-import logging
 import json
+import logging
 from pathlib import Path
 
 import pygame
 
 from src.sprite_sheet import get_images
 
-logger = logging.getLogger("log")
+logger = logging.getLogger()
 
 
 def load_assets(state: str) -> dict:
@@ -34,4 +34,3 @@ def load_assets(state: str) -> dict:
             assets[file.replace(file_extension, "")] = asset
 
     return assets
-

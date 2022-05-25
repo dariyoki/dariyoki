@@ -12,7 +12,7 @@
   "game_border.png": {
     "sprite_sheet": null,
     "convert_alpha": true,
-    "states": ["level", "main menu"]
+    "states": ["level", "main menu", "level selector"]
   },
   "selected_border.png": {
     "sprite_sheet": null,

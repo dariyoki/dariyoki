@@ -2,8 +2,8 @@ import random
 
 import pygame
 
-from src.generics import EventInfo
 from src.effects.particle import BezierParticle, SoulParticle
+from src.generics import EventInfo
 
 
 class MainMenuFlare:

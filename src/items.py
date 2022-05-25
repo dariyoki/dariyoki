@@ -8,7 +8,7 @@ from src.utils import Glow, circle_surf
 
 
 class HoverDirection(Enum):
-    UP = ("UP",)
+    UP = "UP"
     DOWN = "DOWN"
 
 
@@ -95,30 +95,22 @@ class Chest:
         # Predetermined Items
         self.items = []
         n_items = random.randrange(2, 7)
-        chances = {
-            60: "health potion",
-            50: "shield potion",
-            30: "shuriken",
-            10: "sword",
-            5: "smoke bomb",
-            1: "scythe",
+        weights = {
+            "health potion": 50,
+            "shield potion": 60,
+            "shuriken": 40,
+            "sword": 20,
+            "smoke bomb": 10,
+            "scythe": 3,
         }
 
         for _ in range(n_items):
-            name = None
-            while name is None:
-                n_item = random.uniform(0, 100)
-
-                for chance in list(chances.keys())[::-1]:
-                    if n_item < chance:
-                        name = chances[chance]
-                        break
-
+            name, *_ = random.choices(
+                tuple(weights.keys()),
+                k=1,
+                weights=tuple(weights.values()))
             item = Item(name, items[name], [self.x, self.y])
             self.items.append(item)
-
-        if len(self.items) == 0:
-            self.items.append(Item("shuriken", items["shuriken"], [self.x, self.y]))
 
     def update(self, keys, dt):
         if keys[self.load_control]:

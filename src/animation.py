@@ -1,4 +1,5 @@
 import pygame
+from src.generics import Pos
 
 
 class Animation:
@@ -14,7 +15,7 @@ class Animation:
         if self.index > self.f_len:
             self.index = 0
 
-    def draw(self, screen: pygame.Surface, pos: tuple[int, int]):
+    def draw(self, screen: pygame.Surface, pos: Pos):
         screen.blit(self.frames[int(self.index)], pos)
 
     def play(self, screen, pos, dt):

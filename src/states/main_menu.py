@@ -1,7 +1,10 @@
+from typing import Optional
+
 import pygame
 
-from src.generics import EventInfo, Vec
 from src.effects.particle_effects import MainMenuFlare
+from src.generics import EventInfo
+from src.states.enums import States
 from src.states.game_state import GameState
 from src.ui.widgets import MenuButton
 
@@ -10,7 +13,7 @@ class MainMenu(GameState):
     def __init__(self, screen: pygame.Surface, assets: dict):
         super().__init__("main menu", screen)
         self.assets = assets
-        self.next_state = None
+        self.next_state: Optional[States] = None
 
         # User interface
         self.menu_button_names = ["Start", "Reset", "Exit", "Contents", "Credits"]
@@ -48,10 +51,11 @@ class MainMenu(GameState):
 
         if self.transitioning:
             if self.handle_fade_in(event_info["dt"]):
-                self.next_state = "level selector"
+                self.next_state = States.LEVEL_SELECTOR
 
     def draw(self, event_info: EventInfo):
         self.screen.blit(self.assets["red_ski_looks_good"], (0, 0))
+        self.screen.blit(self.assets["moon"], self.moon_bob)
         self.main_menu_flare.draw(self.screen, event_info)
 
         for menu_btn in self.menu_buttons:

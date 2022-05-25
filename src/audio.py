@@ -4,7 +4,7 @@ pygame.mixer.init()
 
 path = "assets/audio/"
 pygame.mixer.music.load(path + "harmony_in_chaos2.mp3")
-pygame.mixer.music.play(-1)
+pygame.mixer.music.play(-1, fade_ms=2000)
 dash_sfx = pygame.mixer.Sound(path + "dash.wav")
 dash_sfx.set_volume(0.1)
 
