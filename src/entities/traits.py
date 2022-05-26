@@ -65,4 +65,3 @@ def jump(self, dt, dy):
         self.touched_ground = False
 
     return dy
-

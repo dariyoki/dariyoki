@@ -9,7 +9,8 @@ from src.utils import circle_surf, get_movement
 
 class Particle:
     def __init__(
-        self, pos, color, size, speed, shape: str, size_reduction, glow: bool = False
+            self, pos, color, size, speed, shape: str, size_reduction, glow: bool = False,
+            angle=None
     ):
         self.pos = pos
         self.color = color
@@ -18,10 +19,13 @@ class Particle:
         self.shape = shape
         self.vec = pygame.Vector2(self.pos)
         # self.vec.rotate(random.randrange(0, 360))
-        self.angle = math.atan2(
-            random.randrange(-300, 500) - random.randrange(-300, 500),
-            random.randrange(-300, 500) - random.randrange(-300, 500),
-        )
+        if angle is None:
+            self.angle = math.atan2(
+                random.randrange(-300, 500) - random.randrange(-300, 500),
+                random.randrange(-300, 500) - random.randrange(-300, 500),
+            )
+        else:
+            self.angle = angle
         self.dx, self.dy = get_movement(self.angle, speed)
 
         self.rect = pygame.Rect(tuple(self.pos), (size, size))
@@ -43,7 +47,7 @@ class Particle:
         if self.shape == "square":
             pygame.draw.rect(screen, self.color, self.rect)
         elif self.shape == "circle":
-            pygame.draw.circle(screen, self.color, self.vec, self.size)
+            pygame.draw.circle(screen, self.color, self.rect.center, self.size)
 
         if self.glow and self.size > 0:
             surf = circle_surf(self.size * 2, (20, 20, 20))
@@ -102,18 +106,18 @@ class CircleParticle:
 
 class SoulParticle:
     def __init__(
-        self,
-        start_x,
-        start_y,
-        speed,
-        mode,
-        shape,
-        size: list[int],
-        colour: tuple[int, int, int],
-        prange: tuple[float, float],
-        acceleration=False,
-        glow=True,
-        size_reduction: float = 0.3,
+            self,
+            start_x,
+            start_y,
+            speed,
+            mode,
+            shape,
+            size: list[int],
+            colour: tuple[int, int, int],
+            prange: tuple[float, float],
+            acceleration=False,
+            glow=True,
+            size_reduction: float = 0.3,
     ):
         self.x = start_x
         self.y = start_y

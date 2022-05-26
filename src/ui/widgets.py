@@ -5,7 +5,7 @@ from typing import Any
 import pygame
 
 from src.audio import hover_sfx
-from src.generics import ColorValue, Pos, Size, Vec, WSurfInfo, EventInfo
+from src.generics import ColorValue, EventInfo, Pos, Size, Vec, WSurfInfo
 from src.utils import Expansion
 
 logger = logging.getLogger()
@@ -13,13 +13,13 @@ logger = logging.getLogger()
 
 class LoadingBar:
     def __init__(
-            self,
-            value,
-            fg_color,
-            bg_color,
-            rect: pygame.Rect,
-            border_image: pygame.Surface,
-            max_value=100,
+        self,
+        value,
+        fg_color,
+        bg_color,
+        rect: pygame.Rect,
+        border_image: pygame.Surface,
+        max_value=100,
     ):
         self.value = value
         self.sfg_color = fg_color
@@ -96,7 +96,7 @@ class EnergyBar(LoadingBar):
             w_surf[0][0] -= 5.3 * event_info["dt"]
             if self.val_rect.width > 0:
                 w_surf[1] -= (
-                        10.3 * event_info["dt"] * (self.rect.width / self.val_rect.width)
+                    10.3 * event_info["dt"] * (self.rect.width / self.val_rect.width)
                 )
             else:
                 w_surf[1] -= 10.3 * event_info["dt"]
@@ -178,14 +178,14 @@ class Label:
     """
 
     def __init__(
-            self,
-            position: Pos,
-            size: Size,
-            content: str,
-            colour: ColorValue = None,
-            border_colour: ColorValue = None,
-            txt_colour: ColorValue = (255, 255, 255),
-            shape: str = "rectangle",
+        self,
+        position: Pos,
+        size: Size,
+        content: str,
+        colour: ColorValue = None,
+        border_colour: ColorValue = None,
+        txt_colour: ColorValue = (255, 255, 255),
+        shape: str = "rectangle",
     ):
         """
         Initialize the Label Widget.
@@ -275,7 +275,7 @@ class FloatyText:
     FLOATY_ROTATE_SPEED = 0.3
 
     def __init__(
-            self, title: str, center_pos: Vec, size: int, color: ColorValue
+        self, title: str, center_pos: Vec, size: int, color: ColorValue
     ) -> None:
         self.title = title
         self.center_pos = center_pos
@@ -329,6 +329,7 @@ class LevelIcon:
     """
     Nice looking Level Icons to click on.
     """
+
     PAD_X = 50
     FONT = pygame.font.Font(None, 30)
 
@@ -338,25 +339,29 @@ class LevelIcon:
         self.image = image
         self.size = self.image.get_width()
         upper_expansion_limit = self.size * 1.2
-        self.vec = Vec((
-                            ((level_number % 5) or 5) *
-                            (self.size + self.PAD_X)
-                       ) + 100,
-                       303)
+        self.vec = Vec(
+            (((level_number % 5) or 5) * (self.size + self.PAD_X)) + 100, 303
+        )
         self.rect = self.image.get_rect(topleft=self.vec)
         self.level_number_surf = self.FONT.render(str(level_number), True, "yellow")
-        self.level_number_surf_rect = self.level_number_surf.get_rect(center=self.rect.center)
+        self.level_number_surf_rect = self.level_number_surf.get_rect(
+            center=self.rect.center
+        )
         self.hover = False
         self.is_clicked = False
-        self.expansion = Expansion(self.size,
-                                   lower_limit=self.size,
-                                   upper_limit=upper_expansion_limit,
-                                   speed=2.3)
+        self.expansion = Expansion(
+            self.size,
+            lower_limit=self.size,
+            upper_limit=upper_expansion_limit,
+            speed=2.3,
+        )
 
     def update(self, event_info: EventInfo):
         self.hover = self.rect.collidepoint(event_info["mouse pos"])
         self.expansion.update(self.hover, event_info["dt"])
-        self.image = pygame.transform.scale(self.org_image, (self.expansion.number, self.expansion.number))
+        self.image = pygame.transform.scale(
+            self.org_image, (self.expansion.number, self.expansion.number)
+        )
 
         for event in event_info["events"]:
             if event.type == pygame.MOUSEBUTTONDOWN and self.hover:

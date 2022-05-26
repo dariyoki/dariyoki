@@ -11,11 +11,12 @@ from src.ui.widgets import LoadingBar
 from src.weapons.shurikens import Shuriken
 
 
-class Ninja:
+class Ninja(pygame.sprite.Sprite):
     JUMP_HEIGHT = 200
     PLAYER_CHASE_RANGE = 400
 
     def __init__(self, x, y, weapon, clan: str, speed, characters, border_image, items):
+        super().__init__()
         self.items = items
         self.x, self.y = x, y
         self.PLAYER_DIST = random.randrange(100, 200)
@@ -158,26 +159,25 @@ class Ninja:
         else:
             screen.blit(self.question_mark, denotion_pos)
 
-        # pygame.draw.rect(screen, "red", (
-        #     self.rect.x - camera[0],
-        #     self.rect.y - camera[1],
-        #     *self.rect.size
-        # ), width=3)
 
-
-class Bee:
-    SPEED = 1.2
+class Bee(pygame.sprite.Sprite):
+    SPEED = 3.5
 
     def __init__(self, player_instance, vec: Vec, bee_img: pygame.Surface):
+        super().__init__()
+        self.damage = 10
         self.player_instance = player_instance
         self.vec = vec
-        self.bee_img = bee_img
+        self.img = bee_img
+        self.rect = bee_img.get_rect()
         self.image = bee_img.copy()
+        self.hp = 30
 
-    def update(self):
-        self.vec.move_towards(self.player_instance.vec, self.SPEED)
-        angle = self.vec.angle_to(self.player_instance.vec)
-        self.image = pygame.transform.rotate(self.bee_img, angle)
+    def update(self, dt: float):
+        self.vec.move_towards(self.player_instance.vec, self.SPEED * dt)
+        angle = math.degrees(math.atan2(*(self.player_instance.vec - self.vec))) - 90
+        self.image = pygame.transform.rotate(self.img, angle)
+        self.rect.center = self.vec
 
     def draw(self, screen: pygame.Surface, camera: Vec):
-        screen.blit(self.image, self.vec - camera)
+        screen.blit(self.image, self.rect.topleft - camera)

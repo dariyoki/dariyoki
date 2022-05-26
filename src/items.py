@@ -106,9 +106,8 @@ class Chest:
 
         for _ in range(n_items):
             name, *_ = random.choices(
-                tuple(weights.keys()),
-                k=1,
-                weights=tuple(weights.values()))
+                tuple(weights.keys()), k=1, weights=tuple(weights.values())
+            )
             item = Item(name, items[name], [self.x, self.y])
             self.items.append(item)
 

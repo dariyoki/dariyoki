@@ -8,7 +8,7 @@ import pygame
 def circle_surf(radius, color):
     surf = pygame.Surface((radius * 2, radius * 2))
     pygame.draw.circle(surf, color, (radius, radius), radius)
-    surf.set_colorkey((0, 0, 0))
+    # surf.set_colorkey((0, 0, 0))
 
     return surf
 
@@ -97,7 +97,9 @@ class Expansion:
     Number expansion and contraption
     """
 
-    def __init__(self, number: float, lower_limit: float, upper_limit: float, speed: float):
+    def __init__(
+        self, number: float, lower_limit: float, upper_limit: float, speed: float
+    ):
         self.number = number
         self.lower_limit = lower_limit
         self.upper_limit = upper_limit
@@ -110,4 +112,3 @@ class Expansion:
         else:
             if self.number > self.lower_limit:
                 self.number -= self.speed * dt
-

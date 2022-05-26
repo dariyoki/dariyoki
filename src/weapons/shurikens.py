@@ -2,7 +2,7 @@ import uuid
 
 import pygame
 
-from src.angular_movement import Projectile
+from src.weapons.projectiles import Projectile
 from src.effects.particle_effects import ShurikenContrail
 from src.utils import circle_surf
 
@@ -21,11 +21,6 @@ class Shuriken(Projectile):
 
     def draw(self, screen, camera, dt):
         self.angle += 5 * dt
-        # pygame.draw.rect(screen, 'red', pygame.Rect(
-        #     self.rect.x - camera[0],
-        #     self.rect.y - camera[1],
-        #     *self.rect.size
-        # ), width=1)
 
         self.image = pygame.transform.rotozoom(self.shuriken_img, int(self.angle), 1)
         self.contrail.update(

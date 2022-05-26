@@ -52,7 +52,6 @@ class Info:
         screen.blit(self.surf, tuple(self.pos))
 
 
-
 class PlayerStatistics:
     def __init__(self, screen, player_obj, assets: dict):
         self.screen = screen

@@ -4,7 +4,7 @@ from src.effects.particle import Particle
 
 
 class Explosion:
-    def __init__(self, n_particles, n_size, pos, speed, color, size_reduction=5):
+    def __init__(self, n_particles, n_size, pos, speed, color, size_reduction=5, glow=True):
         self.n_particles = n_particles
         self.n_size = n_size
 
@@ -15,7 +15,7 @@ class Explosion:
                 size=random.randrange(*n_size),
                 speed=random.uniform(*speed),
                 shape="square",
-                glow=True,
+                glow=glow,
                 size_reduction=size_reduction,
             )
             for _ in range(n_particles)

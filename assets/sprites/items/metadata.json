@@ -8,7 +8,8 @@
     "sprite_sheet": {
       "rows": 1,
       "columns": 2,
-      "size": 32
+      "size": 32,
+      "bound": true
     },
     "convert_alpha": true,
     "states": ["level"]

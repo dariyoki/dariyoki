@@ -5,7 +5,9 @@ import pygame
 
 class Vec(pygame.math.Vector2):
     def move_towards(self, target, speed: float):
-        self += (target - self).normalize() * speed
+        vec = (target - self).normalize() * speed
+        self.x += vec.x
+        self.y += vec.y
 
 
 Pos = Union[Tuple[int, int], List[int], pygame.Vector2, Vec]

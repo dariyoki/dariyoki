@@ -20,13 +20,6 @@ class Projectile:
         self.dx = math.cos(self.angle) * self.speed
         self.dy = math.sin(self.angle) * self.speed
 
-        # if self.target_x < self.x:
-        #
-        #     print('event hp')
-        #     self.dx = -self.dx
-        # if self.target_y < self.y:
-        #     self.dy = -self.dy
-
         # Calculating how much the object has moved
         self.distance = 0
 
@@ -51,3 +44,7 @@ class Projectile:
 
         # Increasing amount moved
         self.distance += math.sqrt(((self.dx * dt) ** 2) + ((self.dy * dt) ** 2))
+
+
+class SwordSlash(Projectile):
+    pass

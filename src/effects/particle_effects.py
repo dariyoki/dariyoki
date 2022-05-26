@@ -2,8 +2,38 @@ import random
 
 import pygame
 
-from src.effects.particle import BezierParticle, SoulParticle
-from src.generics import EventInfo
+from src.effects.particle import BezierParticle, SoulParticle, Particle
+from src.utils import Time
+from src.generics import EventInfo, Vec
+
+
+class LevelMapFlare:
+    def __init__(self):
+        self.particles: set[Particle] = set()
+        self.particle_gen_time = Time(random.uniform(0.003, 0.02))
+
+    def update(self):
+        if self.particle_gen_time.update():
+            up_or_down = random.choice((0, 650))
+            angle = -90 if up_or_down else 90
+            particle = Particle(
+                pos=Vec(random.randrange(0, 1100), up_or_down),
+                color=(204, 255, 0),
+                size=random.uniform(3, 15),
+                speed=random.uniform(0.3, 3.2),
+                shape="circle",
+                size_reduction=0.2,
+                glow=True,
+                angle=angle
+            )
+            self.particles.add(particle)
+
+    def draw(self, screen, dt: float):
+        for particle in set(self.particles):
+            particle.draw(screen, dt)
+
+            if particle.size < 0.1:
+                self.particles.remove(particle)
 
 
 class MainMenuFlare:

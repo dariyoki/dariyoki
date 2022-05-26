@@ -28,6 +28,7 @@ class Player:
         # Constructor objects
         self.x, self.y = x, y
         self.vec = Vec(self.x, self.y)
+        self.assets = assets
         self.right_img = assets["dari"][0]
         self.left_img = pygame.transform.flip(self.right_img, True, False)
         self.image = self.right_img
@@ -54,8 +55,8 @@ class Player:
             "soul bomb": 0,
             "soul sword": 0,
         }
-        self.inventory: list[Optional[str]] = [
-            None for _ in range(self.INVENTORY_SLOTS)
+        self.inventory: list[Optional[str]] = [] + [
+            None for _ in range(self.INVENTORY_SLOTS - 1)
         ]
         self.item_pickup_circle_radius = self.rect.height
         self.item_pickup_circle_width = 5
@@ -169,7 +170,7 @@ class Player:
         if self.health_potion.loading_bar.loaded:
             if self.item_count["health potion"] > 0:
                 self.item_count["health potion"] -= 1
-                self.health_potion = HealthPotion(self)
+                self.health_potion = HealthPotion(self, self.assets["border"])
             else:
                 self.equipped = None
 
@@ -183,9 +184,19 @@ class Player:
             self.glow_surf_alpha = 255
             if self.item_count["shield potion"] > 0:
                 self.item_count["shield potion"] -= 1
-                self.shield_potion = ShieldPotion(self)
+                self.shield_potion = ShieldPotion(self, self.assets["border"])
             else:
                 self.equipped = None
+
+    def take_damage(self, damage: int, shield=False) -> tuple[int, int]:
+
+        if shield and self.shield:
+            self.shield -= damage
+        else:
+            self.hp -= damage
+        screen_shake = 30
+        screen_shake_val = 4
+        return screen_shake, screen_shake_val
 
     def handle_item_pickup(self, info, raw_dt):
         # Handle items
@@ -193,7 +204,10 @@ class Player:
         if (index := self.rect.collidelist(stub_rx)) != -1:
             self.item_collide_stack += raw_dt
             self.colliding_item = info["items"][index]
-            if not info["item info"].o_lock and self.item_collide_stack > self.AUTO_ITEM_INFO_TIME:
+            if (
+                not info["item info"].o_lock
+                and self.item_collide_stack > self.AUTO_ITEM_INFO_TIME
+            ):
                 info["item info"].opening = True
         else:
             self.item_collide_stack = 0
@@ -258,7 +272,7 @@ class Player:
                 if self.attack_cd >= self.cooldowns[self.equipped]:
                     if self.equipped == "shuriken":
                         self.handle_shurikens(event_info["mouse pos"])
-                        self.attack_cd = 0
+                    self.attack_cd = 0
 
             if self.equipped == "health potion":
                 self.handle_health_potion()

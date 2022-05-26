@@ -5,7 +5,8 @@ from typing import Optional
 import pygame
 import pytmx
 
-from src._globals import enemy_ids, explosions, general_info, shurikens, spawners
+from src._globals import (enemy_ids, explosions, general_info, shurikens,
+                          spawners)
 from src.display import camera, player_start_pos, screen_height, screen_width
 from src.effects.exp_circle import ExpandingCircle, ExpandingCircles
 from src.effects.explosion import Explosion
@@ -20,6 +21,7 @@ from src.ui.stats import Info, PlayerStatistics
 from src.ui.widgets import FloatyText, LevelIcon
 from src.utils import Time, resize
 from src.world import World
+from src.effects.particle_effects import LevelMapFlare
 
 
 class LevelSelector(GameState):
@@ -36,9 +38,15 @@ class LevelSelector(GameState):
         self.level_icon = pygame.Surface((85, 85))
         self.level_icon.fill("blue")
         self.level_icons = {
-            "Bee Territory": tuple((LevelIcon(n, self.assets["level_icon"]) for n in range(1, 6))),
-            "Electri City": tuple((LevelIcon(n, self.assets["level_icon"]) for n in range(6, 11))),
+            "Bee Territory": tuple(
+                (LevelIcon(n, self.assets["level_icon"]) for n in range(1, 6))
+            ),
+            "Electri City": tuple(
+                (LevelIcon(n, self.assets["level_icon"]) for n in range(6, 11))
+            ),
         }
+        self.level_map_flare = LevelMapFlare()
+        self.dt = 0
 
     def mod_assets(self):
         self.assets["bee_territory_level_map"] = pygame.transform.scale(
@@ -47,6 +55,7 @@ class LevelSelector(GameState):
         pass
 
     def update(self, event_info: EventInfo):
+        self.dt = event_info["dt"]
         self.floaty_title_text.update(event_info["dt"])
         for level_icon in self.level_icons[self.current_territory]:
             level_icon.update(event_info)
@@ -56,9 +65,14 @@ class LevelSelector(GameState):
                 pygame.mixer.music.load(path + "two_worlds_pre_chorus.mp3")
                 pygame.mixer.music.play(-1, fade_ms=5000)
 
+        self.level_map_flare.update()
+
     def draw(self):
         self.screen.blit(self.assets["bee_territory_level_map"], -self.camera)
+        self.screen.blit(self.translucent_dark, (0, 0))
         self.floaty_title_text.draw(self.screen, self.camera)
+        self.level_map_flare.draw(self.screen, self.dt)
+
         for level_icon in self.level_icons[self.current_territory]:
             level_icon.draw(self.screen, self.camera)
 
@@ -143,12 +157,12 @@ class Level(GameState):
         ]
         # spawners = []
 
-        self.enemies: list[Ninja] = []
+        self.enemies = pygame.sprite.Group()
 
         # Inventory
         self.statistics = PlayerStatistics(screen, self.player, self.assets)
 
-        self.bees: list[Bee] = []
+        self.bees: set[Bee] = set()
         self.bee_gen_time = Time(random.uniform(4, 6))
 
         self.i_cards = {
@@ -213,7 +227,7 @@ class Level(GameState):
 
             broken = False
             if not isinstance(shuriken.launcher, Ninja):
-                for enemy in self.enemies:
+                for enemy in self.enemies + list(self.bees):
                     if shuriken.rect.colliderect(
                         (
                             enemy.rect.x - self.camera[0],
@@ -255,12 +269,11 @@ class Level(GameState):
                 self.player.rect
             ):
                 if self.player.shield > 0:
-                    self.player.shield -= shuriken.damage
+                    self.screen_shake, self.screen_shake_val = self.player.take_damage(damage=shuriken.damage, shield=True)
                 else:
-                    self.player.hp -= shuriken.damage
+                    self.screen_shake, self.screen_shake_val = self.player.take_damage(damage=shuriken.damage)
+                    
                 shurikens.remove(shuriken)
-                self.screen_shake = 30
-                self.screen_shake_val = 4
                 continue
 
             # Remove shuriken if it goes outside of boundary
@@ -344,17 +357,32 @@ class Level(GameState):
                 self.enemies.remove(enemy)
                 enemy_ids.remove(enemy.id)
 
-        if self.bee_gen_time.update():
+        if len(self.bees) <= 5 and self.bee_gen_time.update():
             new_bee = Bee(
                 self.player,
-                Vec(random.randrange(0, 300), random.randrange(0, 300)),
+                Vec(random.randrange(0, self.TILE_SIZE), random.randrange(0, self.TILE_SIZE)),
                 bee_img=self.assets["bee"],
             )
-            self.bees.append(new_bee)
+            self.bees.add(new_bee)
 
-        for bee in self.bees:
-            bee.update()
+        for bee in set(self.bees):
+            bee.update(event_info["dt"])
             bee.draw(self.screen, camera)
+            
+            if bee.rect.colliderect(self.player.rect) or bee.hp <= 0:
+                self.screen_shake, self.screen_shake_val = self.player.take_damage(bee.damage, shield=True)
+                explosions.append(
+                    Explosion(
+                        n_particles=350,
+                        n_size=(7, 19),
+                        pos=list(bee.rect.center - self.camera),
+                        speed=(3, 14),
+                        color="yellow",
+                        size_reduction=1.5,
+                        # glow=False
+                    )
+                )
+                self.bees.remove(bee)
 
         # Items
         for item in self.items:
