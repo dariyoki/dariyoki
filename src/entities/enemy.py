@@ -1,28 +1,24 @@
 import math
 import random
-import uuid
 
 import pygame
 
-from src._globals import enemy_ids, shurikens
+from src._globals import shurikens
 from src.entities.traits import collide, jump
 from src.generics import Vec
 from src.ui.widgets import LoadingBar
 from src.weapons.shurikens import Shuriken
 
 
-class Ninja(pygame.sprite.Sprite):
+class Ninja:
     JUMP_HEIGHT = 200
     PLAYER_CHASE_RANGE = 400
 
     def __init__(self, x, y, weapon, clan: str, speed, characters, border_image, items):
-        super().__init__()
         self.items = items
         self.x, self.y = x, y
         self.PLAYER_DIST = random.randrange(100, 200)
         self.weapon = weapon
-        self.id = uuid.uuid1()
-        enemy_ids.append(self.id)
         self.denotion_font = pygame.font.SysFont("arialrounded", 24)
         self.question_mark = self.denotion_font.render("?", True, "red")
         self.exclamation_mark = self.denotion_font.render("!", True, "red")
@@ -62,6 +58,7 @@ class Ninja(pygame.sprite.Sprite):
         # Stacking values
         self.jump_stack = 0
         self.shuriken_stack = 0
+        self.vec = Vec()
 
         # HP bar
         self.hp_bar_size = (60, 10)
@@ -75,7 +72,7 @@ class Ninja(pygame.sprite.Sprite):
         self.camera = [0, 0]
 
     def handle_shurikens(self, target):
-        shurikens.append(
+        shurikens.add(
             Shuriken(
                 start=self.rect.center,
                 target=target,
@@ -126,10 +123,11 @@ class Ninja(pygame.sprite.Sprite):
 
             self.image = self.left_img
 
-        dx, dy = collide(self, info, event_info, dx, dy)
+        dx, dy = collide(self, info, event_info, dx, dy, self.vec)
 
         dy = jump(self, dt, dy)
 
+        self.vec += (dx, dy)
         self.x += dx
         self.y += dy
 
@@ -160,11 +158,10 @@ class Ninja(pygame.sprite.Sprite):
             screen.blit(self.question_mark, denotion_pos)
 
 
-class Bee(pygame.sprite.Sprite):
+class Bee:
     SPEED = 3.5
 
     def __init__(self, player_instance, vec: Vec, bee_img: pygame.Surface):
-        super().__init__()
         self.damage = 10
         self.player_instance = player_instance
         self.vec = vec

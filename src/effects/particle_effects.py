@@ -2,9 +2,9 @@ import random
 
 import pygame
 
-from src.effects.particle import BezierParticle, SoulParticle, Particle
-from src.utils import Time
+from src.effects.particle import BezierParticle, Particle, SoulParticle
 from src.generics import EventInfo, Vec
+from src.utils import Time
 
 
 class LevelMapFlare:
@@ -24,7 +24,7 @@ class LevelMapFlare:
                 shape="circle",
                 size_reduction=0.2,
                 glow=True,
-                angle=angle
+                angle=angle,
             )
             self.particles.add(particle)
 

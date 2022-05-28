@@ -9,8 +9,15 @@ from src.utils import circle_surf, get_movement
 
 class Particle:
     def __init__(
-            self, pos, color, size, speed, shape: str, size_reduction, glow: bool = False,
-            angle=None
+        self,
+        pos,
+        color,
+        size,
+        speed,
+        shape: str,
+        size_reduction,
+        glow: bool = False,
+        angle=None,
     ):
         self.pos = pos
         self.color = color
@@ -106,18 +113,18 @@ class CircleParticle:
 
 class SoulParticle:
     def __init__(
-            self,
-            start_x,
-            start_y,
-            speed,
-            mode,
-            shape,
-            size: list[int],
-            colour: tuple[int, int, int],
-            prange: tuple[float, float],
-            acceleration=False,
-            glow=True,
-            size_reduction: float = 0.3,
+        self,
+        start_x,
+        start_y,
+        speed,
+        mode,
+        shape,
+        size: list[int],
+        colour: tuple[int, int, int],
+        prange: tuple[float, float],
+        acceleration=False,
+        glow=True,
+        size_reduction: float = 0.3,
     ):
         self.x = start_x
         self.y = start_y

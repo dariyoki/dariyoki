@@ -2,6 +2,8 @@
   "controls": {
     "right": "K_d",
     "left": "K_a",
+    "up": "K_w",
+    "down": "K_d",
     "jump": ["K_SPACE", "K_w"],
     "dash": "K_LSHIFT",
     "info toggle": "K_i",

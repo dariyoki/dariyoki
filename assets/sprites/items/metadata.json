@@ -4,6 +4,11 @@
     "convert_alpha": true,
     "states": ["level"]
   },
+  "jetpack.png": {
+    "sprite_sheet": null,
+    "convert_alpha": true,
+    "states": ["level"]
+  },
   "chest.png": {
     "sprite_sheet": {
       "rows": 1,

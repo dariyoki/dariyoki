@@ -47,7 +47,10 @@ class Info:
 
     def draw(self, screen, i_cards: dict):
         if self.item is not None:
-            self.surf = i_cards[self.item.name]
+            try:
+                self.surf = i_cards[self.item.name]
+            except KeyError:
+                return
             self.surf.set_alpha(self.ALPHA)
         screen.blit(self.surf, tuple(self.pos))
 
@@ -101,11 +104,12 @@ class PlayerStatistics:
             "health potion": pygame.transform.scale(assets["health_potion"], bsize),
             "shield potion": pygame.transform.scale(assets["shield_potion"], bsize),
             "smoke bomb": pygame.transform.scale(assets["smoke_bomb"], bsize),
+            "jetpack": pygame.transform.scale(assets["jetpack"], bsize)
         }
 
         # Indices
-        self.chosen_index = 1
-        self.init_collide_index = 1
+        self.chosen_index = 0
+        self.init_collide_index = 0
         self.init_collide = False
         self.last_index = None
 

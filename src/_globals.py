@@ -1,5 +1,4 @@
-enemy_ids = []
-shurikens = []
+shurikens = set()
 explosions = []
 spawners = []
 general_info = [None]

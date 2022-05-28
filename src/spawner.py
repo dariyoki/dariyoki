@@ -24,6 +24,7 @@ class Spawner:
         border_image: pygame.Surface,
         characters,
         items,
+        enemy_set: set
     ) -> None:
         self.items = items
         self.border_image = border_image
@@ -40,7 +41,6 @@ class Spawner:
         self.rect = self.image.get_rect()
         self.angle = 0
         self.glow = Glow(self.image, (11, 3, 25), self.location)
-        self.enemies: list[Ninja] = []
         self.time_passed = 0
         self.cool_down = cool_down
         self.number_of_enemies = number_of_enemies
@@ -65,6 +65,7 @@ class Spawner:
             rect=pygame.Rect((0, 0), self.hp_bar_size),
             border_image=border_image,
         )
+        self.enemies = enemy_set
 
     def spawn(self, n):
         if len(self.spawning_rects) < n - 1:
@@ -79,19 +80,19 @@ class Spawner:
             ]
 
     def spawn_enemies(self, n):
-        self.enemies += [
-            Ninja(
-                self.location[0] + random.randrange(self.size[0]),
-                self.location[1],
-                weapon=None,
-                clan="shadow",
-                speed=1.7,
-                characters=self.characters,
-                border_image=self.border_image,
-                items=self.items,
+        for _ in range(n):
+            self.enemies.add(
+                Ninja(
+                    self.location[0] + random.randrange(self.size[0]),
+                    self.location[1],
+                    weapon=None,
+                    clan="shadow",
+                    speed=1.7,
+                    characters=self.characters,
+                    border_image=self.border_image,
+                    items=self.items,
+                )
             )
-            for _ in range(n)
-        ]
 
     def handle_shuriken_collision(self):
         for shuriken in shurikens:

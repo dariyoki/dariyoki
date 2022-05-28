@@ -14,6 +14,8 @@ from src.ui.game_events import GeneralInfo
 from src.utils import camerify as c
 from src.utils import circle_surf, turn_left
 from src.weapons.shurikens import Shuriken
+from src.weapons.swords import Sword
+from src.weapons.jetpack import Jetpack
 
 
 class Player:
@@ -23,7 +25,7 @@ class Player:
     AUTO_ITEM_INFO_TIME = 1
 
     def __init__(
-        self, x, y, camera, controls, screen: pygame.Surface, assets: dict, items: dict
+        self, x, y, camera, controls, screen: pygame.Surface, assets: dict, items: dict,
     ):
         # Constructor objects
         self.x, self.y = x, y
@@ -34,6 +36,7 @@ class Player:
         self.image = self.right_img
         self.rect = self.image.get_rect()
         self.screen = screen
+        self.camera = camera
 
         # Controls
         self.controls = controls
@@ -49,24 +52,22 @@ class Player:
             "shield potion": 0,
             "smoke bomb": 0,
             "shuriken": 0,
-            "sword": 0,
+            "sword": 1,
             "scythe": 0,
             "soul shuriken": 0,
             "soul bomb": 0,
             "soul sword": 0,
+            "jetpack": 0,
         }
-        self.inventory: list[Optional[str]] = [] + [
+        self.inventory: list[Optional[str]] = ["sword"] + [
             None for _ in range(self.INVENTORY_SLOTS - 1)
         ]
+        self.sword = Sword(1, 0, assets["sword_attack"])
         self.item_pickup_circle_radius = self.rect.height
         self.item_pickup_circle_width = 5
         self.item_pickup_start = False
 
         # Animations
-        sword_attack = assets["sword attack"]
-        lsword_attack = turn_left(sword_attack)
-        self.sword_attack_animation = Animation(sword_attack, speed=0.4)
-        self.lsword_attack_animation = Animation(lsword_attack, speed=0.4)
         self.shield_breaking_animation = Animation(assets["shield_bubble"], speed=0.2)
         self.run_right_animation = Animation(assets["dari"][1:], speed=0.15)
         self.run_left_animation = Animation(turn_left(assets["dari"][1:]), speed=0.15)
@@ -103,6 +104,8 @@ class Player:
             pygame.transform.scale2x(self.equip_items["scythe"]), -45
         )
         self.player_shield_img = assets["shield_bubble"][0]
+        # Make the jetpack
+        self.jetpack = None
 
         # Consumables
         self.health_potion = HealthPotion(self, assets["border"])
@@ -115,7 +118,7 @@ class Player:
         self.shield = 0
         self.soul_energy = 100
         self.current_damage = 0
-        self.equipped = None
+        self.equipped = "sword"
         self.costs = {
             "dash": 15,
         }
@@ -126,7 +129,6 @@ class Player:
 
         # Movement vars
         self.angle = 0
-        self.camera = camera
 
         # Movement speeds
         self.speed = 5
@@ -144,7 +146,7 @@ class Player:
         self.dx, self.dy = 0, 0
 
     def handle_shurikens(self, target):
-        shurikens.append(
+        shurikens.add(
             Shuriken(
                 start=(
                     self.rect.center[0] - self.camera[0],
@@ -251,6 +253,19 @@ class Player:
         # Default iteration values
         dx, dy = 0, 0
 
+        # Update the jetpack
+        if self.equipped == "jetpack":
+            if self.jetpack is None:
+                self.jetpack = Jetpack(self, self.vec)
+
+            self.jetpack.update(event_info)
+            if self.jetpack.countdown < 0.1:
+                self.jetpack = None
+                self.inventory.remove("jetpack")
+                self.item_count["jetpack"] -= 1
+                self.equipped = None
+            return
+
         if event_info["keys"][self.right_control]:
             dx += self.speed * dt
             self.last_direction = "right"
@@ -342,7 +357,7 @@ class Player:
             d_img.set_alpha(150)
             self.dash_images.append([d_img, (self.x, self.y), 150])
 
-        dx, dy = collide(self, info, event_info, dx, dy)
+        dx, dy = collide(self, info, event_info, dx, dy, self.vec)
         dy = jump(self, dt, dy)
 
         # Handle chests
@@ -363,6 +378,9 @@ class Player:
         if self.standing_near_chest and len(info["chests"]) != 0:
             info["chests"][self.chest_index].update(event_info["keys"], dt)
 
+        self.update_coord(dx, dy)
+
+    def update_coord(self, dx, dy):
         # Update player coord
         self.x += dx
         self.y += dy
@@ -379,6 +397,11 @@ class Player:
         #     self.rect.y - self.camera[1],
         #     *self.rect.size
         # ), width=3)
+
+        # Update camera pos
+        self.camera[0] += (self.x - self.camera[0] - (screen.get_width() // 2)) * 0.03
+        self.camera[1] += (self.y - self.camera[1] - (screen.get_height() // 2)) * 0.03
+
         # Draw dash shadows
         for dasher in self.dash_images:
             dasher[2] -= 2 * self.dt
@@ -386,6 +409,16 @@ class Player:
                 self.dash_images.remove(dasher)
             dasher[0].set_alpha(int(dasher[2]))
             screen.blit(dasher[0], c(dasher[1], self.camera))
+
+        # Draw the jetpack
+        if self.jetpack is not None:
+            self.jetpack.draw(screen, self.camera)
+
+            if self.equipped != "jetpack":
+                self.jetpack = None
+                self.inventory.remove("jetpack")
+                self.item_count["jetpack"] -= 1
+            return
 
         # Draw player aura
         player_shield_rect = self.player_shield_img.get_rect(center=self.rect.center)
@@ -414,14 +447,14 @@ class Player:
             if self.last_direction == "right":
                 screen.blit(
                     self.equip_items[self.equipped],
-                    (stub.x + 20 - self.camera[0], stub.y - self.camera[1]),
+                    (stub.x + 30 - self.camera[0], stub.y - self.camera[1]),
                 )
             elif self.last_direction == "left":
                 img = pygame.transform.flip(
                     self.equip_items[self.equipped], True, False
                 )
                 screen.blit(
-                    img, (stub.x - 20 - self.camera[0], stub.y - self.camera[1])
+                    img, (stub.x - 30 - self.camera[0], stub.y - self.camera[1])
                 )
 
         # Draw loading bar
@@ -454,6 +487,3 @@ class Player:
             else:
                 self.shield_breaking_animation.play(screen, shield_pos, self.dt)
 
-        # Update camera pos
-        self.camera[0] += (self.x - self.camera[0] - (screen.get_width() // 2)) * 0.03
-        self.camera[1] += (self.y - self.camera[1] - (screen.get_height() // 2)) * 0.03

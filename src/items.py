@@ -5,6 +5,7 @@ import pygame
 
 from src.ui.widgets import LoadingBar
 from src.utils import Glow, circle_surf
+from src.generics import Vec
 
 
 class HoverDirection(Enum):
@@ -14,8 +15,8 @@ class HoverDirection(Enum):
 
 class Item:
     def __init__(self, name: str, image: pygame.Surface, pos):
-        self.init_pos = pos
-        self.pos = pos
+        self.init_pos = pos if isinstance(pos, Vec) else Vec(pos)
+        self.pos = self.init_pos.copy()
         self.name = name
         self.image = image
         self.rect = self.image.get_bounding_rect()
@@ -24,6 +25,8 @@ class Item:
             self.color = (20, 60, 20)
         elif name == "shield potion":
             self.color = (20, 40, 40)
+        elif name == "jetpack":
+            self.color = None
         else:
             self.color = (20, 20, 20)
 
@@ -48,7 +51,7 @@ class Item:
         if self.slide_dist > self.slide_len:
             self.slide_speed = 0
 
-        self.pos = list(self.init_pos)
+        self.pos = Vec(self.init_pos)
         if self.hover_direction == HoverDirection.UP:
             self.hover_movement -= self.hover_speed * dt
             self.i_radius -= (self.hover_speed * dt) / 4
@@ -64,12 +67,13 @@ class Item:
         self.rect = self.image.get_rect(topleft=(self.pos[0], self.pos[1]))
 
     def draw(self, screen, camera):
-        screen.blit(self.image, (self.pos[0] - camera[0], self.pos[1] - camera[1]))
-        screen.blit(
-            circle_surf(radius=self.rect.height + self.i_radius, color=self.color),
-            (self.pos[0] - 12 - camera[0], self.pos[1] - 11 - camera[1]),
-            special_flags=pygame.BLEND_RGB_ADD,
-        )
+        screen.blit(self.image, self.pos - camera)
+        if self.color is not None:
+            screen.blit(
+                circle_surf(radius=self.rect.height + self.i_radius, color=self.color),
+                (self.pos[0] - 12 - camera[0], self.pos[1] - 11 - camera[1]),
+                special_flags=pygame.BLEND_RGB_ADD,
+            )
 
 
 class Chest:

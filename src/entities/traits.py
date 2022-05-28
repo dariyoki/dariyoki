@@ -1,12 +1,18 @@
 import pygame
 
+from src.generics import Vec
 
-def collide(self, info, event_info, dx, dy):
+
+def collide(self, info, event_info, dx, dy, vec: Vec):
     dt = event_info["dt"]
     # Check collisions
     for pos in info["tiles"]:
         tile_type = info["tiles"][pos][0]
         stub = info["tiles"][pos][1]
+
+        if vec.distance_to(stub.center) > 300:
+            # logger.info("this should not be happening though")
+            continue
         # Check for right collision
         if "right" in tile_type and self.last_direction == "left":
             if stub.colliderect(self.rect):
@@ -25,6 +31,9 @@ def collide(self, info, event_info, dx, dy):
     for pos in info["tiles"]:
         tile_type = info["tiles"][pos][0]
         stub = info["tiles"][pos][1]
+
+        if vec.distance_to(stub.center) > 300:
+            continue
         # Check for floor collision
         if "up" in tile_type:
             if stub.collidepoint(self.rect.midbottom) and self.rect.y < pos[1]:
@@ -38,7 +47,8 @@ def collide(self, info, event_info, dx, dy):
                 break
     else:
         if not self.jumping:
-            self.velocity += self.acceleration * dt
+            if self.velocity < 30:
+                self.velocity += self.acceleration * dt
             dy += self.velocity * dt
 
     return dx, dy

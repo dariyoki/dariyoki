@@ -23,9 +23,14 @@ def camerify(coord, camera):
 
 
 def rotate(extract, angle):
-    dump = [pygame.transform.rotozoom(img, angle, 1) for img in extract]
+    dump = [pygame.transform.rotate(img, angle) for img in extract]
 
     return dump
+
+
+def mod_alpha(extract, alpha):
+    for surf in extract:
+        surf.set_alpha(alpha)
 
 
 def resize(extract: Sequence[pygame.Surface], scale: float):

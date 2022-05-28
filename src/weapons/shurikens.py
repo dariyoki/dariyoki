@@ -2,9 +2,9 @@ import uuid
 
 import pygame
 
-from src.weapons.projectiles import Projectile
 from src.effects.particle_effects import ShurikenContrail
 from src.utils import circle_surf
+from src.weapons.projectiles import Projectile
 
 
 class Shuriken(Projectile):
