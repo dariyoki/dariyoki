@@ -19,7 +19,7 @@ class WindSlash(Projectile):
         mouse_pos: tuple,
         speed: float,
     ):
-        frames = resize(frames, 2)
+        frames = resize(frames, 3)
         super().__init__(start=pos, target=mouse_pos, speed=speed, size=frames[3].get_bounding_rect().size)
         # self.frames = rotate(frames, self.degrees - 20 + 60)
         self.frames = frames

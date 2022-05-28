@@ -15,7 +15,7 @@ logger = logging.getLogger()
 class Game:
     def __init__(self):
         self.state: States = States.MAIN_MENU
-        self.assets = load_assets(self.state.value)
+        self.assets = load_assets(self.state.value, screen)
         self.current_state: GameStates = MainMenu(screen, self.assets)
         # Controls
         with open("assets/data/controls.json") as f:
@@ -95,7 +95,7 @@ class Game:
 
             if self.current_state.next_state is not None:
                 self.state = self.current_state.next_state
-                self.assets = load_assets(self.state.value)
+                self.assets = load_assets(self.state.value, screen)
                 self.selective_load()
 
             pygame.display.flip()
