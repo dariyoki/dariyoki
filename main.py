@@ -61,8 +61,8 @@ class Game:
 
             # Calc
             end = time.perf_counter()
-            dt = end - start
-            raw_dt = dt
+            raw_dt = min(end - start, 0.7)
+            dt = raw_dt
             dt *= fps
             start = time.perf_counter()
 
