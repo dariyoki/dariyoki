@@ -8,7 +8,7 @@ import pytmx
 import functools
 import operator
 
-from src._globals import explosions, general_info, shurikens, spawners
+from src._globals import general_info
 from src.display import camera, player_start_pos, screen_height, screen_width
 from src.effects.exp_circle import ExpandingCircle, ExpandingCircles
 from src.effects.explosion import Explosion
@@ -24,6 +24,7 @@ from src.ui.stats import Info, PlayerStatistics
 from src.ui.widgets import FloatyText, LevelIcon
 from src.utils import Time, resize
 from src.world import World
+from src.weapons.shurikens import Shuriken
 
 logger = logging.getLogger()
 
@@ -88,6 +89,13 @@ class Level(GameState):
 
     def __init__(self, n: int, screen: pygame.Surface, assets: dict):
         super().__init__("level", screen)
+
+        # Entities
+        self.enemies: set[Ninja] = set()
+        self.shurikens: set[Shuriken] = set()
+        self.bees: set[Bee] = set()
+        self.explosions: list[Explosion] = []
+
         # Controls
         with open("assets/data/controls.json") as f:
             self.controls = json.load(f)
@@ -148,10 +156,7 @@ class Level(GameState):
             for obj in self.tile_map.get_layer_by_name("chests")
         ]
 
-        self.enemies: set[Ninja] = set()
-
-        global spawners
-        spawners += [
+        self.spawners = [
             Spawner(
                 [obj.x, obj.y],
                 (obj.width, obj.height),
@@ -174,7 +179,6 @@ class Level(GameState):
         # Inventory
         self.statistics = PlayerStatistics(screen, self.player, self.assets)
 
-        self.bees: set[Bee] = set()
         self.bee_gen_time = Time(random.uniform(4, 6))
 
         self.i_cards = {
@@ -240,7 +244,7 @@ class Level(GameState):
                         self.player.sword.projectiles.remove(slash)
                     except KeyError:
                         pass
-                    explosions.append(
+                    self.explosions.append(
                         Explosion(
                             500,
                             (12, 25),
@@ -263,8 +267,8 @@ class Level(GameState):
                     self.screen_shake_val = 2
 
     def handle_shurikens(self, dt):
-        # Shurikens
-        for shuriken in set(shurikens):
+        # self.shurikens
+        for shuriken in set(self.shurikens):
             shuriken.move(dt)
             if shuriken.launcher == self.player:
                 shuriken.draw(self.screen, [0, 0], dt)
@@ -282,8 +286,8 @@ class Level(GameState):
                             )
                     ):
                         enemy.hp -= shuriken.damage
-                        shurikens.remove(shuriken)
-                        explosions.append(
+                        self.shurikens.remove(shuriken)
+                        self.explosions.append(
                             Explosion(
                                 500,
                                 (12, 25),
@@ -323,12 +327,12 @@ class Level(GameState):
                         damage=shuriken.damage
                     )
 
-                shurikens.remove(shuriken)
+                self.shurikens.remove(shuriken)
                 continue
 
             # Remove shuriken if it goes outside of boundary
             if shuriken.distance > 800:
-                shurikens.remove(shuriken)
+                self.shurikens.remove(shuriken)
 
     def update(self, event_info: dict) -> None:
         dt = event_info["dt"]
@@ -353,11 +357,11 @@ class Level(GameState):
         self.screen.blit(self.assets["background"], (0, 0))
 
         # Handle spawners
-        for spawner in spawners:
+        for spawner in self.spawners:
             if self.player.vec.distance_to(spawner.rect.center) > 1100:
                 continue
 
-            spawner.update(event_info)
+            spawner.update(event_info, self.shurikens, self.spawners)
             spawner.draw(self.screen, camera)
 
         self.world.draw_parallax(self.screen, camera)
@@ -386,17 +390,18 @@ class Level(GameState):
                 self.opened_chests.append(chest)
 
         # Player and enemies
-        self.player.update(info, event_info)
+        self.player.update(info, event_info, self.shurikens, self.explosions)
         self.player.draw(self.screen)
 
-        for spawner in spawners:
+        for spawner in self.spawners:
             spawner.draw_spawn(self.screen, self.camera)
 
         for enemy in set(self.enemies):
             if self.player.vec.distance_to(enemy.vec) > 1200:
                 continue
             enemy.update(
-                player_pos=self.player.rect.center, info=info, event_info=event_info
+                player_pos=self.player.rect.center, info=info, event_info=event_info,
+                shurikens=self.shurikens
             )
             enemy.draw(self.screen, self.camera)
             if (
@@ -427,7 +432,7 @@ class Level(GameState):
                 )
 
             if bee.hp <= 0:
-                explosions.append(
+                self.explosions.append(
                     Explosion(
                         n_particles=350,
                         n_size=(7, 19),
@@ -467,11 +472,11 @@ class Level(GameState):
         self.handle_screen_shake(dt)
 
         # Explosions
-        for explosion in explosions:
+        for explosion in self.explosions:
             explosion.draw(self.screen, dt)
 
             if len(explosion.particles) == 0:
-                explosions.remove(explosion)
+                self.explosions.remove(explosion)
 
         # General Info and Achievements
         if general_info[0] is not None:

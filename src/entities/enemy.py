@@ -3,7 +3,6 @@ import random
 
 import pygame
 
-from src._globals import shurikens
 from src.entities.traits import collide, jump
 from src.generics import Vec
 from src.ui.widgets import LoadingBar
@@ -71,7 +70,7 @@ class Ninja:
         )
         self.camera = [0, 0]
 
-    def handle_shurikens(self, target):
+    def handle_shurikens(self, target, shurikens):
         shurikens.add(
             Shuriken(
                 start=self.rect.center,
@@ -87,7 +86,7 @@ class Ninja:
         #     if shuriken not in shuriken_ids:
         #         self.shurikens.remove(shuriken)
 
-    def update(self, player_pos, info, event_info):
+    def update(self, player_pos, info, event_info, shurikens):
         dt = event_info["dt"]
         direction = ""
         dist = abs(self.x - player_pos[0])
@@ -102,7 +101,7 @@ class Ninja:
         if self.chasing:
             self.shuriken_stack += event_info["raw dt"]
             if self.shuriken_stack > self.shuriken_cd:
-                self.handle_shurikens(player_pos)
+                self.handle_shurikens(player_pos, shurikens)
                 self.shuriken_stack = 0
         else:
             direction = self.idle_movement_direction

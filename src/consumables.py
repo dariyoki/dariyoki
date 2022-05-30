@@ -1,6 +1,5 @@
 import pygame
 
-from src._globals import explosions
 from src.effects.explosion import Explosion
 from src.ui.widgets import LoadingBar
 
@@ -19,7 +18,7 @@ class HealthPotion:
             border_image=border_image,
         )
 
-    def draw(self, screen: pygame.Surface, camera):
+    def draw(self, screen: pygame.Surface, camera, explosions):
         self.loading_bar.draw(screen, camera, moving=True)
 
         if self.loading_bar.loaded:
@@ -56,7 +55,7 @@ class ShieldPotion:
             border_image=border_image,
         )
 
-    def draw(self, screen: pygame.Surface, camera):
+    def draw(self, screen: pygame.Surface, camera, explosions):
         self.loading_bar.draw(screen, camera, moving=True)
 
         if self.loading_bar.loaded:

@@ -48,5 +48,10 @@
     },
     "convert_alpha": true,
     "states": ["level"]
+  },
+  "sword_slash.png": {
+    "sprite_sheet": null,
+    "convert_alpha": true,
+    "states": ["level"]
   }
 }

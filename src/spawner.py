@@ -3,11 +3,11 @@ from typing import Sequence
 
 import pygame
 
-from src._globals import shurikens, spawners
+from src.generics import Pos, EventInfo
 from src.entities.enemy import Ninja
 from src.entities.player import Player
 from src.ui.widgets import LoadingBar
-from src.utils import Glow
+from src.utils import Glow, Time
 from src.utils import camerify as c
 
 
@@ -94,7 +94,7 @@ class Spawner:
                 )
             )
 
-    def handle_shuriken_collision(self):
+    def handle_shuriken_collision(self, shurikens):
         for shuriken in shurikens:
             if isinstance(shuriken.launcher, Player) and shuriken.rect.colliderect(
                 (c(self.init_rect.topleft, self.camera), self.size)
@@ -105,9 +105,9 @@ class Spawner:
                 self.gain_damage = True
                 break
 
-    def update(self, event_info):
+    def update(self, event_info: EventInfo, shurikens, spawners):
         self.dt = event_info["dt"]
-        self.handle_shuriken_collision()
+        self.handle_shuriken_collision(shurikens)
 
         if self.hp <= 0:
             spawners.remove(self)
@@ -189,27 +189,37 @@ class Spawner:
         self.hp_bar.draw(screen, camera, moving=True)
 
 
-class BeeSpawner(Spawner):
+class BeeSpawner:
+    SIZE = (20, 20)
+    HP = 50
+
     def __init__(
         self,
-        location,
-        size,
+        location: Pos,
         cool_down,
-        number_of_enemies,
-        enemy,
-        enemy_size,
-        hp,
-        bee_spawner_imgs,
+        bee_spawner_img,
         border_image: pygame.Surface,
     ) -> None:
-        super().__init__(
-            location,
-            size,
-            cool_down,
-            number_of_enemies,
-            enemy,
-            enemy_size,
-            hp,
-            spawn_images=bee_spawner_imgs,
+        self.location = location
+        self.cool_down = cool_down
+        self.img = bee_spawner_img
+        self.rect = self.img.get_rect(topleft=location)
+
+        # Health Points (HP)
+        self.hp = self.HP  # Mutable hp
+
+        self.hp_bar_size = (80, 10)
+        self.hp_bar = LoadingBar(
+            value=self.HP,
+            fg_color=(179, 2, 43),
+            bg_color="black",
+            rect=pygame.Rect((0, 0), self.hp_bar_size),
             border_image=border_image,
         )
+
+        # Bee Generation
+        self.bee_gen = Time(cool_down)
+
+    def update(self, shurikens: set, sword_slashes: set, ) -> None:
+        self.hp_bar.value = self.hp * (self.hp_bar_size[0] / self.HP)
+        self.hp_bar.rect.center = (self.rect.midtop[0], self.rect.midtop[1] - 10)

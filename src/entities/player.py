@@ -3,7 +3,7 @@ from typing import Optional
 
 import pygame
 
-from src._globals import general_info, shurikens
+from src._globals import general_info
 from src.animation import Animation
 from src.audio import dash_sfx, pickup_item_sfx
 from src.consumables import HealthPotion, ShieldPotion
@@ -145,7 +145,7 @@ class Player:
         self.dt = 0
         self.dx, self.dy = 0, 0
 
-    def handle_shurikens(self, target):
+    def handle_shurikens(self, target, shurikens):
         shurikens.add(
             Shuriken(
                 start=(
@@ -163,12 +163,12 @@ class Player:
         else:
             self.equipped = None
 
-    def handle_health_potion(self):
+    def handle_health_potion(self, explosions):
         self.health_potion.loading_bar.rect = pygame.Rect(
             pygame.Rect(self.rect.midtop[0], self.rect.midtop[1] - 10, 50, 12)
         )
         self.health_potion.loading_bar.value += 0.9 * self.dt
-        self.health_potion.draw(self.screen, self.camera)
+        self.health_potion.draw(self.screen, self.camera, explosions)
         if self.health_potion.loading_bar.loaded:
             if self.item_count["health potion"] > 0:
                 self.item_count["health potion"] -= 1
@@ -176,12 +176,12 @@ class Player:
             else:
                 self.equipped = None
 
-    def handle_shield_potion(self):
+    def handle_shield_potion(self, explosions):
         self.shield_potion.loading_bar.rect = pygame.Rect(
             pygame.Rect(self.rect.midtop[0], self.rect.midtop[1] - 10, 50, 12)
         )
         self.shield_potion.loading_bar.value += 0.5 * self.dt
-        self.shield_potion.draw(self.screen, self.camera)
+        self.shield_potion.draw(self.screen, self.camera, explosions)
         if self.shield_potion.loading_bar.loaded:
             self.glow_surf_alpha = 255
             if self.item_count["shield potion"] > 0:
@@ -241,7 +241,7 @@ class Player:
             if quantity == 0 and item in self.inventory:
                 self.inventory[self.inventory.index(item)] = None
 
-    def update(self, info: dict, event_info: dict) -> None:
+    def update(self, info: dict, event_info: dict, shurikens, explosions) -> None:
         dt = event_info["dt"]
         self.dt = event_info["dt"]
         self.info = info
@@ -286,14 +286,14 @@ class Player:
             if self.equipped in self.cooldowns:
                 if self.attack_cd >= self.cooldowns[self.equipped]:
                     if self.equipped == "shuriken":
-                        self.handle_shurikens(event_info["mouse pos"])
+                        self.handle_shurikens(event_info["mouse pos"], shurikens)
                     self.attack_cd = 0
 
             if self.equipped == "health potion":
-                self.handle_health_potion()
+                self.handle_health_potion(explosions)
 
             if self.equipped == "shield potion":
-                self.handle_shield_potion()
+                self.handle_shield_potion(explosions)
 
         for event in event_info["events"]:
             if event.type == pygame.KEYDOWN:
@@ -486,4 +486,3 @@ class Player:
                 )
             else:
                 self.shield_breaking_animation.play(screen, shield_pos, self.dt)
-

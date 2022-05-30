@@ -33,13 +33,13 @@ except ImportError:
 screen: pygame.Surface = pygame.display.set_mode(
     (screen_width, screen_height), pygame.SCALED | pygame.RESIZABLE
 )
-pygame.display.set_caption("src")
+pygame.display.set_caption("Dariyoki")
 logo = pygame.image.load("assets/sprites/logo.ico").convert_alpha()
 pygame.display.set_icon(logo)
 
 # camera = [-(screen_width // 2 - 60), -(screen_height // 2)]
 camera = Vec(100, 100)
-player_start_pos = (950, -200)
+player_start_pos = (550, -300)
 
 # Game boundary
 start_x = -1000
