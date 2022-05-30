@@ -1,3 +1,8 @@
+"""
+This file is a part of the 'dariyoki' source code.
+The source code is distributed under the GPL V3 license.
+"""
+
 import logging
 import random
 from typing import Any
@@ -28,7 +33,9 @@ class LoadingBar:
         self.bg_color = bg_color
         self.rect = rect
         self.rect.center = self.rect.topleft
-        self.val_rect = pygame.Rect(rect.topleft, (self.value, self.rect.height))
+        self.val_rect = pygame.Rect(
+            rect.topleft, (self.value, self.rect.height)
+        )
         self.background_surf = pygame.Surface(self.rect.size)
         self.loaded = False
         self.border_img = pygame.transform.scale(border_image, rect.size)
@@ -40,7 +47,8 @@ class LoadingBar:
                 self.rect.topleft, (self.value, self.rect.height)
             )
         screen.blit(
-            self.background_surf, (self.rect.x - camera[0], self.rect.y - camera[1])
+            self.background_surf,
+            (self.rect.x - camera[0], self.rect.y - camera[1]),
         )
 
         self.loaded = self.value >= self.rect.width
@@ -54,7 +62,9 @@ class LoadingBar:
             ),
         )
 
-        screen.blit(self.border_img, (self.rect.x - camera[0], self.rect.y - camera[1]))
+        screen.blit(
+            self.border_img, (self.rect.x - camera[0], self.rect.y - camera[1])
+        )
 
 
 class EnergyBar(LoadingBar):
@@ -96,7 +106,9 @@ class EnergyBar(LoadingBar):
             w_surf[0][0] -= 5.3 * event_info["dt"]
             if self.val_rect.width > 0:
                 w_surf[1] -= (
-                    10.3 * event_info["dt"] * (self.rect.width / self.val_rect.width)
+                    10.3
+                    * event_info["dt"]
+                    * (self.rect.width / self.val_rect.width)
                 )
             else:
                 w_surf[1] -= 10.3 * event_info["dt"]
@@ -123,7 +135,9 @@ class MenuButton:
         self.title = title
         self.clicked = False
         self.hover = False
-        self.font = pygame.font.Font("assets/fonts/Roboto/Roboto-Regular.ttf", 17)
+        self.font = pygame.font.Font(
+            "assets/fonts/Roboto/Roboto-Regular.ttf", 17
+        )
         self.rect = pygame.Rect(self.pos, self.size)
         self.text_surf = self.font.render(title, True, "white")
         self.text_surf_rect = self.text_surf.get_rect(center=self.pos)
@@ -209,9 +223,9 @@ class Label:
         self.border_colour = border_colour or None
         self.txt_colour = txt_colour
         self.shape = shape
-        self.t = pygame.font.SysFont("bahnschrift", size=self.rect.width // 14).render(
-            content, True, self.txt_colour
-        )
+        self.t = pygame.font.SysFont(
+            "bahnschrift", size=self.rect.width // 14
+        ).render(content, True, self.txt_colour)
 
     def change_txt(self, txt):
         """
@@ -220,9 +234,9 @@ class Label:
         :param txt: Text to be changed into
         :return:
         """
-        self.t = pygame.font.SysFont("arial", size=self.rect.size[0] // 8).render(
-            txt, True, self.txt_colour
-        )
+        self.t = pygame.font.SysFont(
+            "arial", size=self.rect.size[0] // 8
+        ).render(txt, True, self.txt_colour)
 
     def change_pos(self, pos):
         """
@@ -343,7 +357,9 @@ class LevelIcon:
             (((level_number % 5) or 5) * (self.size + self.PAD_X)) + 100, 303
         )
         self.rect = self.image.get_rect(topleft=self.vec)
-        self.level_number_surf = self.FONT.render(str(level_number), True, "yellow")
+        self.level_number_surf = self.FONT.render(
+            str(level_number), True, "yellow"
+        )
         self.level_number_surf_rect = self.level_number_surf.get_rect(
             center=self.rect.center
         )

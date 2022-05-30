@@ -1,11 +1,16 @@
+"""
+This file is a part of the 'dariyoki' source code.
+The source code is distributed under the GPL V3 license.
+"""
+
 import random
 from enum import Enum
 
 import pygame
 
+from src.generics import Vec
 from src.ui.widgets import LoadingBar
 from src.utils import Glow, circle_surf
-from src.generics import Vec
 
 
 class HoverDirection(Enum):
@@ -70,7 +75,9 @@ class Item:
         screen.blit(self.image, self.pos - camera)
         if self.color is not None:
             screen.blit(
-                circle_surf(radius=self.rect.height + self.i_radius, color=self.color),
+                circle_surf(
+                    radius=self.rect.height + self.i_radius, color=self.color
+                ),
                 (self.pos[0] - 12 - camera[0], self.pos[1] - 11 - camera[1]),
                 special_flags=pygame.BLEND_RGB_ADD,
             )

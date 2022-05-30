@@ -1,3 +1,8 @@
+"""
+This file is a part of the 'dariyoki' source code.
+The source code is distributed under the GPL V3 license.
+"""
+
 import math
 import random
 
@@ -13,7 +18,9 @@ class Ninja:
     JUMP_HEIGHT = 200
     PLAYER_CHASE_RANGE = 400
 
-    def __init__(self, x, y, weapon, clan: str, speed, characters, border_image, items):
+    def __init__(
+        self, x, y, weapon, clan: str, speed, characters, border_image, items
+    ):
         self.items = items
         self.x, self.y = x, y
         self.PLAYER_DIST = random.randrange(100, 200)
@@ -141,7 +148,10 @@ class Ninja:
 
         self.rect = self.right_img.get_rect(topleft=(self.x, self.y))
         self.hp_bar.value = self.hp * (self.hp_bar_size[0] / self.max_hp)
-        self.hp_bar.rect.center = (self.rect.midtop[0], self.rect.midtop[1] - 10)
+        self.hp_bar.rect.center = (
+            self.rect.midtop[0],
+            self.rect.midtop[1] - 10,
+        )
 
     def draw(self, screen: pygame.Surface, camera):
         self.camera = camera
@@ -171,7 +181,10 @@ class Bee:
 
     def update(self, dt: float):
         self.vec.move_towards(self.player_instance.vec, self.SPEED * dt)
-        angle = math.degrees(math.atan2(*(self.player_instance.vec - self.vec))) - 90
+        angle = (
+            math.degrees(math.atan2(*(self.player_instance.vec - self.vec)))
+            - 90
+        )
         self.image = pygame.transform.rotate(self.img, angle)
         self.rect.center = self.vec
 

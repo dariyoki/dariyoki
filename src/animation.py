@@ -1,7 +1,13 @@
+"""
+This file is a part of the 'dariyoki' source code.
+The source code is distributed under the GPL V3 license.
+"""
+
+from typing import Sequence
+
 import pygame
 
 from src.generics import Pos
-from typing import Sequence
 
 
 class Animation:

@@ -1,3 +1,8 @@
+"""
+This file is a part of the 'dariyoki' source code.
+The source code is distributed under the GPL V3 license.
+"""
+
 import pygame
 
 from src.effects.explosion import Explosion
@@ -13,7 +18,10 @@ class HealthPotion:
             fg_color="white",
             bg_color="black",
             rect=pygame.Rect(
-                player_obj.rect.midtop[0], player_obj.rect.midtop[1] - 10, 50, 12
+                player_obj.rect.midtop[0],
+                player_obj.rect.midtop[1] - 10,
+                50,
+                12,
             ),
             border_image=border_image,
         )
@@ -50,7 +58,10 @@ class ShieldPotion:
             fg_color="white",
             bg_color="black",
             rect=pygame.Rect(
-                player_obj.rect.midtop[0], player_obj.rect.midtop[1] - 10, 50, 12
+                player_obj.rect.midtop[0],
+                player_obj.rect.midtop[1] - 10,
+                50,
+                12,
             ),
             border_image=border_image,
         )
@@ -59,7 +70,10 @@ class ShieldPotion:
         self.loading_bar.draw(screen, camera, moving=True)
 
         if self.loading_bar.loaded:
-            if self.player_obj.shield + self.shield > self.player_obj.max_shield:
+            if (
+                self.player_obj.shield + self.shield
+                > self.player_obj.max_shield
+            ):
                 self.player_obj.shield = self.player_obj.max_shield
             else:
                 self.player_obj.shield += self.shield

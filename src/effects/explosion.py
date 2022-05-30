@@ -1,3 +1,8 @@
+"""
+This file is a part of the 'dariyoki' source code.
+The source code is distributed under the GPL V3 license.
+"""
+
 import random
 
 from src.effects.particle import Particle
@@ -5,7 +10,14 @@ from src.effects.particle import Particle
 
 class Explosion:
     def __init__(
-        self, n_particles, n_size, pos, speed, color, size_reduction=5, glow=True
+        self,
+        n_particles,
+        n_size,
+        pos,
+        speed,
+        color,
+        size_reduction=5,
+        glow=True,
     ):
         self.n_particles = n_particles
         self.n_size = n_size

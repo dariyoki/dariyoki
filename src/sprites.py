@@ -1,3 +1,8 @@
+"""
+This file is a part of the 'dariyoki' source code.
+The source code is distributed under the GPL V3 license.
+"""
+
 import json
 import logging
 import time
@@ -45,7 +50,7 @@ def load_assets(state: str, screen: pygame.Surface) -> dict:
             else:
                 asset = get_images(image, *data["sprite_sheet"].values())
 
-            file_extension = file[file.find("."):]
+            file_extension = file[file.find(".") :]
             assets[file.replace(file_extension, "")] = asset
         screen.fill("black")
         width += total_rect_width * total_files

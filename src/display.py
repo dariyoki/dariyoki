@@ -1,3 +1,8 @@
+"""
+This file is a part of the 'dariyoki' source code.
+The source code is distributed under the GPL V3 license.
+"""
+
 import json
 import logging
 import os
@@ -26,9 +31,7 @@ try:
 
     pyi_splash.close()
 except ImportError:
-    compiling = (
-        False  # this is expected to throw an exception in non-splash launch contexts.
-    )
+    compiling = False  # this is expected to throw an exception in non-splash launch contexts.
 
 screen: pygame.Surface = pygame.display.set_mode(
     (screen_width, screen_height), pygame.SCALED | pygame.RESIZABLE

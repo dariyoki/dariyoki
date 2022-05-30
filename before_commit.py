@@ -1,4 +1,7 @@
 """
+This file is a part of the 'dariyoki' source code.
+The source code is distributed under the GPL V3 license.
+
 This file is a part of the 'Pygame Examples (pgex)' source code.
 The source code is distributed under the MIT license.
 Runs black and isort on all project files, makes sure each file has the license

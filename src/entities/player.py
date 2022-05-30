@@ -1,3 +1,8 @@
+"""
+This file is a part of the 'dariyoki' source code.
+The source code is distributed under the GPL V3 license.
+"""
+
 import math
 from typing import Optional
 
@@ -13,9 +18,9 @@ from src.generics import Vec
 from src.ui.game_events import GeneralInfo
 from src.utils import camerify as c
 from src.utils import circle_surf, turn_left
+from src.weapons.jetpack import Jetpack
 from src.weapons.shurikens import Shuriken
 from src.weapons.swords import Sword
-from src.weapons.jetpack import Jetpack
 
 
 class Player:
@@ -25,7 +30,14 @@ class Player:
     AUTO_ITEM_INFO_TIME = 1
 
     def __init__(
-        self, x, y, camera, controls, screen: pygame.Surface, assets: dict, items: dict,
+        self,
+        x,
+        y,
+        camera,
+        controls,
+        screen: pygame.Surface,
+        assets: dict,
+        items: dict,
     ):
         # Constructor objects
         self.x, self.y = x, y
@@ -42,7 +54,9 @@ class Player:
         self.controls = controls
         self.right_control = getattr(pygame, controls["right"])
         self.left_control = getattr(pygame, controls["left"])
-        self.jump_control = [getattr(pygame, control) for control in controls["jump"]]
+        self.jump_control = [
+            getattr(pygame, control) for control in controls["jump"]
+        ]
         self.dash_control = getattr(pygame, controls["dash"])
         self.pickup_control = getattr(pygame, controls["pickup item"])
 
@@ -68,9 +82,13 @@ class Player:
         self.item_pickup_start = False
 
         # Animations
-        self.shield_breaking_animation = Animation(assets["shield_bubble"], speed=0.2)
+        self.shield_breaking_animation = Animation(
+            assets["shield_bubble"], speed=0.2
+        )
         self.run_right_animation = Animation(assets["dari"][1:], speed=0.15)
-        self.run_left_animation = Animation(turn_left(assets["dari"][1:]), speed=0.15)
+        self.run_left_animation = Animation(
+            turn_left(assets["dari"][1:]), speed=0.15
+        )
 
         self.aura = PlayerAura((0, 0, 0), 2)
 
@@ -241,7 +259,9 @@ class Player:
             if quantity == 0 and item in self.inventory:
                 self.inventory[self.inventory.index(item)] = None
 
-    def update(self, info: dict, event_info: dict, shurikens, explosions) -> None:
+    def update(
+        self, info: dict, event_info: dict, shurikens, explosions
+    ) -> None:
         dt = event_info["dt"]
         self.dt = event_info["dt"]
         self.info = info
@@ -286,7 +306,9 @@ class Player:
             if self.equipped in self.cooldowns:
                 if self.attack_cd >= self.cooldowns[self.equipped]:
                     if self.equipped == "shuriken":
-                        self.handle_shurikens(event_info["mouse pos"], shurikens)
+                        self.handle_shurikens(
+                            event_info["mouse pos"], shurikens
+                        )
                     self.attack_cd = 0
 
             if self.equipped == "health potion":
@@ -307,7 +329,9 @@ class Player:
                         self.dash_stack = 0
                         self.soul_energy -= self.costs["dash"]
                     else:
-                        general_info[0] = GeneralInfo("Not enough soul energy!", "red")
+                        general_info[0] = GeneralInfo(
+                            "Not enough soul energy!", "red"
+                        )
 
                 if event.key == self.pickup_control:
                     if self.colliding_item is not None:
@@ -399,8 +423,12 @@ class Player:
         # ), width=3)
 
         # Update camera pos
-        self.camera[0] += (self.x - self.camera[0] - (screen.get_width() // 2)) * 0.03
-        self.camera[1] += (self.y - self.camera[1] - (screen.get_height() // 2)) * 0.03
+        self.camera[0] += (
+            self.x - self.camera[0] - (screen.get_width() // 2)
+        ) * 0.03
+        self.camera[1] += (
+            self.y - self.camera[1] - (screen.get_height() // 2)
+        ) * 0.03
 
         # Draw dash shadows
         for dasher in self.dash_images:
@@ -421,7 +449,9 @@ class Player:
             return
 
         # Draw player aura
-        player_shield_rect = self.player_shield_img.get_rect(center=self.rect.center)
+        player_shield_rect = self.player_shield_img.get_rect(
+            center=self.rect.center
+        )
         shield_pos = c(player_shield_rect.topleft, self.camera)
         if self.shield < 1 or self.glow_surf_alpha <= 0:
             self.aura.update(
@@ -443,7 +473,9 @@ class Player:
 
         # Draw player weapon
         if self.equipped is not None:
-            stub = self.equip_items[self.equipped].get_rect(center=self.rect.center)
+            stub = self.equip_items[self.equipped].get_rect(
+                center=self.rect.center
+            )
             if self.last_direction == "right":
                 screen.blit(
                     self.equip_items[self.equipped],
@@ -454,12 +486,15 @@ class Player:
                     self.equip_items[self.equipped], True, False
                 )
                 screen.blit(
-                    img, (stub.x - 30 - self.camera[0], stub.y - self.camera[1])
+                    img,
+                    (stub.x - 30 - self.camera[0], stub.y - self.camera[1]),
                 )
 
         # Draw loading bar
         if self.standing_near_chest and len(self.info["chests"]) != 0:
-            self.info["chests"][self.chest_index].loading_bar.draw(screen, self.camera)
+            self.info["chests"][self.chest_index].loading_bar.draw(
+                screen, self.camera
+            )
 
         self.current_damage = self.last_hp - self.hp
 
@@ -473,7 +508,9 @@ class Player:
                 self.glow_surf.set_alpha(self.glow_surf_alpha)
                 screen.blit(self.player_shield_img, shield_pos)
                 screen.blit(
-                    self.glow_surf, shield_pos, special_flags=pygame.BLEND_RGB_ADD
+                    self.glow_surf,
+                    shield_pos,
+                    special_flags=pygame.BLEND_RGB_ADD,
                 )
         elif self.shield_break:
             if (
@@ -482,7 +519,10 @@ class Player:
             ):
                 self.shield_break = False
                 self.info["expanding circles"].add(
-                    pos=c(player_shield_rect.center, self.camera), color=(0, 20, 200)
+                    pos=c(player_shield_rect.center, self.camera),
+                    color=(0, 20, 200),
                 )
             else:
-                self.shield_breaking_animation.play(screen, shield_pos, self.dt)
+                self.shield_breaking_animation.play(
+                    screen, shield_pos, self.dt
+                )

@@ -1,5 +1,10 @@
-import math
+"""
+This file is a part of the 'dariyoki' source code.
+The source code is distributed under the GPL V3 license.
+"""
+
 import logging
+import math
 
 import pygame
 
@@ -51,4 +56,6 @@ class Projectile:
         # self.rect.y = int(self.y)
         self.rect.center = self.x, self.y
 
-        self.distance += math.sqrt(((self.dx * dt) ** 2) + ((self.dy * dt) ** 2))
+        self.distance += math.sqrt(
+            ((self.dx * dt) ** 2) + ((self.dy * dt) ** 2)
+        )

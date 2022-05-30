@@ -1,3 +1,8 @@
+"""
+This file is a part of the 'dariyoki' source code.
+The source code is distributed under the GPL V3 license.
+"""
+
 import uuid
 
 import pygame
@@ -22,11 +27,18 @@ class Shuriken(Projectile):
     def draw(self, screen, camera, dt):
         self.angle += 5 * dt
 
-        self.image = pygame.transform.rotozoom(self.shuriken_img, int(self.angle), 1)
-        self.contrail.update(
-            self.rect.center[0] - camera[0], self.rect.center[1] - camera[1], screen, dt
+        self.image = pygame.transform.rotozoom(
+            self.shuriken_img, int(self.angle), 1
         )
-        screen.blit(self.image, (self.rect.x - camera[0], self.rect.y - camera[1]))
+        self.contrail.update(
+            self.rect.center[0] - camera[0],
+            self.rect.center[1] - camera[1],
+            screen,
+            dt,
+        )
+        screen.blit(
+            self.image, (self.rect.x - camera[0], self.rect.y - camera[1])
+        )
 
         surf = circle_surf(self.glow_radius, (31, 32, 34))
         rect = surf.get_rect(center=self.rect.center)

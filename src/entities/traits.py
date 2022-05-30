@@ -1,3 +1,8 @@
+"""
+This file is a part of the 'dariyoki' source code.
+The source code is distributed under the GPL V3 license.
+"""
+
 import pygame
 
 from src.generics import Vec
@@ -38,7 +43,9 @@ def collide(self, info, event_info, dx, dy, vec: Vec):
         if "up" in tile_type:
             if stub.collidepoint(self.rect.midbottom) and self.rect.y < pos[1]:
                 self.image = (
-                    self.right_img if self.last_direction == "right" else self.left_img
+                    self.right_img
+                    if self.last_direction == "right"
+                    else self.left_img
                 )
                 self.touched_ground = True
                 self.angle = 0
@@ -59,7 +66,9 @@ def jump(self, dt, dy):
     if self.jumping:
         self.angle += 200 * dt
 
-        self.image = pygame.transform.rotozoom(self.right_img, int(self.angle), 1)
+        self.image = pygame.transform.rotozoom(
+            self.right_img, int(self.angle), 1
+        )
         self.velocity -= self.acceleration * dt
         dy -= self.velocity * dt
         self.jump_stack += abs(dy)

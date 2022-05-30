@@ -1,3 +1,8 @@
+"""
+This file is a part of the 'dariyoki' source code.
+The source code is distributed under the GPL V3 license.
+"""
+
 import math
 import random
 
@@ -172,7 +177,9 @@ class SoulParticle:
             )
 
         if self.glow and self.shape != "rectangle":
-            bloom_rect = pygame.Rect(self.x, self.y, self.size[0] * 2, self.size[1] * 2)
+            bloom_rect = pygame.Rect(
+                self.x, self.y, self.size[0] * 2, self.size[1] * 2
+            )
             bloom_rect.center = (self.x, self.y)
             try:
                 bloom = circle_surf(tuple(self.size)[0] * 1.2, (150, 150, 150))

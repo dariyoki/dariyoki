@@ -1,3 +1,8 @@
+"""
+This file is a part of the 'dariyoki' source code.
+The source code is distributed under the GPL V3 license.
+"""
+
 import json
 import logging
 import time
@@ -85,7 +90,9 @@ class Game:
             screen.blit(self.current_state.transition_overlay_surface, (0, 0))
 
             screen.blit(
-                self.font.render(f"{clock.get_fps():.2f}", True, (200, 174, 0)),
+                self.font.render(
+                    f"{clock.get_fps():.2f}", True, (200, 174, 0)
+                ),
                 (1000, 10),
             )
             # Event handler

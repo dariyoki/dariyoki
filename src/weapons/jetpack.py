@@ -1,8 +1,15 @@
-import pygame
+"""
+This file is a part of the 'dariyoki' source code.
+The source code is distributed under the GPL V3 license.
+"""
+
 import math
-from src.utils import turn_left
-from src.generics import EventInfo, Vec
+
+import pygame
+
 from src.animation import Animation
+from src.generics import EventInfo, Vec
+from src.utils import turn_left
 
 
 class Jetpack:
@@ -18,11 +25,15 @@ class Jetpack:
         self.vec = pos.copy()
         frames = player_instance.assets["dari_jetpack"][1:]
         self.animation = Animation(frames, self.ANIMATION_SPEED)
-        self.left_animation = Animation(turn_left(frames), self.ANIMATION_SPEED)
+        self.left_animation = Animation(
+            turn_left(frames), self.ANIMATION_SPEED
+        )
         self.facing_right: bool = True
         self.countdown = self.TIME_LIMIT
         self.width_mult = self.TOTAL_TIMER_RECT_WIDTH / self.TIME_LIMIT
-        self.timer_fore_rect = pygame.Rect(50, 200, self.TOTAL_TIMER_RECT_WIDTH, 40)
+        self.timer_fore_rect = pygame.Rect(
+            50, 200, self.TOTAL_TIMER_RECT_WIDTH, 40
+        )
         self.timer_back_rect = self.timer_fore_rect.copy()
 
     def update(self, event_info: EventInfo) -> None:
@@ -71,5 +82,13 @@ class Jetpack:
             color = "yellow"
         if self.countdown < 3:
             color = "red"
-        count_down_surf = self.FONT.render(f"{self.countdown:.2f}", True, color)
-        screen.blit(count_down_surf, (self.timer_fore_rect.x, self.timer_fore_rect.y + count_down_surf.get_height()))
+        count_down_surf = self.FONT.render(
+            f"{self.countdown:.2f}", True, color
+        )
+        screen.blit(
+            count_down_surf,
+            (
+                self.timer_fore_rect.x,
+                self.timer_fore_rect.y + count_down_surf.get_height(),
+            ),
+        )

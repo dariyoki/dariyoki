@@ -1,12 +1,17 @@
+"""
+This file is a part of the 'dariyoki' source code.
+The source code is distributed under the GPL V3 license.
+"""
+
+import functools
 import json
-import random
 import logging
+import operator
+import random
 from typing import Optional
 
 import pygame
 import pytmx
-import functools
-import operator
 
 from src._globals import general_info
 from src.display import camera, player_start_pos, screen_height, screen_width
@@ -23,8 +28,8 @@ from src.states.game_state import GameState
 from src.ui.stats import Info, PlayerStatistics
 from src.ui.widgets import FloatyText, LevelIcon
 from src.utils import Time, resize
-from src.world import World
 from src.weapons.shurikens import Shuriken
+from src.world import World
 
 logger = logging.getLogger()
 
@@ -38,7 +43,10 @@ class LevelSelector(GameState):
         self.camera = Vec()
         self.current_territory = "Bee Territory"
         self.floaty_title_text = FloatyText(
-            self.current_territory, screen.get_rect().midtop + Vec(0, 50), 40, "yellow"
+            self.current_territory,
+            screen.get_rect().midtop + Vec(0, 50),
+            40,
+            "yellow",
         )
         self.level_icon = pygame.Surface((85, 85))
         self.level_icon.fill("blue")
@@ -55,7 +63,8 @@ class LevelSelector(GameState):
 
     def mod_assets(self):
         self.assets["bee_territory_level_map"] = pygame.transform.scale(
-            self.assets["bee_territory_level_map"], (screen_width, screen_height)
+            self.assets["bee_territory_level_map"],
+            (screen_width, screen_height),
         )
         pass
 
@@ -115,8 +124,12 @@ class Level(GameState):
             "shield potion": pygame.transform.scale(
                 self.assets["shield_potion"], item_size
             ),
-            "shuriken": pygame.transform.scale(self.assets["shuriken"], item_size),
-            "smoke bomb": pygame.transform.scale(self.assets["smoke_bomb"], item_size),
+            "shuriken": pygame.transform.scale(
+                self.assets["shuriken"], item_size
+            ),
+            "smoke bomb": pygame.transform.scale(
+                self.assets["smoke_bomb"], item_size
+            ),
             "sword": pygame.transform.scale(self.assets["sword"], item_size),
             "scythe": pygame.transform.scale(self.assets["scythe"], item_size),
         }
@@ -137,7 +150,9 @@ class Level(GameState):
 
         try:
             self.items = [
-                Item("jetpack", self.assets["jetpack"], Vec(obj.x, obj.y - 100))
+                Item(
+                    "jetpack", self.assets["jetpack"], Vec(obj.x, obj.y - 100)
+                )
                 for obj in self.tile_map.get_layer_by_name("items")
             ]
         except ValueError:
@@ -171,7 +186,7 @@ class Level(GameState):
                 ),
                 characters=self.assets["characters"],
                 items=self._items,
-                enemy_set=self.enemies
+                enemy_set=self.enemies,
             )
             for obj in self.tile_map.get_layer_by_name("spawners")
         ]
@@ -195,7 +210,11 @@ class Level(GameState):
         self.t_time_passed = 0
 
         self.expanding_circles = ExpandingCircles(
-            init_radius=5, max_radius=40, increment=3, colour=(255, 0, 0), width=10
+            init_radius=5,
+            max_radius=40,
+            increment=3,
+            colour=(255, 0, 0),
+            width=10,
         )
         self.screen_shake = 0
         self.screen_shake_val = 0
@@ -208,10 +227,12 @@ class Level(GameState):
         render_offset = [0, 0]
         if self.screen_shake > 0:
             render_offset[0] = (
-                    random.randint(0, self.screen_shake_val * 2) - self.screen_shake_val
+                random.randint(0, self.screen_shake_val * 2)
+                - self.screen_shake_val
             )
             render_offset[1] = (
-                    random.randint(0, self.screen_shake_val * 2) - self.screen_shake_val
+                random.randint(0, self.screen_shake_val * 2)
+                - self.screen_shake_val
             )
 
         self.camera[0] += render_offset[0]
@@ -219,7 +240,9 @@ class Level(GameState):
 
     def load_level(self, n):
         # Level data
-        self.tile_map = pytmx.load_pygame(f"assets/data/level_data/level_{n}_test.tmx")
+        self.tile_map = pytmx.load_pygame(
+            f"assets/data/level_data/level_{n}_test.tmx"
+        )
         tile_map = self.tile_map
         for index, layer in enumerate(tile_map):
             if layer.name == "Tile Layer 1":
@@ -228,10 +251,15 @@ class Level(GameState):
                     if tile_properties["type"] == "center":
                         continue
 
-                    tile_pos = (x * tile_map.tileheight, y * tile_map.tilewidth)
+                    tile_pos = (
+                        x * tile_map.tileheight,
+                        y * tile_map.tilewidth,
+                    )
                     self.all_rects[tile_pos] = (
                         tile_properties["type"],
-                        pygame.Rect(tile_pos, (self.TILE_SIZE, self.TILE_SIZE)),
+                        pygame.Rect(
+                            tile_pos, (self.TILE_SIZE, self.TILE_SIZE)
+                        ),
                     )
                 break
 
@@ -277,13 +305,15 @@ class Level(GameState):
 
             broken = False
             if not isinstance(shuriken.launcher, Ninja):
-                for enemy in functools.reduce(operator.or_, [self.enemies, self.bees]):
+                for enemy in functools.reduce(
+                    operator.or_, [self.enemies, self.bees]
+                ):
                     if shuriken.rect.colliderect(
-                            (
-                                    enemy.rect.x - self.camera[0],
-                                    enemy.rect.y - self.camera[1],
-                                    *enemy.rect.size,
-                            )
+                        (
+                            enemy.rect.x - self.camera[0],
+                            enemy.rect.y - self.camera[1],
+                            *enemy.rect.size,
+                        )
                     ):
                         enemy.hp -= shuriken.damage
                         self.shurikens.remove(shuriken)
@@ -316,16 +346,20 @@ class Level(GameState):
                     continue
 
             if shuriken.launcher != self.player and shuriken.rect.colliderect(
-                    self.player.rect
+                self.player.rect
             ):
                 if self.player.shield > 0:
-                    self.screen_shake, self.screen_shake_val = self.player.take_damage(
+                    (
+                        self.screen_shake,
+                        self.screen_shake_val,
+                    ) = self.player.take_damage(
                         damage=shuriken.damage, shield=True
                     )
                 else:
-                    self.screen_shake, self.screen_shake_val = self.player.take_damage(
-                        damage=shuriken.damage
-                    )
+                    (
+                        self.screen_shake,
+                        self.screen_shake_val,
+                    ) = self.player.take_damage(damage=shuriken.damage)
 
                 self.shurikens.remove(shuriken)
                 continue
@@ -400,14 +434,13 @@ class Level(GameState):
             if self.player.vec.distance_to(enemy.vec) > 1200:
                 continue
             enemy.update(
-                player_pos=self.player.rect.center, info=info, event_info=event_info,
-                shurikens=self.shurikens
+                player_pos=self.player.rect.center,
+                info=info,
+                event_info=event_info,
+                shurikens=self.shurikens,
             )
             enemy.draw(self.screen, self.camera)
-            if (
-                    enemy.hp <= 0
-                    or enemy.y > self.TILE_SIZE * 100
-            ):
+            if enemy.hp <= 0 or enemy.y > self.TILE_SIZE * 100:
                 self.enemies.remove(enemy)
 
         if len(self.bees) <= 5 and self.bee_gen_time.update():
@@ -427,9 +460,10 @@ class Level(GameState):
 
             if bee.rect.colliderect(self.player.rect):
                 bee.hp = 0
-                self.screen_shake, self.screen_shake_val = self.player.take_damage(
-                    bee.damage, shield=True
-                )
+                (
+                    self.screen_shake,
+                    self.screen_shake_val,
+                ) = self.player.take_damage(bee.damage, shield=True)
 
             if bee.hp <= 0:
                 self.explosions.append(
@@ -453,7 +487,9 @@ class Level(GameState):
         # Projectiles
         self.handle_shurikens(dt)
         if self.player.equipped == "sword":
-            self.player.sword.update(event_info, (self.player.x, self.player.y), self.camera)
+            self.player.sword.update(
+                event_info, (self.player.x, self.player.y), self.camera
+            )
 
         for wind_slash in set(self.player.sword.projectiles):
             wind_slash.update(event_info["dt"])

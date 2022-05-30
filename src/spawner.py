@@ -1,11 +1,16 @@
+"""
+This file is a part of the 'dariyoki' source code.
+The source code is distributed under the GPL V3 license.
+"""
+
 import random
 from typing import Sequence
 
 import pygame
 
-from src.generics import Pos, EventInfo
 from src.entities.enemy import Ninja
 from src.entities.player import Player
+from src.generics import EventInfo, Pos
 from src.ui.widgets import LoadingBar
 from src.utils import Glow, Time
 from src.utils import camerify as c
@@ -24,13 +29,15 @@ class Spawner:
         border_image: pygame.Surface,
         characters,
         items,
-        enemy_set: set
+        enemy_set: set,
     ) -> None:
         self.items = items
         self.border_image = border_image
         self.location = location
         self.size = size
-        self.spawn_images = [pygame.transform.scale(img, size) for img in spawn_images]
+        self.spawn_images = [
+            pygame.transform.scale(img, size) for img in spawn_images
+        ]
         self.init_spawn_images = list(self.spawn_images)
         self.image = self.spawn_images[0]
         self.damage_surf = pygame.Surface(size)
@@ -96,7 +103,9 @@ class Spawner:
 
     def handle_shuriken_collision(self, shurikens):
         for shuriken in shurikens:
-            if isinstance(shuriken.launcher, Player) and shuriken.rect.colliderect(
+            if isinstance(
+                shuriken.launcher, Player
+            ) and shuriken.rect.colliderect(
                 (c(self.init_rect.topleft, self.camera), self.size)
             ):
                 self.hp -= shuriken.damage
@@ -124,11 +133,15 @@ class Spawner:
             self.time_passed = 0
 
         if self.spawn_it:
-            self.image = pygame.transform.rotate(self.spawn_images[1], self.angle)
+            self.image = pygame.transform.rotate(
+                self.spawn_images[1], self.angle
+            )
             self.time_passed = 0
             self.spawn(random.randrange(*self.number_of_enemies))
         else:
-            self.image = pygame.transform.rotate(self.spawn_images[0], self.angle)
+            self.image = pygame.transform.rotate(
+                self.spawn_images[0], self.angle
+            )
 
         self.rect = self.image.get_rect(center=self.init_rect.center)
 
@@ -157,7 +170,10 @@ class Spawner:
 
         self.rect = self.image.get_rect(topleft=self.rect.topleft)
         self.hp_bar.value = self.hp * (self.hp_bar_size[0] / self.max_hp)
-        self.hp_bar.rect.center = (self.rect.midtop[0], self.rect.midtop[1] - 10)
+        self.hp_bar.rect.center = (
+            self.rect.midtop[0],
+            self.rect.midtop[1] - 10,
+        )
 
     def draw_spawn(self, screen, camera):
         for rect in self.spawning_rects:
@@ -220,6 +236,13 @@ class BeeSpawner:
         # Bee Generation
         self.bee_gen = Time(cool_down)
 
-    def update(self, shurikens: set, sword_slashes: set, ) -> None:
+    def update(
+        self,
+        shurikens: set,
+        sword_slashes: set,
+    ) -> None:
         self.hp_bar.value = self.hp * (self.hp_bar_size[0] / self.HP)
-        self.hp_bar.rect.center = (self.rect.midtop[0], self.rect.midtop[1] - 10)
+        self.hp_bar.rect.center = (
+            self.rect.midtop[0],
+            self.rect.midtop[1] - 10,
+        )

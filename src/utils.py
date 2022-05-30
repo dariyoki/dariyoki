@@ -1,3 +1,8 @@
+"""
+This file is a part of the 'dariyoki' source code.
+The source code is distributed under the GPL V3 license.
+"""
+
 import math
 import time
 from typing import Sequence
@@ -34,7 +39,10 @@ def mod_alpha(extract, alpha):
 
 
 def resize(extract: Sequence[pygame.Surface], scale: float):
-    width, height = extract[0].get_width() * scale, extract[0].get_height() * scale
+    width, height = (
+        extract[0].get_width() * scale,
+        extract[0].get_height() * scale,
+    )
     scaled = [pygame.transform.scale(img, (width, height)) for img in extract]
 
     return scaled
@@ -103,7 +111,11 @@ class Expansion:
     """
 
     def __init__(
-        self, number: float, lower_limit: float, upper_limit: float, speed: float
+        self,
+        number: float,
+        lower_limit: float,
+        upper_limit: float,
+        speed: float,
     ):
         self.number = number
         self.lower_limit = lower_limit

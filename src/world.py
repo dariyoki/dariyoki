@@ -1,3 +1,8 @@
+"""
+This file is a part of the 'dariyoki' source code.
+The source code is distributed under the GPL V3 license.
+"""
+
 import pygame
 import pytmx
 
@@ -41,12 +46,20 @@ class World:
 
         self.tiles_background = pygame.Surface((250 * 25, 100 * 25))
         self.tiles_background.set_colorkey(0)
-        for x, y, image in self.tile_map.get_layer_by_name("Tile Layer 1").tiles():
+        for x, y, image in self.tile_map.get_layer_by_name(
+            "Tile Layer 1"
+        ).tiles():
             self.tiles_background.blit(
-                image, ((x * self.tile_map.tileheight), (y * self.tile_map.tilewidth))
+                image,
+                (
+                    (x * self.tile_map.tileheight),
+                    (y * self.tile_map.tilewidth),
+                ),
             )
 
-        for obj in self.parallax_tile_map.get_layer_by_name("parallax decorations"):
+        for obj in self.parallax_tile_map.get_layer_by_name(
+            "parallax decorations"
+        ):
             obj.image.set_alpha(100)
             self.parallax_background.blit(obj.image, (obj.x, obj.y))
         self.parallax_background = self.parallax_background.subsurface(
@@ -70,7 +83,9 @@ class World:
 
     def draw_parallax(self, screen: pygame.Surface, camera: Vec):
         screen.blit(self.bush_img, (self.x - camera[0], 450))
-        screen.blit(self.r_bush_img, (self.x - camera[0] + self.bush_width, 450))
+        screen.blit(
+            self.r_bush_img, (self.x - camera[0] + self.bush_width, 450)
+        )
         screen.blit(
             self.parallax_background,
             (100 - (camera[0] * self.f), 100 - (camera[1] * self.f)),

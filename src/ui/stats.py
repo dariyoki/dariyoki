@@ -1,3 +1,8 @@
+"""
+This file is a part of the 'dariyoki' source code.
+The source code is distributed under the GPL V3 license.
+"""
+
 import pygame
 
 from src.generics import EventInfo
@@ -92,7 +97,8 @@ class PlayerStatistics:
         brect = self.border_img.get_rect()
         self.inventory_rects = [
             pygame.Rect(
-                ((brect.height + 5) * col + 300, (brect.width + 5) * 0 + 30), brect.size
+                ((brect.height + 5) * col + 300, (brect.width + 5) * 0 + 30),
+                brect.size,
             )
             for col in range(8)
         ]
@@ -101,10 +107,14 @@ class PlayerStatistics:
             "shuriken": pygame.transform.scale(assets["shuriken"], bsize),
             "sword": pygame.transform.scale(assets["sword"], bsize),
             "scythe": pygame.transform.scale(assets["scythe"], bsize),
-            "health potion": pygame.transform.scale(assets["health_potion"], bsize),
-            "shield potion": pygame.transform.scale(assets["shield_potion"], bsize),
+            "health potion": pygame.transform.scale(
+                assets["health_potion"], bsize
+            ),
+            "shield potion": pygame.transform.scale(
+                assets["shield_potion"], bsize
+            ),
             "smoke bomb": pygame.transform.scale(assets["smoke_bomb"], bsize),
-            "jetpack": pygame.transform.scale(assets["jetpack"], bsize)
+            "jetpack": pygame.transform.scale(assets["jetpack"], bsize),
         }
 
         # Indices
@@ -138,14 +148,21 @@ class PlayerStatistics:
                         self.init_collide_index = hover_index
                         self.init_collide = True
 
-                    if event.type == pygame.MOUSEBUTTONUP and self.init_collide:
+                    if (
+                        event.type == pygame.MOUSEBUTTONUP
+                        and self.init_collide
+                    ):
                         if hover_index != self.init_collide_index:
                             (
-                                self.player_obj.inventory[self.init_collide_index],
+                                self.player_obj.inventory[
+                                    self.init_collide_index
+                                ],
                                 self.player_obj.inventory[hover_index],
                             ) = (
                                 self.player_obj.inventory[hover_index],
-                                self.player_obj.inventory[self.init_collide_index],
+                                self.player_obj.inventory[
+                                    self.init_collide_index
+                                ],
                             )
 
                         self.init_collide = False
@@ -154,13 +171,19 @@ class PlayerStatistics:
                     copy_rects = []
                     for index, i_rect in enumerate(self.inventory_rects):
                         if index < hover_index:
-                            i_rect = pygame.Rect(i_rect.x - 10, i_rect.y, *i_rect.size)
+                            i_rect = pygame.Rect(
+                                i_rect.x - 10, i_rect.y, *i_rect.size
+                            )
                         elif index > hover_index:
-                            i_rect = pygame.Rect(i_rect.x + 10, i_rect.y, *i_rect.size)
+                            i_rect = pygame.Rect(
+                                i_rect.x + 10, i_rect.y, *i_rect.size
+                            )
                         else:
                             center = i_rect.center
                             i_rect = pygame.Rect(
-                                *i_rect.topleft, i_rect.width + 5, i_rect.height + 5
+                                *i_rect.topleft,
+                                i_rect.width + 5,
+                                i_rect.height + 5
                             )
                             i_rect.center = center
                         copy_rects.append(i_rect)
@@ -189,9 +212,13 @@ class PlayerStatistics:
                         self.player_obj.equipped = item_name
                     if quantity > 1:
                         if item_name in ("sword", "scythe"):
-                            num_surf = self.font.render(str(quantity), True, "yellow")
+                            num_surf = self.font.render(
+                                str(quantity), True, "yellow"
+                            )
                         else:
-                            num_surf = self.font.render(str(quantity), True, "green")
+                            num_surf = self.font.render(
+                                str(quantity), True, "green"
+                            )
                         self.screen.blit(num_surf, (rect.x + 5, rect.y + 20))
                 elif index == self.chosen_index:
                     self.player_obj.equipped = None

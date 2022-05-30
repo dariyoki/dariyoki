@@ -1,3 +1,8 @@
+"""
+This file is a part of the 'dariyoki' source code.
+The source code is distributed under the GPL V3 license.
+"""
+
 from typing import Optional
 
 import pygame
@@ -16,11 +21,19 @@ class MainMenu(GameState):
         self.next_state: Optional[States] = None
 
         # User interface
-        self.menu_button_names = ["Start", "Reset", "Exit", "Contents", "Credits"]
+        self.menu_button_names = [
+            "Start",
+            "Reset",
+            "Exit",
+            "Contents",
+            "Credits",
+        ]
         start = (screen.get_rect().center[0] - (170 / 2), 300)
         padding = 10
         self.menu_buttons = [
-            MenuButton((start[0], start[1] + ((30 + padding) * index)), title=name)
+            MenuButton(
+                (start[0], start[1] + ((30 + padding) * index)), title=name
+            )
             for index, name in enumerate(self.menu_button_names)
         ]
         self.main_menu_flare = MainMenuFlare(self.assets["flame_particles"])

@@ -1,3 +1,8 @@
+"""
+This file is a part of the 'dariyoki' source code.
+The source code is distributed under the GPL V3 license.
+"""
+
 import random
 
 import pygame
@@ -78,7 +83,9 @@ class MainMenuFlare:
                 self.wind_to_be -= 1.3
             else:
                 self.wind_to_be = 1.5
-            self.wind_tension = random.uniform(0.3, 0.9) if self.wind_to_be > 0 else 1.3
+            self.wind_tension = (
+                random.uniform(0.3, 0.9) if self.wind_to_be > 0 else 1.3
+            )
 
             self.time_passed = 0
             self.time_to_pass = random.randrange(1, 3)
@@ -105,7 +112,9 @@ class MainMenuFlare:
 
 
 class PlayerAura:
-    def __init__(self, colour: tuple[int, int, int] | str, generation_rate: int):
+    def __init__(
+        self, colour: tuple[int, int, int] | str, generation_rate: int
+    ):
         self.particles: list[SoulParticle] = []
         self.colour = colour
         self.generation_rate = generation_rate

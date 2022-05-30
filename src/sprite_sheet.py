@@ -1,3 +1,8 @@
+"""
+This file is a part of the 'dariyoki' source code.
+The source code is distributed under the GPL V3 license.
+"""
+
 import pygame
 
 
@@ -50,7 +55,9 @@ class SpriteSheet:
             for e in range(columns):
                 # Mod image
                 image = self.sheet.subsurface(
-                    pygame.Rect((e * width), ((i * fixer) * columns), width, height)
+                    pygame.Rect(
+                        (e * width), ((i * fixer) * columns), width, height
+                    )
                 )
                 if bound:
                     r = image.get_bounding_rect()
