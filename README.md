@@ -6,7 +6,7 @@
   <br/>
   <br/>
   <a href="https://discord.gg/NptRnYYxcV"><img src="https://img.shields.io/discord/975779920603148358"/></a>
-	<a href="https://github.com/dariyoki/dariyoki/blob/main/LICENSE"><img src="https://img.shields.io/github/license/dariyoki/dariyoki"></a>
+	<a href="https://github.com/dariyoki/dariyoki/blob/main/LICENSE.txt"><img src="https://img.shields.io/github/license/dariyoki/dariyoki"></a>
 	<a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-brightgreen"></a>
   <img src="https://img.shields.io/tokei/lines/github/dariyoki/dariyoki">
   
