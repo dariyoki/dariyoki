@@ -17,7 +17,7 @@ from src.entities.traits import collide, jump
 from src.generics import Vec
 from src.ui.game_events import GeneralInfo
 from src.utils import camerify as c
-from src.utils import circle_surf, turn_left
+from src.utils import circle_surf, turn_left, Time
 from src.weapons.jetpack import Jetpack
 from src.weapons.shurikens import Shuriken
 from src.weapons.swords import Sword
@@ -122,6 +122,9 @@ class Player:
             pygame.transform.scale2x(self.equip_items["scythe"]), -45
         )
         self.player_shield_img = assets["shield_bubble"][0]
+        self.hacky_fix_lag = Time(0.5)
+        self.start_update = False
+
         # Make the jetpack
         self.jetpack = None
 
@@ -262,6 +265,11 @@ class Player:
     def update(
         self, info: dict, event_info: dict, shurikens, explosions
     ) -> None:
+        if not self.start_update:
+            if self.hacky_fix_lag.update():
+                self.start_update = True
+            return
+
         dt = event_info["dt"]
         self.dt = event_info["dt"]
         self.info = info
