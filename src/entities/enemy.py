@@ -191,7 +191,7 @@ class Bee:
         self.image = pygame.transform.rotate(self.img, angle)
         self.rect.center = self.vec
         if self.SPEED != 3.5:
-            logger.error("WTF IS WRONG WITH THIS BULLSHIT WTFaad")
+            logger.error("This should not be happening")
 
     def draw(self, screen: pygame.Surface, camera: Vec):
         screen.blit(self.image, self.rect.topleft - camera)
