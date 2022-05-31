@@ -76,7 +76,7 @@ class LevelSelector(GameState):
             if level_icon.is_clicked:
                 self.next_state = States.LEVEL
                 path = "assets/audio/"
-                pygame.mixer.music.load(path + "two_worlds_pre_chorus.mp3")
+                pygame.mixer.music.load(path + "two_worlds.mp3")
                 pygame.mixer.music.play(-1, fade_ms=5000)
 
         self.level_map_flare.update()

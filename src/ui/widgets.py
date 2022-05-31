@@ -382,8 +382,6 @@ class LevelIcon:
         for event in event_info["events"]:
             if event.type == pygame.MOUSEBUTTONDOWN and self.hover:
                 self.is_clicked = True
-            else:
-                self.is_clicked = False
 
         self.rect = self.image.get_rect(center=self.rect.center)
         self.level_number_surf_rect.center = self.rect.center
