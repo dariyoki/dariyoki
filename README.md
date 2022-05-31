@@ -16,10 +16,13 @@
 # About
  - Dariyoki is a Ninja themed 2D action platformer, written using a wrapper for SDL with its scripting logic in Python. The aim of the game is to collect the soul energy from the boss of each territory. On total, there are 5 territories: The bee territory, electricity, Shadow clan territory, Darwin territory and Mecha town.
  - [**NOTE**: Dariyoki is heavily WIP.]
- - 
- <video width="550" height="325" controls>
-  <source src="https://media.discordapp.net/attachments/975780875436453968/980046773483622410/2022-05-28_15-24-38.mp4" type="video/mp4">
- </video> 
+
+
+
+
+
+https://user-images.githubusercontent.com/77634274/171137816-cbc56686-c377-47cc-b0bd-b1a293c9c5fc.mp4
+
 
 
 # Useful commands
