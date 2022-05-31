@@ -22,7 +22,7 @@ from src.entities.enemy import Bee, Ninja
 from src.entities.player import Player
 from src.generics import EventInfo, Vec
 from src.items import Chest, Item
-from src.spawner import Spawner
+from src.spawner import BeeSpawner, Spawner
 from src.states.enums import States
 from src.states.game_state import GameState
 from src.ui.stats import Info, PlayerStatistics
@@ -171,25 +171,39 @@ class Level(GameState):
             for obj in self.tile_map.get_layer_by_name("chests")
         ]
 
-        self.spawners = [
-            Spawner(
-                [obj.x, obj.y],
-                (obj.width, obj.height),
-                7,
-                (1, 4),
-                self.player.rect.size,
-                100,
-                border_image=self.assets["border"],
-                spawn_images=(
-                    self.assets["spawner_shadow_ninja"],
-                    self.assets["spawning_shadow_ninja"],
-                ),
-                characters=self.assets["characters"],
-                items=self._items,
-                enemy_set=self.enemies,
-            )
-            for obj in self.tile_map.get_layer_by_name("spawners")
-        ]
+        self.spawners = []
+        self.bee_spawners = set()
+        for obj in self.tile_map.get_layer_by_name("spawners"):
+            if obj.name == "bee spawner":
+                self.bee_spawners.add(
+                    BeeSpawner(
+                        Vec(obj.x, obj.y),
+                        self.assets["stone_bush_hive"][8],
+                        self.assets["bee"],
+                        self.assets["border"],
+                        self.player,
+                    )
+                )
+
+        # self.spawners = [
+        #     Spawner(
+        #         [obj.x, obj.y],
+        #         (obj.width, obj.height),
+        #         7,
+        #         (1, 4),
+        #         self.player.rect.size,
+        #         100,
+        #         border_image=self.assets["border"],
+        #         spawn_images=(
+        #             self.assets["spawner_shadow_ninja"],
+        #             self.assets["spawning_shadow_ninja"],
+        #         ),
+        #         characters=self.assets["characters"],
+        #         items=self._items,
+        #         enemy_set=self.enemies,
+        #     )
+        #     for obj in self.tile_map.get_layer_by_name("spawners")
+        # ]
 
         # Inventory
         self.statistics = PlayerStatistics(screen, self.player, self.assets)
@@ -245,7 +259,7 @@ class Level(GameState):
         )
         tile_map = self.tile_map
         for index, layer in enumerate(tile_map):
-            if layer.name == "Tile Layer 1":
+            if layer.name == "tile layer 1":
                 for x, y, _ in layer.tiles():
                     tile_properties = tile_map.get_tile_properties(x, y, index)
                     if tile_properties["type"] == "center":
@@ -443,16 +457,24 @@ class Level(GameState):
             if enemy.hp <= 0 or enemy.y > self.TILE_SIZE * 100:
                 self.enemies.remove(enemy)
 
-        if len(self.bees) <= 5 and self.bee_gen_time.update():
-            new_bee = Bee(
-                self.player,
-                Vec(
-                    random.randrange(0, self.TILE_SIZE),
-                    random.randrange(0, self.TILE_SIZE),
-                ),
-                bee_img=self.assets["bee"],
+        # Bee spawner
+        for spawner in set(self.bee_spawners):
+            if (
+                self.player.vec.distance_squared_to(spawner.location)
+                > 1100**2
+            ):
+                continue
+
+            spawner.update(
+                shurikens=self.shurikens,
+                sword_slashes=self.player.sword.projectiles,
+                bees=self.bees,
             )
-            self.bees.add(new_bee)
+            spawner.draw(self.screen, self.camera)
+
+            if not spawner.is_alive:
+                self.bee_spawners.remove(spawner)
+                logger.critical(len(self.bee_spawners))
 
         for bee in set(self.bees):
             bee.update(event_info["dt"])

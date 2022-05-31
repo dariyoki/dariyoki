@@ -2,7 +2,7 @@
 This file is a part of the 'dariyoki' source code.
 The source code is distributed under the GPL V3 license.
 """
-
+import logging
 import math
 import random
 
@@ -12,6 +12,9 @@ from src.entities.traits import collide, jump
 from src.generics import Vec
 from src.ui.widgets import LoadingBar
 from src.weapons.shurikens import Shuriken
+
+
+logger = logging.getLogger()
 
 
 class Ninja:
@@ -187,6 +190,8 @@ class Bee:
         )
         self.image = pygame.transform.rotate(self.img, angle)
         self.rect.center = self.vec
+        if self.SPEED != 3.5:
+            logger.error("WTF IS WRONG WITH THIS BULLSHIT WTFaad")
 
     def draw(self, screen: pygame.Surface, camera: Vec):
         screen.blit(self.image, self.rect.topleft - camera)

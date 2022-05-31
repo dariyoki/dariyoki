@@ -8,9 +8,9 @@ from typing import Sequence
 
 import pygame
 
-from src.entities.enemy import Ninja
+from src.entities.enemy import Bee, Ninja
 from src.entities.player import Player
-from src.generics import EventInfo, Pos
+from src.generics import EventInfo, Pos, Vec
 from src.ui.widgets import LoadingBar
 from src.utils import Glow, Time
 from src.utils import camerify as c
@@ -206,20 +206,24 @@ class Spawner:
 
 
 class BeeSpawner:
-    SIZE = (20, 20)
+    SIZE = (70, 70)
     HP = 50
+    COOL_DOWN_RANGE = (3.4, 6.7)
 
     def __init__(
         self,
         location: Pos,
-        cool_down,
-        bee_spawner_img,
+        bee_spawner_img: pygame.Surface,
+        bee_img: pygame.Surface,
         border_image: pygame.Surface,
+        player_instance,
     ) -> None:
         self.location = location
-        self.cool_down = cool_down
-        self.img = bee_spawner_img
-        self.rect = self.img.get_rect(topleft=location)
+        self.cool_down = random.uniform(*self.COOL_DOWN_RANGE)
+        self.img = pygame.transform.scale(bee_spawner_img, self.SIZE)
+        self.bee_img = bee_img
+        self.rect = self.img.get_rect(center=location)
+        self.player_instance = player_instance
 
         # Health Points (HP)
         self.hp = self.HP  # Mutable hp
@@ -234,15 +238,37 @@ class BeeSpawner:
         )
 
         # Bee Generation
-        self.bee_gen = Time(cool_down)
+        self.bee_gen = Time(self.cool_down)
+        self.is_alive = True
 
-    def update(
-        self,
-        shurikens: set,
-        sword_slashes: set,
+    def spawn_enemies(self, bees: set):
+        bees.add(Bee(self.player_instance, self.location, self.bee_img))
+        self.cool_down = random.uniform(*self.COOL_DOWN_RANGE)
+        self.bee_gen = Time(self.cool_down)
+
+    def handle_projectile_collision(
+        self, shurikens: set, sword_slashes: set
     ) -> None:
+        for shuriken in set(shurikens):
+            if shuriken.rect.colliderect(self.rect):
+                self.is_alive = False
+                shurikens.remove(shuriken)
+
+        for sword_slash in set(sword_slashes):
+            if sword_slash.rect.colliderect(self.rect):
+                self.is_alive = False
+                sword_slashes.remove(sword_slash)
+
+    def update(self, shurikens: set, sword_slashes: set, bees: set) -> None:
         self.hp_bar.value = self.hp * (self.hp_bar_size[0] / self.HP)
         self.hp_bar.rect.center = (
             self.rect.midtop[0],
             self.rect.midtop[1] - 10,
         )
+
+        if self.bee_gen.update():
+            self.spawn_enemies(bees)
+        self.handle_projectile_collision(shurikens, sword_slashes)
+
+    def draw(self, screen: pygame.Surface, camera: Vec):
+        screen.blit(self.img, self.rect.topleft - camera)

@@ -47,7 +47,7 @@ class World:
         self.tiles_background = pygame.Surface((250 * 25, 100 * 25))
         self.tiles_background.set_colorkey(0)
         for x, y, image in self.tile_map.get_layer_by_name(
-            "Tile Layer 1"
+            "tile layer 1"
         ).tiles():
             self.tiles_background.blit(
                 image,

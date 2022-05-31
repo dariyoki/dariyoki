@@ -13,7 +13,17 @@
     },
     "convert_alpha": true,
     "states": ["main menu"]
-  }
+  },
+"stone_bush_hive.png": {
+    "sprite_sheet": {
+      "rows": 3,
+      "columns": 4,
+      "size": 32,
+      "bound": false
+    },
+    "convert_alpha": true,
+    "states": ["level"]
+}
 }
 
 

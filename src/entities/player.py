@@ -16,8 +16,9 @@ from src.effects.particle_effects import PlayerAura
 from src.entities.traits import collide, jump
 from src.generics import Vec
 from src.ui.game_events import GeneralInfo
+from src.utils import Time
 from src.utils import camerify as c
-from src.utils import circle_surf, turn_left, Time
+from src.utils import circle_surf, turn_left
 from src.weapons.jetpack import Jetpack
 from src.weapons.shurikens import Shuriken
 from src.weapons.swords import Sword
