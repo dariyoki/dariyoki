@@ -4,7 +4,7 @@
       "rows": 1,
       "columns": 4,
       "size": 64,
-      "bound": true
+      "bound": false
     },
     "convert_alpha": true,
     "states": ["level"]
